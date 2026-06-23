@@ -1,0 +1,73 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "b447f66d60ab4d0c8e7121c8fe291758",
+                "template": ".MikroTik Router",
+                "name": ".MikroTik Router",
+                "description": "[netbox]\nmanufacturer = [ \"MikroTik\" ]\ndevice_type = [ \"CCR2004-16G-2S+\", \"CHR\" ]\ndevice_role = [\"Core Router\", \"Edge Router\", \"Border Router\", \"Customer Premises Equipment Router\"]",
+                "templates": [
+                    {
+                        "name": ".Generic by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik - BGP monitoring by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik - OSPF monitoring by SSH"
+                    },
+                    {
+                        "name": ".MikroTik Generic by SNMP"
+                    },
+                    {
+                        "name": ".Network Interfaces by SNMP"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "a2fd6989f3854a3b81d0ba43f6f94a9c",
+                        "name": "Get raw data",
+                        "type": "SSH",
+                        "key": "ssh.run[getldpneighbor{HOST.IP}]",
+                        "value_type": "TEXT",
+                        "params": ":local result \"{\\\"data\\\":[\"; :local first true; :foreach n in=[/mpls ldp neighbor find] do={ :local neighborTransport [/mpls ldp neighbor get $n transport]; :local peer [/mpls ldp neighbor get $n peer]; :local route [/ip route find where dst-address=\"$neighborTransport/32\"]; :if ([:len $route] > 0) do={ :local gateway [/ip route get $route gateway]; :local pct [:find $gateway \"%\"]; :local routeIface \"\"; :if ([:len $pct] > 0) do={ :set routeIface [:pick $gateway ($pct+1) [:len $gateway]] } else={ :set routeIface $gateway }; :if ($first = true) do={ :set first false } else={ :set result ($result . \",\") }; :set result ($result . \"{\\\"{#PEER}\\\":\\\"$peer\\\",\\\"{#INTERFACE}\\\":\\\"$routeIface\\\"}\") } }; :set result ($result . \"]}\"); :put $result",
+                        "username": "netdiscover",
+                        "password": "{$SECRET_PASS}"
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ]
+            }
+        ]
+    }
+}

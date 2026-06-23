@@ -1,0 +1,451 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "030e6c535ea0482c87098bafd02697b3",
+                "template": ".MikroTik - OSPF monitoring by SSH",
+                "name": ".MikroTik - OSPF monitoring by SSH",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "1b7b6014f0714ca68e86601c6a1e605d",
+                        "name": "OSPF - Neighbor JSON",
+                        "type": "SSH",
+                        "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "params": ":global neighborData \"{\"; :global count 0; :global list [/routing ospf interface-template find]; :global total [:len $list]; :foreach iface in=$list do={:local ifaceName [/routing ospf interface-template get $iface interfaces]; :local networks [/routing ospf interface-template get $iface networks]; :local cost [/routing ospf interface-template get $iface cost]; :local area [/routing ospf interface-template get $iface area]; :local flags \"0\"; :if [/routing ospf interface-template get $iface disabled] do={:set flags \"1\";}; :if [/routing ospf interface-template get $iface inactive] do={:set flags ($flags . \"2\");}; :local hasNeighbor 0; :local neighborInfo \"{}\"; :foreach network in=$networks do={:foreach neighbor in=[/routing ospf neighbor find] do={:local neighborAddress [/routing ospf neighbor get $neighbor address]; :local routerId [/routing ospf neighbor get $neighbor router-id]; :local stateChanges [/routing ospf neighbor get $neighbor state-changes]; :local adjacency [/routing ospf neighbor get $neighbor adjacency]; :local state [/routing ospf neighbor get $neighbor state]; :if ($neighborAddress in $network) do={:set hasNeighbor 1; :set neighborInfo \"{\\\"INTERFACE\\\":\\\"$ifaceName\\\",\\\"NETWORKS\\\":\\\"$networks\\\",\\\"COST\\\":\\\"$cost\\\",\\\"AREA\\\":\\\"$area\\\",\\\"FLAGS\\\":\\\"$flags\\\",\\\"HASNEIGHBOR\\\":\\\"1\\\",\\\"ADDRESS\\\":\\\"$neighborAddress\\\",\\\"ROUTERID\\\":\\\"$routerId\\\",\\\"STATEOSPF\\\":\\\"$state\\\",\\\"ADJACENCY\\\":\\\"$adjacency\\\",\\\"STATECHANGES\\\":\\\"$stateChanges\\\"}\";};};}; :if ($hasNeighbor = 0) do={:set neighborInfo \"{\\\"INTERFACE\\\":\\\"$ifaceName\\\",\\\"NETWORKS\\\":\\\"$networks\\\",\\\"COST\\\":\\\"$cost\\\",\\\"AREA\\\":\\\"$area\\\",\\\"FLAGS\\\":\\\"$flags\\\",\\\"HASNEIGHBOR\\\":\\\"0\\\"}\";}; :if ($count < $total - 1) do={:set neighborData ($neighborData . \"\\\"$count\\\":$neighborInfo,\");} else={:set neighborData ($neighborData . \"\\\"$count\\\":$neighborInfo\");}; :set count ($count + 1);}; :set neighborData ($neighborData . \"}\"); :put $neighborData;",
+                        "username": "{$MIKROTIK_SSH_USER}",
+                        "password": "{$MIKROTIK_SSH_PASS}",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "OSPF JSONs"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "ospf"
+                            },
+                            {
+                                "tag": "componet",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "756beb5ac78c4354af1b03523f58ecfb",
+                        "name": "OSPF - Neighbor Discovery",
+                        "type": "SSH",
+                        "key": "ssh.run[OSPF - Neighbor Discovery,{HOST.IP},{$MIKROTIK_SSH_PORT}]",
+                        "delay": "{$UPDATEINT}",
+                        "params": ":global neighborData \"[\"; :global count 0; :global list [/routing ospf interface-template find]; :global total [:len $list]; :foreach iface in=$list do={:local ifaceName [/routing ospf interface-template get $iface interfaces]; :local networks [/routing ospf interface-template get $iface networks]; :local cost [/routing ospf interface-template get $iface cost]; :local area [/routing ospf interface-template get $iface area]; :local flags \"0\"; :if [/routing ospf interface-template get $iface disabled] do={:set flags \"1\";}; :if [/routing ospf interface-template get $iface inactive] do={:set flags ($flags . \"2\");}; :local hasNeighbor 0; :local neighborInfo \"{}\"; :foreach network in=$networks do={:foreach neighbor in=[/routing ospf neighbor find] do={:local neighborAddress [/routing ospf neighbor get $neighbor address]; :local routerId [/routing ospf neighbor get $neighbor router-id]; :local stateChanges [/routing ospf neighbor get $neighbor state-changes]; :local adjacency [/routing ospf neighbor get $neighbor adjacency]; :local state [/routing ospf neighbor get $neighbor state]; :if ($neighborAddress in $network) do={:set hasNeighbor 1; :set neighborInfo \"{\\\"{#NUMBER}\\\":\\\"$count\\\",\\\"{#INTERFACE}\\\":\\\"$ifaceName\\\",\\\"{#NETWORKS}\\\":\\\"$networks\\\",\\\"{#COST}\\\":\\\"$cost\\\",\\\"{#AREA}\\\":\\\"$area\\\",\\\"{#FLAGS}\\\":\\\"$flags\\\",\\\"{#HASNEIGHBOR}\\\":\\\"1\\\",\\\"{#ADDRESS}\\\":\\\"$neighborAddress\\\",\\\"{#ROUTERID}\\\":\\\"$routerId\\\",\\\"{#STATEOSPF}\\\":\\\"$state\\\",\\\"{#ADJACENCY}\\\":\\\"$adjacency\\\",\\\"{#STATECHANGES}\\\":\\\"$stateChanges\\\"}\";};};}; :if ($hasNeighbor = 0) do={:set neighborInfo \"{\\\"{#NUMBER}\\\":\\\"$count\\\",\\\"{#INTERFACE}\\\":\\\"$ifaceName\\\",\\\"{#NETWORKS}\\\":\\\"$networks\\\",\\\"{#COST}\\\":\\\"$cost\\\",\\\"{#AREA}\\\":\\\"$area\\\",\\\"{#FLAGS}\\\":\\\"$flags\\\",\\\"{#HASNEIGHBOR}\\\":\\\"0\\\"}\";}; :if ($count < $total - 1) do={:set neighborData ($neighborData . $neighborInfo . \",\");} else={:set neighborData ($neighborData . $neighborInfo);}; :set count ($count + 1);}; :set neighborData ($neighborData . \"]\"); :put \"{\\\"data\\\":\"; :put $neighborData; :put \"}\";",
+                        "username": "{$MIKROTIK_SSH_USER}",
+                        "password": "{$MIKROTIK_SSH_PASS}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#INTERFACE}",
+                                    "value": "{$OSPF_INTERFACE_EXCLUDE}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "item_prototypes": [
+                            {
+                                "uuid": "ee81b6d7afea48ddb8430666f92bbcd1",
+                                "name": "Cost on OSPF interface {#ROUTERID} - \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospf.IfMetric[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.COST"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "172f67fdad3349548ce27153edbde49d",
+                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#1)<>last(/.MikroTik - OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#2)",
+                                        "recovery_mode": "NONE",
+                                        "name": "MikroTik: Cost change to {ITEM.VALUE} for int:\"{#INTERFACE}\"",
+                                        "priority": "INFO",
+                                        "description": "Neighbor address \"{#ADDRESS}\" and neighbor router id \"{#ROUTERID}\"\nAcknowledge to close the problem.",
+                                        "type": "MULTIPLE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ecd5967fb2c241aa9ccaa328f1479781",
+                                "name": "OSPF interface {#ROUTERID} admin status \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfIfAdminStat[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "FLAGS:\n0 = enabled\n1 = disabled\n2 = inactive",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.FLAGS"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7c435c114746428091d0dbc147dca0f6",
+                                "name": "OSPF neighbor {#ADDRESS} adjacency \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrAdjacency[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "s",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.ADJACENCY"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var timeParts = value.split(/\\D+/).map(Number).reverse();\n\n// Assigning default values for missing parts\nvar seconds = timeParts[0] || 0;\nvar minutes = timeParts[1] || 0;\nvar hours = timeParts[2] || 0;\nvar days = timeParts[3] || 0;\nvar weeks = timeParts[4] || 0;\nvar years = timeParts[5] || 0;\n\nreturn seconds + minutes * 60 + hours * 3600 + days * 86400 + weeks * 604800 + years * 31536000;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "a73fd04345ce445d8b355dd809e40c18",
+                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrAdjacency[{#INTERFACE}])<{$ADJACENCY4T}",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" uptime LOW",
+                                        "priority": "INFO",
+                                        "description": "OSPF adjacency with neighbor with address \"{#ADDRESS}\" and router id \"{#ROUTERID}\" is lower than {$ADJACENCY4T}",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f66a0d27027346178affec54ad02c399",
+                                "name": "OSPF neighbor {#ADDRESS} number of relationship changes \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrEvents[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.STATECHANGES"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "1f907d1232fe429cb48957c86cf2e142",
+                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}]) - avg(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],4h) > {$STATECHANGES4T}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#1) = last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#2)",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" have {ITEM.LASTVALUE} state changes",
+                                        "opdata": "Number of relationship changes: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "The relationship with OSPF neighbor with address \"{#ADDRESS}\" and router id \"{#ROUTERID}\" has a high state change ({$STATECHANGES4T} state changes)",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e26076d843e8489d8dcd3baf8dd154d6",
+                                "name": "OSPF neighbor {#ADDRESS} router id \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrRtrId[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.ROUTERID"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c9248ec0d34440a19c66a39cee3331be",
+                                "name": "OSPF neighbor {#ADDRESS} relationship state \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrState[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.STATEOSPF"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "5d6a87dd7e6c49d4ace0f2f03c6c963b",
+                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#1)<>\"Full\" and last(/.MikroTik - OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#2)<>\"Full\"",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" state is not FULL",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "description": "OSPF neighbor with router id \"{#ROUTERID}\" is in operational state down.\n\nThe state down represents the initial state of a conversation when no information has been exchanged and retained between routers with the Hello Protocol.",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "07ae6798fc254b05bb284fb772a76d12",
+                                "name": "OSPF int.{#INTERFACE} has neighbor",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrUp[{#INTERFACE}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.HASNEIGHBOR"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[OSPF - Neighbor JSON,{HOST.IP},{$MIKROTIK_SSH_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "015fa0e630074ef48043124e758d8036",
+                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrUp[{#INTERFACE}],#1)=0",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" is DOWN",
+                                        "priority": "DISASTER",
+                                        "description": "OSPF neighbor with router id \"{#ROUTERID}\" and address \"{#ADDRESS}\" went DOWN.",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "overrides": [
+                            {
+                                "name": "Exclude neighbor stats for disabled interfaces or with NoNeighbor",
+                                "step": "1",
+                                "filter": {
+                                    "evaltype": "OR",
+                                    "conditions": [
+                                        {
+                                            "macro": "{#FLAGS}",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "macro": "{#HASNEIGHBOR}",
+                                            "value": "0"
+                                        }
+                                    ]
+                                },
+                                "operations": [
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "adjacency",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "Cost on OSPF interface",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "number of relationship changes",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "relationship state",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "router id",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$ADJACENCY4T}",
+                        "value": "10m"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_SSH_PASS}",
+                        "type": "SECRET_TEXT"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_SSH_PORT}",
+                        "value": "22"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_SSH_USER}",
+                        "value": "hora"
+                    },
+                    {
+                        "macro": "{$OSPF_INTERFACE_EXCLUDE}",
+                        "value": "(?i)(Loopback|^lo$|mgmt|test|vlan900-|vlan901-|vlan999-)"
+                    },
+                    {
+                        "macro": "{$STATECHANGES4T}",
+                        "value": "10"
+                    },
+                    {
+                        "macro": "{$UPDATEINT}",
+                        "value": "1h"
+                    }
+                ]
+            }
+        ]
+    }
+}

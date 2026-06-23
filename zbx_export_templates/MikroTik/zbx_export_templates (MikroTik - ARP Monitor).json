@@ -1,0 +1,113 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "1d593b20f5f448949ec646f7df220e90",
+                "template": "MikroTik - ARP Monitor",
+                "name": "MikroTik - ARP Monitor",
+                "description": "Monitors IP to MAC bindings via SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "4c3e846575384e359be2c4a7dd9589dd",
+                        "name": "ARP Table Entries: Get data",
+                        "type": "SSH",
+                        "key": "ssh.run[getinterfacesdata,{HOST.IP}]",
+                        "delay": "5m",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "params": "ip arp pr",
+                        "username": "netdiscover",
+                        "password": "{$SECRET_PASS}",
+                        "description": "Get arp table information.",
+                        "timeout": "30",
+                        "tags": [
+                            {
+                                "tag": "componet",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "6628117c4cea48fd9652e855b445c56d",
+                        "name": "ARP Table Entries discovery",
+                        "type": "DEPENDENT",
+                        "key": "mikrotik.net.arp.discovery",
+                        "lifetime": "14d",
+                        "description": "Discovery of the interfaces from Mikrotik device.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "f2f8af504e9a4c1891def0ae3a938185",
+                                "name": "arp [{#ARPIF}, {#ARPIP}]",
+                                "type": "DEPENDENT",
+                                "key": "arp.status[{#IFNAME},{#ARPIP}]",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var lines = value.split('\\n');\nvar targetIP = '{#ARPIP}';\n\nfor (var i = 0; i < lines.length; i++) {\n    if (lines[i].indexOf(targetIP) > -1) {\n        var macMatch = lines[i].match(/([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2})/i);\n        if (macMatch) {\n            return macMatch[1];\n        }\n    }\n}\nreturn 'not found';"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[getinterfacesdata,{HOST.IP}]"
+                                }
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ssh.run[getinterfacesdata,{HOST.IP}]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar result = { \"data\": [] };\nvar found = false;\n\nfor (var i = 0; i < lines.length; i++) {\n    // Skip header lines and empty lines\n    if (lines[i].match(/^\\s*[0-9]+\\s+DC/) || lines[i].match(/^\\s*[0-9]+\\s+D/)) {\n        var parts = lines[i].trim().split(/\\s+/);\n        // parts format: [number, flags, ip, mac, interface]\n        if (parts.length >= 5) {\n            result.data.push({\n                \"{#ARPIP}\": parts[2],\n                \"{#ARPMAC}\": parts[3],\n                \"{#ARPIF}\": parts[4]\n            });\n            found = true;\n        }\n    }\n}\n\n// If no entries found with DC format, try simpler pattern\nif (!found) {\n    for (var i = 0; i < lines.length; i++) {\n        var ipMatch = lines[i].match(/([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)/);\n        var macMatch = lines[i].match(/([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2})/i);\n        var intMatch = lines[i].match(/(ether[0-9]+|bridge|vlan)/);\n        \n        if (ipMatch && macMatch) {\n            result.data.push({\n                \"{#ARPIP}\": ipMatch[1],\n                \"{#ARPMAC}\": macMatch[1],\n                \"{#ARPIF}\": intMatch ? intMatch[1] : \"unknown\"\n            });\n        }\n    }\n}\n\nreturn JSON.stringify(result);"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SECRET_PASS}",
+                        "value": "ly00YU03w4KT"
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ]
+            }
+        ]
+    }
+}

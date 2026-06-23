@@ -1,0 +1,608 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "71853926fdd3478ea0e8d7b5275602aa",
+                "name": "Juniper"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "f89df290a5e047398d389310c0f1d3b4",
+                "template": ".Juniper - BGP monitoring by SNMP",
+                "name": ".Juniper - BGP monitoring by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "Juniper"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "db75e9957e9149d28ee69f4c6d3aed9f",
+                        "name": "SNMP walk BGP Peer Prefix Counters",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[ 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.3, 1.3.6.1.4.1.2636.5.1.1.2.4.1.1.1, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.2, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.7, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.8, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.9, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.10, 1.3.6.1.4.1.2636.5.1.1.2.6.2.1.11, 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.2, 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.10, 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.11, 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.13, 1.3.6.1.4.1.2636.5.1.1.2.1.1.1.14]",
+                        "key": "juniper.bgp.peer.data.snmp.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Scanning `BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerData` for BGP Peer Data.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "3a3620f23d2145cfa870f7c1af351009",
+                        "name": "BGP Peer discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.bgp.peer.discovery",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#BGPM2_PEER_ADDR_TYPE}",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "lifetime": "{$TRENDS}",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "{$HISTORY}",
+                        "description": "Scanning `BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerData` for BGP Peer.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "e07e590744a14c69b718b44de81b97c8",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Established time",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.established.time[jnxBgpM2PeerFsmEstablishedTime.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "s",
+                                "description": "This timer indicates how long (in seconds) this peer has been in the Established state or how long since this peer was last in the Established state. It is set to zero when a new peer is configured or the router is booted.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.4.1.1.1.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "24d08ebe38144eabacfe42a8b7d7393e",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Accepted prefixes",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.prefix.accept[jnxBgpM2PrefixInPrefixesAccepted.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of prefixes for a peer that are installed in the Adj-Ribs-In and are eligible to become active in the Loc-Rib.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.6.2.1.8.{#BGPM2_PEER_INDEX}.{#BGPM2_PEER_ADDR_TYPE}.1",
+                                            "0"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "32ff000a2724413bb4ec4caa0a48da1d",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Active prefixes",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.prefix.activ[jnxBgpM2PrefixInPrefixesAccepted.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of prefixes for a peer that are installed in the Adj-Ribs-In and are the active route in the Loc-Rib.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.6.2.1.11.{#BGPM2_PEER_INDEX}.{#BGPM2_PEER_ADDR_TYPE}.1",
+                                            "0"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9679c204fbf9414c915932eaddf202b5",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Advertised prefixes",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.prefix.advertise[jnxBgpM2PrefixOutPrefixes.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of prefixes for a peer that are installed in the peer's Adj-Ribs-Out.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.6.2.1.10.{#BGPM2_PEER_INDEX}.{#BGPM2_PEER_ADDR_TYPE}.1",
+                                            "0"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2e6c9969d67848129c0d1e951cfbd91c",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Received prefixes",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.prefix.receive[jnxBgpM2PrefixInPrefixes.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of prefixes received from a peer and stored in the Adj-Ribs-In for that peer.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.6.2.1.7.{#BGPM2_PEER_INDEX}.{#BGPM2_PEER_ADDR_TYPE}.1",
+                                            "0"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "bc489b43c07840959025fae2fbb380f7",
+                                        "expression": "last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.prefix.receive[jnxBgpM2PrefixInPrefixes.{#SNMPINDEX}],#2) - last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.prefix.receive[jnxBgpM2PrefixInPrefixes.{#SNMPINDEX}],#1) > last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.prefix.receive[jnxBgpM2PrefixInPrefixes.{#SNMPINDEX}],#2) * {$BGP_PREFIX_LOSS_T} / 100 and last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.prefix.receive[jnxBgpM2PrefixInPrefixes.{#SNMPINDEX}],#2) > {$BGP_PREFIX_MIN_REQUIREMENT}",
+                                        "recovery_mode": "NONE",
+                                        "name": "Juniper: BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}] lost more than {$BGP_PREFIX_LOSS_T}% of received prefixes",
+                                        "priority": "INFO",
+                                        "description": "BGP peer {#BGPM2_PEER_REMOTE_ADDR} has lost more than {$BGP_PREFIX_LOSS_T}% of received prefixes",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Juniper: BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: uptime LOW",
+                                                "expression": "last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.established.time[jnxBgpM2PeerFsmEstablishedTime.{#SNMPINDEX}]) < {$ADJACENCY4T}\nand\nlast(/.Juniper - BGP monitoring by SNMP/juniper.bgp.established.time[jnxBgpM2PeerFsmEstablishedTime.{#SNMPINDEX}]) > 0\nand\nlast(/.Juniper - BGP monitoring by SNMP/juniper.bgp.state[jnxBgpM2PeerState.{#SNMPINDEX}]) = 6"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3dad810953b14ab1b04a7ef54874d20a",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Rejected prefixes",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.prefix.reject[jnxBgpM2PrefixInPrefixesRejected.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of prefixes for a peer that are installed in the Adj-Ribs-In and are NOT eligible to become active in the Loc-Rib.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.6.2.1.9.{#BGPM2_PEER_INDEX}.{#BGPM2_PEER_ADDR_TYPE}.1",
+                                            "0"
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7abfe4d7e36c42898fbe8d772c6d6066",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: State",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.state[jnxBgpM2PeerState.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "description": "The remote BGP peer's FSM state.",
+                                "valuemap": {
+                                    "name": "BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.2.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "db895f2ad4e346edbee9c268cc67cf60",
+                                        "expression": "last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.state[jnxBgpM2PeerState.{#SNMPINDEX}])<>6",
+                                        "name": "Juniper: BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}] is down",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "Session [BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]] is down, check the BGP configuration. For information on checking the BGP configuration, see https://www.juniper.net/documentation/us/en/software/junos/bgp/topics/topic-map/troubleshooting-bgp-sessions.html.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "649fb500e0f942aa8281a1751bceddc3",
+                                "name": "BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: Status",
+                                "type": "DEPENDENT",
+                                "key": "juniper.bgp.status[jnxBgpM2PeerStatus.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "description": "Whether or not the BGP FSM for this remote peer is halted or running. The BGP FSM for a remote peer is halted after processing a Stop event. Likewise, it is in the running state after a Start event. The `jnxBgpM2PeerState` will generally be in the idle state when the FSM is halted, although some extensions such as Graceful Restart will leave the peer in the Idle state but with the FSM running.",
+                                "valuemap": {
+                                    "name": "BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerStatus"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.bgp.peer.data.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#BGPM2_PEER_REMOTE_ADDR}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGPM2_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "2818bd3d13ff413c888100d9dc357f40",
+                                "expression": "last(/.Juniper - BGP monitoring by SNMP/juniper.bgp.established.time[jnxBgpM2PeerFsmEstablishedTime.{#SNMPINDEX}]) < {$ADJACENCY4T}\nand\nlast(/.Juniper - BGP monitoring by SNMP/juniper.bgp.established.time[jnxBgpM2PeerFsmEstablishedTime.{#SNMPINDEX}]) > 0\nand\nlast(/.Juniper - BGP monitoring by SNMP/juniper.bgp.state[jnxBgpM2PeerState.{#SNMPINDEX}]) = 6",
+                                "name": "Juniper: BGP AS [{#BGPM2_PEER_REMOTE_AS}] Peer [{#BGPM2_PEER_REMOTE_ADDR}]: uptime LOW",
+                                "opdata": "Uptime: {ITEM.LASTVALUE}",
+                                "priority": "INFO",
+                                "description": "BGP session with peer {#BGPM2_PEER_REMOTE_ADDR} (AS{#BGPM2_PEER_REMOTE_AS}) has been established for less than {$ADJACENCY4T}.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.bgp.peer.data.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#BGPM2_PEER_INDEX}",
+                                    "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.14",
+                                    "0",
+                                    "{#BGPM2_PEER_REMOTE_ADDR}",
+                                    "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.11",
+                                    "0",
+                                    "{#BGPM2_PEER_REMOTE_AS}",
+                                    "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.13",
+                                    "0",
+                                    "{#BGPM2_PEER_ADDR_TYPE}",
+                                    "1.3.6.1.4.1.2636.5.1.1.2.1.1.1.10",
+                                    "0"
+                                ],
+                                "error_handler": "CUSTOM_ERROR",
+                                "error_handler_params": "BGP instance is not running"
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var bgp = JSON.parse(value);\n\nbgp.forEach(function (item, index, array) {\n\tvar ip = item[\"{#BGPM2_PEER_REMOTE_ADDR}\"];\n\tvar parts = ip.trim().split(' ');\n\n\tif (parts.length === 4) {\n\t\tfor (var i = 0; i < parts.length; ++i) {\n\t\t\tparts[i] = parseInt(parts[i], 16);\n\t\t}\n\t\tip = parts.join('.');\n\t}\n\telse if (parts.length == 16) {\n\t\tvar ipSegments = [];\n\t\tfor (var i = 0; i < parts.length; i += 4) {\n\t\t\tvar ipv6 = parts.slice(i, i + 4).join('');\n\t\t\tipv6 = parseInt(ipv6, 16).toString(16);\n\t\t\tipSegments.push(ipv6 || '0');\n\t\t}\n\t\tip = ipSegments.join(':').toLowerCase();\n\n\t\tvar maxZeros = 0, currZeros = 0, startIdx = -1, maxStartIdx = -1;\n\t\tfor (i = 0; i < ipSegments.length; i++) {\n\t\t\tif (ipSegments[i] === '0') {\n\t\t\t\tif (currZeros === 0) startIdx = i;\n\t\t\t\tcurrZeros++;\n\t\t\t} else {\n\t\t\t\tif (currZeros > maxZeros) {\n\t\t\t\t\tmaxZeros = currZeros;\n\t\t\t\t\tmaxStartIdx = startIdx;\n\t\t\t\t}\n\t\t\t\tcurrZeros = 0;\n\t\t\t}\n\t\t}\n\t\tif (currZeros > maxZeros) {\n\t\t\tmaxZeros = currZeros;\n\t\t\tmaxStartIdx = startIdx;\n\t\t}\n\t\tif (maxZeros > 1) {\n\t\t\tipSegments.splice(maxStartIdx, maxZeros, '');\n\t\t\tip = ipSegments.join(':').replace(/(^:|:$)/, '');\n\t\t}\n\t}\n\n\tarray[index][\"{#BGPM2_PEER_REMOTE_ADDR}\"] = ip;\n});\n\nreturn JSON.stringify(bgp);"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "juniper"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$ADJACENCY4T}",
+                        "value": "10m",
+                        "description": "Established time of a peering session considered as LOW uptime"
+                    },
+                    {
+                        "macro": "{$BGP_PREFIX_LOSS_T}",
+                        "value": "20",
+                        "description": "Percentage of prefix loss considered problematic for BGP"
+                    },
+                    {
+                        "macro": "{$BGP_PREFIX_MIN_REQUIREMENT}",
+                        "value": "5",
+                        "description": "Minimum requirement for the previous (initial) number of received prefixes (last(#2)) to filter out smaller peering sessions"
+                    },
+                    {
+                        "macro": "{$CRITICAL_HEALTH_INT}",
+                        "value": "30s",
+                        "description": "For uptime, agent availability"
+                    },
+                    {
+                        "macro": "{$DISCOVERY_INT}",
+                        "value": "1h",
+                        "description": "Discovery rule interval"
+                    },
+                    {
+                        "macro": "{$HEALTH_POLL_INT}",
+                        "value": "1m",
+                        "description": "ICMP checks, SNMP availability, device Health"
+                    },
+                    {
+                        "macro": "{$HEALTH_TRIGGER_INT}",
+                        "value": "5m",
+                        "description": "Trigger evaluation period for health items"
+                    },
+                    {
+                        "macro": "{$HISTORY}",
+                        "value": "7d"
+                    },
+                    {
+                        "macro": "{$INVENTORY_INT}",
+                        "value": "1h",
+                        "description": "Firmware, model, serial, OS"
+                    },
+                    {
+                        "macro": "{$NETWORK_POLL_INT}",
+                        "value": "1m",
+                        "description": "Network health and stats checks"
+                    },
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "dev"
+                    },
+                    {
+                        "macro": "{$SYSTEM_INFO_INT}",
+                        "value": "15m",
+                        "description": "System name, contact, location, object ID"
+                    },
+                    {
+                        "macro": "{$TRENDS}",
+                        "value": "31d"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "8048d84338d242f6a388fa39d61dc703",
+                        "name": "BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerState",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "idle"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "connect"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "active"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "opensent"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "openconfirm"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "established"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "ed7d6f7567ab45aea9d736bf34162b1b",
+                        "name": "BGP4-V2-MIB-JUNIPER::jnxBgpM2PeerStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "halted"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "running"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

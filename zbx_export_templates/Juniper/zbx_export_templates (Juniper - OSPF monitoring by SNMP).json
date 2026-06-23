@@ -1,0 +1,330 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "71853926fdd3478ea0e8d7b5275602aa",
+                "name": "Juniper"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "1971d21795534aa8acd2466b768fa74f",
+                "template": ".Juniper - OSPF monitoring by SNMP",
+                "name": ".Juniper - OSPF monitoring by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "Juniper"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "3c1ac9f50718421f98747e2f3f77089a",
+                        "name": "SNMP walk OSPF Neighbors",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[ 1.3.6.1.2.1.14.10.1.1, 1.3.6.1.2.1.14.10.1.3, 1.3.6.1.2.1.14.10.1.5, 1.3.6.1.2.1.14.10.1.6, 1.3.6.1.2.1.14.10.1.7, 1.3.6.1.2.1.14.10.1.11]",
+                        "key": "juniper.ospf.nbr.snmp.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Scanning `OSPF-MIB::ospfNbrTable` for OSPF Neighbors.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "b104f98e240c451cb0de9e2aefa8c34d",
+                        "name": "OSPF Neighbor discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.ospf.neighbor.discovery",
+                        "lifetime": "{$TRENDS}",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "7d",
+                        "description": "Scanning `OSPF-MIB::ospfNbrTable` for OSPF Neighbors.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "8f12ba209fb247f084eefbdbc4326da7",
+                                "name": "OSPF Neighbor [{#OSPF_IP_ADDR}]: Events",
+                                "type": "DEPENDENT",
+                                "key": "juniper.ospf.events[ospfNbrEvents.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "description": "The number of times this neighbor relationship has changed state, or an error has occurred.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.14.10.1.7.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.ospf.nbr.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#OSPF_IP_ADDR}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "b5056631371c47db8f817ac2ea5038a6",
+                                        "expression": "last(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.events[ospfNbrEvents.{#SNMPINDEX}],#1)<>last(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.events[ospfNbrEvents.{#SNMPINDEX}],#2)",
+                                        "name": "Juniper: OSPF neighbor [{#OSPF_IP_ADDR}] Number of relationship has changed",
+                                        "opdata": "Number of relationship changes: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "description": "The number of times the [{#OSPF_IP_ADDR}] neighbor relationship has changed."
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a6ff54cd31d84bb488f17d1bd63b0dd5",
+                                "name": "OSPF Neighbor [{#OSPF_IP_ADDR}]: Hello suppressed",
+                                "type": "DEPENDENT",
+                                "key": "juniper.ospf.hello.suppressed[ospfNbrHelloSuppressed.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "description": "Indicates whether Hellos are being suppressed to the neighbor.",
+                                "valuemap": {
+                                    "name": "OSPF-MIB::ospfNbrHelloSuppressed"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.14.10.1.11.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.ospf.nbr.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#OSPF_IP_ADDR}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ef7952f4d09e46ca9b3f1fbc219e5515",
+                                "name": "OSPF Neighbor [{#OSPF_IP_ADDR}]: Router Id",
+                                "type": "DEPENDENT",
+                                "key": "juniper.ospf.rtr.id[ospfNbrRtrId.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "CHAR",
+                                "description": "A 32-bit integer (represented as a type `IpAddress`) uniquely identifying the neighboring router in the Autonomous System.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.14.10.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.ospf.nbr.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#OSPF_IP_ADDR}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1676cdca49b6450fbb79acd8d3f27799",
+                                "name": "OSPF Neighbor [{#OSPF_IP_ADDR}]: State",
+                                "type": "DEPENDENT",
+                                "key": "juniper.ospf.state[ospfNbrState.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "description": "The state of the relationship with this neighbor.",
+                                "valuemap": {
+                                    "name": "OSPF-MIB::ospfNbrState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.14.10.1.6.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.ospf.nbr.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#OSPF_IP_ADDR}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "d65716815ade49d6b9590d563ce30c61",
+                                        "expression": "last(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.state[ospfNbrState.{#SNMPINDEX}]) = 1",
+                                        "name": "Juniper: OSPF neighbor [{#OSPF_IP_ADDR}] is DOWN",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "status": "DISABLED",
+                                        "priority": "AVERAGE",
+                                        "description": "OSPF neighbor [{#OSPF_IP_ADDR}] in operational state `down`."
+                                    },
+                                    {
+                                        "uuid": "810166140688475ca756c92a4adc8e9a",
+                                        "expression": "(last(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.state[ospfNbrState.{#SNMPINDEX}],#1) <> 8 and\nlast(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.state[ospfNbrState.{#SNMPINDEX}],#2) <> 8)\nor\nnodata(/.Juniper - OSPF monitoring by SNMP/juniper.ospf.state[ospfNbrState.{#SNMPINDEX}],1m)=1",
+                                        "name": "Juniper: OSPF neighbor [{#OSPF_IP_ADDR}] state is not FULL",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "OSPF neighbor [{#OSPF_IP_ADDR}] in operational state `init`.\ndown (1),\nattempt (2),\ninit (3),\ntwoWay (4),\nexchangeStart (5),\nexchange (6),\nloading (7),\nfull (8)",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.ospf.nbr.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#OSPF_IP_ADDR}",
+                                    "1.3.6.1.2.1.14.10.1.1",
+                                    "0"
+                                ],
+                                "error_handler": "CUSTOM_ERROR",
+                                "error_handler_params": "OSPF instance is not running"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "juniper"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "648ec69380c44746b2cfe37f1a77d82f",
+                        "name": "OSPF-MIB::ospfNbrHelloSuppressed",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "true"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "false"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "0beee46847f44508816eb7968506c0ae",
+                        "name": "OSPF-MIB::ospfNbrState",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "down"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "attempt"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "init"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "twoWay"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "exchangeStart"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "exchange"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "loading"
+                            },
+                            {
+                                "value": "8",
+                                "newvalue": "full"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

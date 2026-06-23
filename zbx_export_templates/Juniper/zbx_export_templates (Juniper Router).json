@@ -1,0 +1,1022 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "71853926fdd3478ea0e8d7b5275602aa",
+                "name": "Juniper"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "f634fe5e053445b6b3309d2ddf80a0ee",
+                "template": ".Juniper Router",
+                "name": ".Juniper Router",
+                "description": "[netbox]\nmanufacturer = [ \"Juniper\" ]\ndevice_role = [\"Core Router\", \"Edge Router\", \"Border Router\", \"Route Reflector Router\", \"Virtual Route Reflector Router\"]",
+                "templates": [
+                    {
+                        "name": ".Generic by SNMP"
+                    },
+                    {
+                        "name": ".Juniper - BGP monitoring by SNMP"
+                    },
+                    {
+                        "name": ".Juniper - OSPF monitoring by SNMP"
+                    },
+                    {
+                        "name": ".Juniper Generic by SNMP"
+                    },
+                    {
+                        "name": ".Network Interfaces by SNMP"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "Juniper"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "juniper"
+                    }
+                ],
+                "dashboards": [
+                    {
+                        "uuid": "ab9edc5354e243cd82b2f49b7e88674a",
+                        "name": "Juniper: General",
+                        "display_period": "10",
+                        "auto_start": "NO",
+                        "pages": [
+                            {
+                                "name": "Juniper: Overview",
+                                "widgets": [
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper: Memory utilization",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "3EA900"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Memory utilization"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "lefty_max",
+                                                "value": "100"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "lefty_min",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "4"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_statistic",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "CCDBA"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "righty",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "simple_triggers",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper: Temperature",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*Temperature"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "primary_label",
+                                                "value": "{ITEM.NAME}"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "primary_label_bold",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "CACFE"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "secondary_label_color",
+                                                "value": "2334B9"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "secondary_label_decimal_places",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "thresholds.0.color",
+                                                "value": "FF0000"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "thresholds.0.threshold",
+                                                "value": "80"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper: CPU utilization",
+                                        "x": "36",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "00C3FF"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*CPU utilization"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "lefty_max",
+                                                "value": "100"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "lefty_min",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "4"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_statistic",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "ADFBC"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "righty",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "simple_triggers",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper: Current running state",
+                                        "x": "36",
+                                        "y": "5",
+                                        "width": "12",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*Current running state"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "EFDCB"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "show.0",
+                                                "value": "2"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper: Reason of the last switchover",
+                                        "x": "48",
+                                        "y": "5",
+                                        "width": "12",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*Reason of the last switchover"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "FCEDA"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "show.0",
+                                                "value": "2"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "item",
+                                        "name": "Juniper: OS",
+                                        "x": "60",
+                                        "y": "5",
+                                        "width": "12",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "show.0",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "units_bold",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "units_show",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "value_size",
+                                                "value": "10"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Juniper: Network",
+                                "widgets": [
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Bits received",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "006274"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Bits received"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "ABFFD"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Inbound packets discarded",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "9c640a"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Inbound packets discarded"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "DBEAF"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Inbound packets with errors",
+                                        "y": "10",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "d73deb"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Inbound packets with errors"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "DBDEA"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Bits sent",
+                                        "x": "36",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "b51b1b"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Bits sent"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "DEDDA"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Outbound packets discarded",
+                                        "x": "36",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "3d5c25"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Outbound packets discarded"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "FBDDA"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: Outbound packets with errors",
+                                        "x": "36",
+                                        "y": "10",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "33309a"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*Outbound packets with errors"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "3"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "EEDCC"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Juniper: Optical Levels",
+                                "widgets": [
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper: Tx optical power lane",
+                                        "width": "36",
+                                        "height": "11",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "29B00B"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.fill",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*TX Laser Power"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.missingdatafunc",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.transparency",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.width",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "10"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines_mode",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "BBCBB"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "righty",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper: Rx optical power lane",
+                                        "x": "36",
+                                        "width": "35",
+                                        "height": "11",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "0D62C3"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.fill",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "*RX Laser Power"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.missingdatafunc",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.transparency",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.0.width",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "10"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines_mode",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "CEACB"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "righty",
+                                                "value": "0"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Juniper: BGP/OSPF",
+                                "widgets": [
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper MX: BGP Peer state",
+                                        "width": "18",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*peer * State"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "primary_label",
+                                                "value": "{ITEM.NAME}"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "primary_label_bold",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "CEFEB"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "secondary_label_color",
+                                                "value": "2334b9"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "secondary_label_decimal_places",
+                                                "value": "0"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: BGP Accepted/Rejected prefixes",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "d882f2"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "BGP * Accepted prefixes"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.color",
+                                                "value": "4ba26e"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.items.0",
+                                                "value": "BGP * Rejected prefixes"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "FEFAD"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: BGP Advertised/Received prefixes",
+                                        "y": "10",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "d882f2"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "BGP * Advertised prefixes"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.color",
+                                                "value": "9bde59"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.items.0",
+                                                "value": "BGP * Received prefixes"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "EDDBF"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper MX: BGP Peer status",
+                                        "x": "18",
+                                        "width": "18",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*peer * Status"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "primary_label",
+                                                "value": "{ITEM.NAME}"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "primary_label_bold",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "DFDBB"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "secondary_label_color",
+                                                "value": "2334b9"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "secondary_label_decimal_places",
+                                                "value": "0"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper MX: OSPF Neighbor State",
+                                        "x": "36",
+                                        "width": "18",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*OSPF Neighbor * State"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "primary_label",
+                                                "value": "{ITEM.NAME}"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "primary_label_bold",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "EDAAA"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "secondary_label_color",
+                                                "value": "2334b9"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "secondary_label_decimal_places",
+                                                "value": "0"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "svggraph",
+                                        "name": "Juniper MX: OSPF/OSPFv3 Number of relationship",
+                                        "x": "36",
+                                        "y": "5",
+                                        "width": "36",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.color",
+                                                "value": "00c3ff"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.0.items.0",
+                                                "value": "OSPF Neighbor * Events"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "ds.1.axisy",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.color",
+                                                "value": "756dbc"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "ds.1.items.0",
+                                                "value": "OSPFv3 Neighbor * Events"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_aggregation",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_lines",
+                                                "value": "2"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "legend_statistic",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "ABDDC"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "simple_triggers",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "working_time",
+                                                "value": "1"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "honeycomb",
+                                        "name": "Juniper MX: OSPFv3 Neighbor State",
+                                        "x": "54",
+                                        "width": "18",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "bg_color",
+                                                "value": "A5D6A7"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "items.0",
+                                                "value": "*OSPFv3 Neighbor * State"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "primary_label",
+                                                "value": "{ITEM.NAME}"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "primary_label_bold",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "EECBF"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "secondary_label_color",
+                                                "value": "2334b9"
+                                            },
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "secondary_label_decimal_places",
+                                                "value": "0"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

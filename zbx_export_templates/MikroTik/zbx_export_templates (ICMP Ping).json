@@ -1,0 +1,228 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "595524ca24ef4f058dc677d5fde33e3e",
+                "template": ".ICMP Ping",
+                "name": ".ICMP Ping",
+                "readme": "## Setup\n\nSet `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`.",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "64e4d4b71e1c4aefa1f34bd7d3624aad",
+                        "name": "ICMP ping",
+                        "type": "SIMPLE",
+                        "key": "icmpping",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "description": "The host accessibility by ICMP ping.\n\n0 - ICMP ping fails;\n1 - ICMP ping successful.",
+                        "valuemap": {
+                            "name": "Service state"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "health"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "network"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e198bf231e484151bf13e33ae9db987b",
+                                "expression": "max(/.ICMP Ping/icmpping,#3)=0",
+                                "name": "Unavailable by ICMP ping",
+                                "priority": "HIGH",
+                                "description": "Last three attempts returned timeout. Please check device connectivity.",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b1d592e9eb52489185f5caa25824bf4e",
+                        "name": "ICMP loss",
+                        "type": "SIMPLE",
+                        "key": "icmppingloss",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "FLOAT",
+                        "trends": "{$TRENDS}",
+                        "units": "%",
+                        "description": "The percentage of lost packets.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "health"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "network"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "3be7b3455c1f4f7a91bb3eeb381052f0",
+                                "expression": "min(/.ICMP Ping/icmppingloss,{$HEALTH_TRIGGER_INT})>{$ICMP_LOSS_WARN} and min(/.ICMP Ping/icmppingloss,{$HEALTH_TRIGGER_INT})<100",
+                                "name": "High ICMP ping loss",
+                                "opdata": "Loss: {ITEM.LASTVALUE1}",
+                                "priority": "WARNING",
+                                "description": "ICMP packets loss detected.",
+                                "dependencies": [
+                                    {
+                                        "name": "Unavailable by ICMP ping",
+                                        "expression": "max(/.ICMP Ping/icmpping,#3)=0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "dece6867d40541c4b429b5ce09761894",
+                        "name": "ICMP response time",
+                        "type": "SIMPLE",
+                        "key": "icmppingsec",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "FLOAT",
+                        "trends": "{$TRENDS}",
+                        "units": "s",
+                        "description": "The ICMP ping response time (in seconds).",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "health"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "network"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "732d90dfcccf440a91421cdb7f28f701",
+                                "expression": "avg(/.ICMP Ping/icmppingsec,{$HEALTH_TRIGGER_INT})>{$ICMP_RESPONSE_TIME_WARN}",
+                                "name": "High ICMP ping response time",
+                                "opdata": "Value: {ITEM.LASTVALUE1}",
+                                "priority": "WARNING",
+                                "description": "Average ICMP response time is too high.",
+                                "dependencies": [
+                                    {
+                                        "name": "High ICMP ping loss",
+                                        "expression": "min(/.ICMP Ping/icmppingloss,{$HEALTH_TRIGGER_INT})>{$ICMP_LOSS_WARN} and min(/.ICMP Ping/icmppingloss,{$HEALTH_TRIGGER_INT})<100"
+                                    },
+                                    {
+                                        "name": "Unavailable by ICMP ping",
+                                        "expression": "max(/.ICMP Ping/icmpping,#3)=0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$ICMP_LOSS_WARN}",
+                        "value": "20",
+                        "description": "Warning threshold of ICMP packet loss in %.",
+                        "config": {
+                            "type": "TEXT",
+                            "priority": "1",
+                            "section_name": "Thresholds",
+                            "label": "Threshold of ICMP packet loss",
+                            "description": "Warning threshold of ICMP packet loss in %. In the range from 0 to 100 inclusive.",
+                            "regex": "^-?([0-9]+|(([0-9]+)\\.([0-9]+)))$"
+                        }
+                    },
+                    {
+                        "macro": "{$ICMP_RESPONSE_TIME_WARN}",
+                        "value": "0.15",
+                        "description": "Warning threshold of the average ICMP response time in seconds.",
+                        "config": {
+                            "type": "TEXT",
+                            "priority": "2",
+                            "section_name": "Thresholds",
+                            "label": "Threshold of the average ICMP response",
+                            "description": "Warning threshold of the average ICMP response time in seconds. No less than 0.",
+                            "regex": "^-?([0-9]+|(([0-9]+)\\.([0-9]+)))$"
+                        }
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "bb62ad60a82c429fa5fd92189a230718",
+                        "name": "Service state",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Down"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Up"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

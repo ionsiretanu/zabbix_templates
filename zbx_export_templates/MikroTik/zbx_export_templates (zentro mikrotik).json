@@ -1,0 +1,2292 @@
+{
+    "zabbix_export": {
+        "version": "7.0",
+        "template_groups": [
+            {
+                "uuid": "8cee5050eeb74783a8bfaa73003ced3a",
+                "name": "RS"
+            },
+            {
+                "uuid": "128d309ace1942e2bba4f0182caa12f5",
+                "name": "Templates"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "f09adce8c9ad4bc29dbaefe668a242d7",
+                "template": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                "name": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                "description": "Touched on 2025-10-15 14:11:11\n2025-10-15 13:58:08",
+                "templates": [
+                    {
+                        "name": "ZENTRO_SNMP_CHECK"
+                    },
+                    {
+                        "name": "ZENTRO_ZBX_TEMPLATE_ICMP_GLOBAL"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "RS"
+                    },
+                    {
+                        "name": "Templates"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "045555904fe3473ea37c26ada98adf66",
+                        "name": "AAA login check (local)",
+                        "type": "EXTERNAL",
+                        "key": "aaa_ssh_probe.sh[\"{HOST.CONN}\",\"{$SSH_PORT}\",\"{$SECRET_USER_LOC_MT}\",\"{$SECRET_PASS_MT_LOC}\",\"{$SSH_TEST_CMD}\",\"{$AAA_TIMEOUT}\"]",
+                        "delay": "{$AAA_LOGIN_TEST}",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "// 1 if string starts with \"OK:\", else 0\nvar s = String(value || '').trim();\nreturn /^OK:/.test(s) ? 1 : 0;"
+                                ]
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "1bd637fec6d4449084eb2512891505fd",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/aaa_ssh_probe.sh[\"{HOST.CONN}\",\"{$SSH_PORT}\",\"{$SECRET_USER_LOC_MT}\",\"{$SECRET_PASS_MT_LOC}\",\"{$SSH_TEST_CMD}\",\"{$AAA_TIMEOUT}\"],#2)=0",
+                                "name": "{HOSTNAME} AAA login fails (local)",
+                                "priority": "HIGH",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} is unreachable",
+                                        "expression": "max(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/icmpping[,{$ICMP_TEST_PACKET_COUNT},{$ICMP_TEST_SEND_INTERVAL},,{$ICMP_TEST_REPLY_TIMEOUT}],60s)<1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "7f99c168ce0049abb3a1d47aef113b39",
+                        "name": "AAA login check (acs)",
+                        "type": "EXTERNAL",
+                        "key": "aaa_ssh_probe.sh[\"{HOST.CONN}\",\"{$SSH_PORT}\",\"{$SECRET_USER_MT_ACS}\",\"{$SECRET_PASS_MT_ACS_REM}\",\"{$SSH_TEST_CMD}\",\"{$AAA_TIMEOUT}\"]",
+                        "delay": "{$AAA_LOGIN_TEST}",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "// 1 if string starts with \"OK:\", else 0\nvar s = String(value || '').trim();\nreturn /^OK:/.test(s) ? 1 : 0;"
+                                ]
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "d3f5c7bca78b47f88b1e40a9a191d788",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/aaa_ssh_probe.sh[\"{HOST.CONN}\",\"{$SSH_PORT}\",\"{$SECRET_USER_MT_ACS}\",\"{$SECRET_PASS_MT_ACS_REM}\",\"{$SSH_TEST_CMD}\",\"{$AAA_TIMEOUT}\"],#2)=0",
+                                "name": "{HOSTNAME} AAA login fails (acs)",
+                                "priority": "HIGH",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} is unreachable",
+                                        "expression": "max(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/icmpping[,{$ICMP_TEST_PACKET_COUNT},{$ICMP_TEST_SEND_INTERVAL},,{$ICMP_TEST_REPLY_TIMEOUT}],60s)<1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "5937cd7b74e441e9b1ca247706aa2fbd",
+                        "name": "Expected speedtest bandwidth",
+                        "type": "CALCULATED",
+                        "key": "expected.bw",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "90d",
+                        "units": "bps",
+                        "params": "{$EXPECTED_BW}",
+                        "inventory_link": "TAG",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "BWTest"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "1bc723e6149f47779ed1c3da43f2d4fd",
+                        "name": "INV_HARD_VER",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.1.0",
+                        "key": "INV_HARD_VER",
+                        "delay": "10m",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "HARDWARE",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e7b1e5063cf74e97a72bf182e437438b",
+                                "expression": "find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/INV_HARD_VER,#1,\"regexp\",\"@TEMPLATE_MODELS_ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER\")=0",
+                                "name": "{HOSTNAME} Zabbix template Mismatch",
+                                "priority": "HIGH"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "08beea4236f14e70bb3b832288640ad2",
+                        "name": "INV_HOSTNAME",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.5.0",
+                        "key": "INV_HOSTNAME",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "NAME",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8d143c4efee94371bf87d47cf218d927",
+                        "name": "INV_MAC",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.17.1.1.0",
+                        "key": "INV_MAC",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "MACADDRESS_A",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    " ",
+                                    ":"
+                                ]
+                            },
+                            {
+                                "type": "TRIM",
+                                "parameters": [
+                                    ":"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "752062c51fdb4c1bbca3829bca9041c6",
+                        "name": "INV_SERIAL",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.7.3.0",
+                        "key": "INV_SERIAL",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "SERIALNO_A",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4bfcce9cc51d480fbbd1dfafa2108722",
+                        "name": "INV_SOFT_VER",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.4.4.0",
+                        "key": "INV_SOFT_VER",
+                        "delay": "1h",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "SOFTWARE",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "79c109ad2e5a40efbfcc212c8766aa2d",
+                                "expression": "find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/INV_SOFT_VER,#1,\"regexp\",\"^6?[4][2-9].[1-9]|^6?[4][3-9]\")=0",
+                                "name": "{HOSTNAME} ROS outdated",
+                                "status": "DISABLED",
+                                "priority": "INFO",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "40da792aa2ff41d4924b24ccc8e77806",
+                        "name": "CPU load",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2021.11.10.0",
+                        "key": "mikrotik.cpu.load",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "CPU"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "6b0f67f1be9d49cc903a5adf85ffcebc",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.cpu.load,600s)> 10",
+                                "name": "{HOSTNAME} CPU load>10% [DEBUG]",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "338391a361bd49f7be8b541947726e65",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.cpu.load,300s)> 60",
+                                "name": "{HOSTNAME} CPU load>60%",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "0c1e3d29ba9d425daaa78b9d4a0b8630",
+                        "name": "CPU temperature",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.3.11.0",
+                        "key": "mikrotik.processor.temperature",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "units": "\u00b0C",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.1"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Health"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "2a11f4d4b8604bc28b11a340a4354a0a",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.processor.temperature,300s)> 80",
+                                "name": "{HOSTNAME} *`[CRITICAL]`* CPU temp>80C",
+                                "priority": "DISASTER",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "61c383ba70744e4fa43668d9742e5051",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.processor.temperature,300s)> 75",
+                                "name": "{HOSTNAME} CPU temp>75C",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "675c46963cb348a9a2de69a8080f2805",
+                        "name": "PSU 1",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.3.15.0",
+                        "key": "mikrotik.psu.1",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "1"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Health"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "ae1d39dcd2d043d8b74adf5e3940dec3",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.psu.1)<> 1",
+                                "name": "{HOSTNAME} PSU1 faulty",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "995a5c40192d4968bb10b61a4ef6fc8c",
+                        "name": "PSU 2",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.3.16.0",
+                        "key": "mikrotik.psu.2",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "1"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Health"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "86d7e430c5ea4fd0a36b839b06f86ab9",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.psu.2)<> 1",
+                                "name": "{HOSTNAME} PSU2 faulty",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "5042cd8a62724c9694e5c1054cfeb450",
+                        "name": "MikroTik queue names (walk) - [sentinelLastRun.num] exists",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "mikrotik.queue_names.walk.sentinelLastRun.num",
+                        "delay": "{$POLL_ITEM_EXISTANCE}",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) {\n    return 0;\n}\n\n// Case-sensitive search.\n// Change to value.toLowerCase().indexOf(\"iamlookingforthistext\".toLowerCase()) if needed.\n// if (value.indexOf(\"IamLookingForThisText\") !== -1) {\nif (value.indexOf(\"sentinel.Stats.LastRun.num\") !== -1) {\n    return 1;\n}\n\nreturn 0;"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "61800ae73d7a4e289c24701af0eaa906",
+                        "name": "System RB version",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.7.4.0",
+                        "key": "mikrotik.rb",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "90d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "SOFTWARE_APP_A",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "{$ITEM_HEARTBEAT}"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "99589940cbee4d0c8c8ab868d4837c10",
+                                "expression": "find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.rb,#1,\"regexp\",\"^6?[4][2-9].[1-9]|^6?[4][3-9]\")=0",
+                                "name": "{HOSTNAME} RB outdated",
+                                "status": "DISABLED",
+                                "priority": "INFO",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "69bd9f00429c429096bc5dd3c861f52f",
+                        "name": "MikroTik scripts (walk) - [sentinel_execute] exists",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.8]",
+                        "key": "mikrotik.scripts.walk.sentinel_execute",
+                        "delay": "{$POLL_ITEM_EXISTANCE}",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) {\n    return 0;\n}\n\n// Case-sensitive search.\n// Change to value.toLowerCase().indexOf(\"iamlookingforthistext\".toLowerCase()) if needed.\n// if (value.indexOf(\"IamLookingForThisText\") !== -1) {\nif (value.indexOf(\"sentinel_execute\") !== -1) {\n    return 1;\n}\n\nreturn 0;"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "240851da3ea84574849cba328daef946",
+                        "name": "MikroTik scripts (walk) - [update_queues] exists",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.8]",
+                        "key": "mikrotik.scripts.walk.update_queues",
+                        "delay": "{$POLL_ITEM_EXISTANCE}",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) {\n    return 0;\n}\n\n// DEBUG TRICK: Uncomment the line below to force an error. \n// Go to Latest Data -> Info (the red 'i' icon) to see exactly what Zabbix received.\n// throw \"ZABBIX RECEIVED THIS RAW VALUE: \" + value;\n\nif (value.includes(\"queue_updater_execute\") || value.includes(\"update_queues\")) {\n    return 1;\n}\n\nreturn 0;"
+                                ]
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "a3dcd465f86a44debe6913662a9ac02a",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.scripts.walk.update_queues)<>1",
+                                "name": "{HOSTNAME} Queues script [update_queues] doesn't exist",
+                                "priority": "AVERAGE"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "94ee6eb07c7846158ce46fd78e2cb170",
+                        "name": "System temperature",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.14988.1.1.3.10.0",
+                        "key": "mikrotik.system.temperature",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "units": "\u00b0C",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "0"
+                            },
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.1"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Health"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "440f8fdffdef43839d005f1c7e5bfab5",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.system.temperature,300s)> 60",
+                                "name": "{HOSTNAME} *`[CRITICAL]`* sys temp>60C",
+                                "priority": "DISASTER",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "96027b70f4a446b1a00985a6df6a696d",
+                        "name": "Total disk space",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "SNMPv2-SMI::mib-2.25.2.3.1.5.131073",
+                        "key": "mikrotik.total.disk.space",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Disk"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "82d97b7bc7c7467eb01f8cac1c16053a",
+                        "name": "Total memory",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "SNMPv2-SMI::mib-2.25.2.3.1.5.65536",
+                        "key": "mikrotik.total.memory",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "2b97040e540548c0a8a57dccf5d6125c",
+                        "name": "System uptime",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.3.0",
+                        "key": "mikrotik.uptime",
+                        "delay": "{$POLL_UPTIME}",
+                        "history": "30d",
+                        "units": "uptime",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.01"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "General"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "826f82469a074762a04cdd2334730227",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.uptime,#2)>last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.uptime)",
+                                "name": "{HOSTNAME} was restarted",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e32ac3689efb4a078ca6a467c3e6009a",
+                        "name": "Used disk space",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "SNMPv2-SMI::mib-2.25.2.3.1.6.131073",
+                        "key": "mikrotik.used.disk.space",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Disk"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "bb4d84f0ddb9487eb0cf116a132875f0",
+                        "name": "Used memory",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "SNMPv2-SMI::mib-2.25.2.3.1.6.65536",
+                        "key": "mikrotik.used.memory",
+                        "delay": "{$POLL_VITAL}",
+                        "history": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8793da4a49ab4b308045a3145072c9e7",
+                        "name": "Voltage",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "SNMPv2-SMI::enterprises.14988.1.1.3.8.0",
+                        "key": "mikrotik.voltage",
+                        "delay": "{$POLL_MISC}",
+                        "history": "30d",
+                        "units": "V",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "0"
+                            },
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.1"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Health"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "586ce91a01ed437e8a0d618bd1b02b0c",
+                        "name": "Mikrotik_Sentinel-1-to-1-Queue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_sentinel1-to-1Queue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_Sentinel1-to-1Queue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "a606573bf2154a5a89b31127b02c3464",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_Sentinel1-to-1NatQueue[{#SNMPVALUE}]",
+                                "units": "pps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "5bcb36304b8e44acb3da305143abe0ab",
+                                        "expression": "nodata(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_Sentinel1-to-1NatQueue[{#SNMPVALUE}],{$SENTINEL_ORPHANED_1TO1})=1",
+                                        "name": "{HOSTNAME} Sentinel orphaned 1-to-1 {#SNMPVALUE}",
+                                        "priority": "INFO",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} is unreachable",
+                                                "expression": "max(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/icmpping[,{$ICMP_TEST_PACKET_COUNT},{$ICMP_TEST_SEND_INTERVAL},,{$ICMP_TEST_REPLY_TIMEOUT}],60s)<1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".num",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".str",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".array",
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "5f69ad625c1a4019881505a89828a783",
+                        "name": "Mikrotik_Sentinel-BwQueue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_SentinelBwQueue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_SentinelBwQueue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "19ebd38ce6bb4561a589f3e0237b2fc9",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_SentinelBwQueue[{#SNMPVALUE}]",
+                                "delay": "4h",
+                                "history": "90d",
+                                "units": "bps",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel-BWtest"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "9de633b855944399b98f7eb23f639afe",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelBwQueue[{#SNMPVALUE}])=0",
+                                        "name": "{HOSTNAME} {#SNMPVALUE} speedtest not running or invalid",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "AVERAGE"
+                                    },
+                                    {
+                                        "uuid": "65edb4f05e8e471db2d39bfce69a26ac",
+                                        "expression": "avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelBwQueue[{#SNMPVALUE}],#6)<{$EXPECTED_BW}",
+                                        "name": "{HOSTNAME} {#SNMPVALUE} speedtest underperforming",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "AVERAGE",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} {#SNMPVALUE} speedtest not running or invalid",
+                                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelBwQueue[{#SNMPVALUE}])=0"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "94a40bcf132240748f66e1dbc6cf3b61",
+                                "name": "Tested {#SNMPVALUE}",
+                                "yaxismax": "1000000000",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "1A7C11",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "Mikrotik_SentinelBwQueue[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "f5b5a761b58b48d3aab9f4cc5942c712",
+                        "name": "Mikrotik_Sentinel-NumValuesQueue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_sentinelNumValuesQueueQueue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_sentinelNumValuesQueue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "6612b79223494ebfb3530841f4091b08",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}]",
+                                "trends": "0",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel-NumValues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "4d57085331d94d13ab901f3e172fe566",
+                                        "expression": "{#SNMPVALUE}=\"sentinel.Mon.NAT.br-nat.available.num\" and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}])>=4",
+                                        "name": "{HOSTNAME} Sentinel - excessive public IPs allocation (br-nat)",
+                                        "priority": "INFO"
+                                    },
+                                    {
+                                        "uuid": "2593267c2ac64f8bac24ec45f782d4e1",
+                                        "expression": "{#SNMPVALUE}=\"sentinel.Mon.BGP.[io-iBGP].sessions.num\" and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}]) <> 1",
+                                        "name": "{HOSTNAME} Sentinel - missing io-iBGP session",
+                                        "priority": "WARNING"
+                                    },
+                                    {
+                                        "uuid": "a8fb4dab77814cad82834be3b890f8d3",
+                                        "expression": "((\n{#SNMPVALUE}=\"sentinelError.num\"\n)\nor\n(\n{#SNMPVALUE}=\"sentinel.Stats.Error.num\"\n))\nand\n(\nlast(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}]) <> 0\n)",
+                                        "name": "{HOSTNAME} Sentinel ERROR! Investigate on the router",
+                                        "priority": "HIGH"
+                                    },
+                                    {
+                                        "uuid": "bdc4667e7e454c5886a98e9162c75edf",
+                                        "expression": "((\n{#SNMPVALUE}=\"sentinelLastRun.num\"\n)\nor\n(\n{#SNMPVALUE}=\"sentinel.Stats.LastRun.num\"\n))\nand\n(\nlast(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}],#11) = last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}])\n)",
+                                        "name": "{HOSTNAME} Sentinel not running in scheduler",
+                                        "priority": "WARNING"
+                                    },
+                                    {
+                                        "uuid": "c07c29b6f504448b94128f7c50432afb",
+                                        "expression": "((\n{#SNMPVALUE}=\"sentinelTraceClosestNodeHops.num\"\n)\nor\n(\n{#SNMPVALUE}=\"sentinel.Mon.Traceroute.[ClosestNodeHops].num\"\n))\nand\n(\nchangecount(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelNumValuesQueue[{#SNMPVALUE}],#15,\"all\")>3\n)",
+                                        "name": "{HOSTNAME} Sentinel routing path unstable",
+                                        "priority": "INFO"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "2af96f1554ec43e6b2678f94de1a402c",
+                        "name": "Mikrotik_Sentinel-PoolsUtilizationQueue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_sentinelPoolsUtilizationQueue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_SentinelPoolsUtilizationQueue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4c1b4b642c284285a084282cc22176c5",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_SentinelPoolsUtilizationQueue[{#SNMPVALUE}]",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel-Toggles"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "e05363ec2cbe4bb99a5119240434b687",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelPoolsUtilizationQueue[{#SNMPVALUE}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}",
+                                        "name": "{HOSTNAME} Pool {#SNMPVALUE} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}%",
+                                        "priority": "DISASTER",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "9e0929e0212e414bbc8c103c8b2e86ca",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelPoolsUtilizationQueue[{#SNMPVALUE}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_HIGH}",
+                                        "name": "{HOSTNAME} Pool {#SNMPVALUE} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_HIGH}%",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} Pool {#SNMPVALUE} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}%",
+                                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelPoolsUtilizationQueue[{#SNMPVALUE}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".num",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".str",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".array",
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b37a13b029e64db889472b9a9d7d4f04",
+                        "name": "Mikrotik_Sentinel-StrValuesQueue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_sentinelStrValuesQueueQueue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_sentinelStrValuesQueue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "7a9fbb30434f49928414a0a5386ffebb",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_SentinelStrValuesQueue[{#SNMPVALUE}]",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel-StrValues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "63a165f3174b487cbbec17b4fcb248fa",
+                                        "expression": "({#SNMPVALUE}=\"sentinel.global.IPv6.Allocation.str\")\nand\n(\n  last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelStrValuesQueue[{#SNMPVALUE}])=\"UNALLOCATED\"\n)",
+                                        "name": "{HOSTNAME} IPv6 not Allocated [SENTINEL]",
+                                        "priority": "INFO"
+                                    },
+                                    {
+                                        "uuid": "d1aa76c728cb453a986cc1ee272816ac",
+                                        "expression": "(\n{#SNMPVALUE}=\"sentinelVersion.str\" or {#SNMPVALUE}=\"sentinel.Stats.Version.str\"\n)\nand\n(\nfind(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Mikrotik_SentinelStrValuesQueue[{#SNMPVALUE}],#1,\"regexp\",\"@SENTINEL_REQUIRED_VER\")=0\n)",
+                                        "name": "{HOSTNAME} Sentinel version outdated",
+                                        "priority": "HIGH"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "2185b3f9eb7842a1ba9b265d525e1bfd",
+                        "name": "Mikrotik_Sentinel-TogglesQueue",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.2.1.2]",
+                        "key": "Mikrotik_sentinelTogglesQueueQueue.discovery",
+                        "delay": "{$DISCOVERY_SENTINEL}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@Mikrotik_SentinelToggleQueue",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4d35007cac8e46a78abbf017da10409f",
+                                "name": "{#SNMPVALUE}",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                "key": "Mikrotik_SentinelTogglesQueue[{#SNMPVALUE}]",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Sentinel-Toggles"
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".num",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".str",
+                                    ""
+                                ]
+                            },
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    ".array",
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "7297dc87ce5a4fe58a87e82f836a15cb",
+                        "name": "Optical Interfaces",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},ifDescr,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8]",
+                        "key": "optical.interfaces",
+                        "delay": "{$DISCOVERY_INTERFACES}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#IFALIAS}",
+                                    "value": "@ZENTRO_REGEX_BB_INTERFACES_EXCLUDED_ALIAS",
+                                    "formulaid": "A"
+                                },
+                                {
+                                    "macro": "{#IFOPERSTATUS}",
+                                    "value": "{$MIKROTIK.NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX",
+                                    "formulaid": "B"
+                                },
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@ZENTRO_REGEX_BB_MIKROTIK_OPTICAL_INTERFACES_NAME",
+                                    "formulaid": "C"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "12e8e1e841cc4576ab8eb65f1c2c1d8d",
+                                "name": "{#SNMPVALUE} admin status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}",
+                                "key": "optical.admin_status[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Optical"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7b67e0b06df14e26b1097f1c58e75161",
+                                "name": "{#SNMPVALUE} optical.wavelength",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.19.1.1.5.{#SNMPINDEX}",
+                                "key": "optical.lambda[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "value_type": "FLOAT",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Optical"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "f4c7007aadd648ed8ac2a44877d5cec4",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.lambda[{#SNMPVALUE}])=\"@MTIK_OPTICAL_LAMBDAS\"",
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) SFP problematic",
+                                        "priority": "WARNING"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "5630b31ab8044346bdaa7058595aa64d",
+                                "name": "{#SNMPVALUE} optical.rx",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.19.1.1.10.{#SNMPINDEX}",
+                                "key": "optical.rx[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "value_type": "FLOAT",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.001"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Optical"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7f03630d06764df9a5664a3bf3c2633d",
+                                "name": "{#SNMPVALUE} optical.temperature",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.19.1.1.6.{#SNMPINDEX}",
+                                "key": "optical.temperature[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "value_type": "FLOAT",
+                                "units": "\u00b0C",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Optical"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "7f09b932183e45e48a8de766344b40b6",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.temperature[{#SNMPVALUE}])>{$TOLERATED_SFP_TEMP}",
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) SFP hot",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "AVERAGE"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "838d543649fe4b71a4a32506a943d15a",
+                                "name": "{#SNMPVALUE} optical.tx",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.19.1.1.9.{#SNMPINDEX}",
+                                "key": "optical.tx[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "value_type": "FLOAT",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.001"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Optical"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "1817c10646c74f1e8e22e7ab0ba2f246",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.rx[{#SNMPVALUE}])<>0 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.rx[{#SNMPVALUE}])<>-40 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.admin_status[{#SNMPVALUE}])=1 and\n(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.tx[{#SNMPVALUE}])-last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/optical.rx[{#SNMPVALUE}])>9)",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) fiber RX signal low",
+                                "priority": "HIGH"
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "1e97f27b9e6f40deac69053a5e45c779",
+                                "name": "SFP temperature: {#SNMPVALUE} -> ({#IFALIAS})",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "1A7C11",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "optical.temperature[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d790fe77fa6c4d388d429e119219ea73",
+                                "name": "Signal: {#SNMPVALUE} -> ({#IFALIAS})",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "1A7C11",
+                                        "calc_fnc": "MAX",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "optical.rx[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "438938d80874423dbd4b83687f0a3686",
+                        "name": "Queues",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.2.1.1.2]",
+                        "key": "queue.discovery",
+                        "delay": "{$DISCOVERY_INTERFACES}",
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "69d386c1aac84146bd9f9d4496187319",
+                                "name": "queue({#SNMPVALUE}) Download",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.1.1.8.{#SNMPINDEX}",
+                                "key": "QueueDownload[{#SNMPVALUE}]",
+                                "delay": "{$POLL_MT_QUEUE}",
+                                "history": "90d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Queues"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2acdc86720c244b0b4ffb55581e8f9cc",
+                                "name": "queue({#SNMPVALUE}) Upload",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.2.1.1.9.{#SNMPINDEX}",
+                                "key": "QueueUpload[{#SNMPVALUE}]",
+                                "delay": "{$POLL_MT_QUEUE}",
+                                "history": "90d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Queues"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "ed4c170bc28540c8ae90d38fe64af396",
+                                "name": "Queue: {#SNMPVALUE}",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "00C800",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "QueueUpload[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "C80000",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "QueueDownload[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "7665b809c4394e649c92ae9621f674a3",
+                        "name": "Interfaces",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},ifDescr,{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFOPERSTATUS},1.3.6.1.2.1.2.2.1.8]",
+                        "key": "snmp.discovery",
+                        "delay": "{$DISCOVERY_INTERFACES}",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#IFALIAS}",
+                                    "value": "@ZENTRO_REGEX_BB_INTERFACES_EXCLUDED_ALIAS",
+                                    "formulaid": "A"
+                                },
+                                {
+                                    "macro": "{#IFOPERSTATUS}",
+                                    "value": "{$MIKROTIK.NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX",
+                                    "formulaid": "B"
+                                },
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@ZENTRO_REGEX_BB_MIKROTIK_INTERFACES_NAME",
+                                    "formulaid": "C"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "5278149b5913494bb84701cb71d01277",
+                                "name": "{#SNMPVALUE} Admin Status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}",
+                                "key": "AdminStatus[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "30d",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "334119ec10004f4eba648945dec4afe3",
+                                "name": "{#SNMPVALUE} Alias",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.18.{#SNMPINDEX}",
+                                "key": "Alias[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ALIAS}",
+                                "history": "30d",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "506cb2869f9d4309ba36285cfd116ef7",
+                                "name": "{#SNMPVALUE} Input errors",
+                                "type": "CALCULATED",
+                                "key": "All.inputErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "90d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "params": "last(//FCSErrors[{#SNMPVALUE}]) + last(//RxCodeErrors[{#SNMPVALUE}]) + last(//inDiscards[{#SNMPVALUE}]) + last(//inErrors[{#SNMPVALUE}])",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "07b1a3e566554fb1b59e7b9a3e517cf6",
+                                        "expression": "sum(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/All.inputErrors[{#SNMPVALUE}],{$ERROR_AVG_TIME})>{$PORT_ERRORS_TOLERATE}",
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) errors_IN",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3e30be00097746ccb757116e58e02294",
+                                "name": "{#SNMPVALUE} Output errors",
+                                "type": "CALCULATED",
+                                "key": "All.outputErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "90d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "params": "last(//outErrors[{#SNMPVALUE}]) + last(//outDiscards[{#SNMPVALUE}])",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "85186a70de3f4c839b1eedc00033d3c6",
+                                        "expression": "sum(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/All.outputErrors[{#SNMPVALUE}],{$ERROR_AVG_TIME})>{$PORT_ERRORS_TOLERATE}",
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) errors_OUT",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "afac2bdaef83467d88932db4de4c022f",
+                                "name": "{#SNMPVALUE} Description",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.18.{#SNMPINDEX}",
+                                "key": "Description[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_NAME}",
+                                "history": "30d",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b3c726f21a6a4ea793d4d1263f2ed850",
+                                "name": "{#SNMPVALUE} FCS errors",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.14.1.1.45.{#SNMPINDEX}",
+                                "key": "FCSErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "dccc5ba419d242f0a47687eb95440e96",
+                                        "expression": "sum(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/FCSErrors[{#SNMPVALUE}],{$ERROR_AVG_TIME})>{$PORT_ERRORS_TOLERATE}",
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) FCS errors",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "53893044c37e45d28801e8f683199e4f",
+                                "name": "{#SNMPVALUE} Download",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}",
+                                "key": "ifHCInOctets[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_TRAFFIC}",
+                                "history": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d9801919c71243bfae3cdf87f2344506",
+                                "name": "{#SNMPVALUE} Upload",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}",
+                                "key": "ifHCOutOctets[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_TRAFFIC}",
+                                "history": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0034ed8a2ca24fbb8321e4477ad7e6a9",
+                                "name": "{#SNMPVALUE} Inbound discarded packets",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}",
+                                "key": "inDiscards[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "01e581295c9f4f45be14874f62e790e6",
+                                "name": "{#SNMPVALUE} Inbound errors",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}",
+                                "key": "inErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "33343c56ddc749a2b0da02e9f5ac9db1",
+                                "name": "{#SNMPVALUE} Last change",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.9.{#SNMPINDEX}",
+                                "key": "LastChange[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "997a87950f364d4c943948383f2ef313",
+                                "name": "{#SNMPVALUE} Name",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.1.{#SNMPINDEX}",
+                                "key": "Name[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_NAME}",
+                                "history": "30d",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "5cdf4a757a6f4ddba620b77b5741d523",
+                                "name": "{#SNMPVALUE} Oper Status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}",
+                                "key": "OperStatus[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "30d",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "db31d886477e4453bb0fba5108118cdd",
+                                "name": "{#SNMPVALUE} Outbound discarded packets",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}",
+                                "key": "outDiscards[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "53a35025a67646f2a118cd96b536efae",
+                                "name": "{#SNMPVALUE} Outbound errors",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}",
+                                "key": "outErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "preprocessing": [
+                                    {
+                                        "type": "SIMPLE_CHANGE",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c021312042af403b9485cee73104e71c",
+                                "name": "{#SNMPVALUE} Rx Code errors",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.4.1.14988.1.1.14.1.1.52.{#SNMPINDEX}",
+                                "key": "RxCodeErrors[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_ERRORS}",
+                                "history": "30d",
+                                "status": "DISABLED",
+                                "discover": "NO_DISCOVER",
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "aa328b1e4ab849e687d614b896f97344",
+                                "name": "{#SNMPVALUE} Speed",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}",
+                                "key": "Speed[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1000000"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Network"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "22827675500c4ce8874f6e0308c3c84e",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.uptime)>2000 and \nlast(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/LastChange[{#SNMPVALUE}],#1)<>last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/LastChange[{#SNMPVALUE}],#2)",
+                                "name": "{HOSTNAME} Flapped {#SNMPVALUE} ({#IFALIAS})",
+                                "priority": "HIGH",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ce4918ffe60e401ca6a7f071d871d30f",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                "opdata": "{#SNMPVALUE}",
+                                "priority": "HIGH",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "Interface",
+                                        "value": "down"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1360b6eccb464d5097db1ba4d627df04",
+                                "expression": "find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Alias[{#SNMPVALUE}],,\"like\",\"100m\")=0 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Alias[{#SNMPVALUE}],,\"like\",\"mgmt\")=0 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Alias[{#SNMPVALUE}],,\"like\",\"BBU\")=0 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Alias[{#SNMPVALUE}],,\"like\",\"UPS\")=0 and  find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Alias[{#SNMPVALUE}],,\"like\",\"APC\")=0 and  find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"100m\")=0 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")=0 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}],#3)<1000000000 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}],#3)<>0",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) not gig",
+                                "priority": "HIGH",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) down",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/OperStatus[{#SNMPVALUE}])<>1 and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,\"like\",\"mgmt\")<>1"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8cf279d460d14fb09547ca6fb0f2a84d",
+                                "expression": "((avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/ifHCInOctets[{#SNMPVALUE}],#3))>(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}])*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}])>0) and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,,\"bond\")=0",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) wired download>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "b622cd800be448bead2f0331f3fded0f",
+                                "expression": "((avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/ifHCOutOctets[{#SNMPVALUE}],#3))>(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}])*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Speed[{#SNMPVALUE}])>0) and find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/Name[{#SNMPVALUE}],,,\"bond\")=0",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} ({#IFALIAS}) wired upload>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "ffc2151b45bf47438f036a890c92b4f3",
+                                "name": "IntErrors: {#SNMPVALUE} -> ({#IFALIAS})",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "color": "6666FF",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "inDiscards[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "66FF66",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "inErrors[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "2",
+                                        "color": "66FFFF",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "outDiscards[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "3",
+                                        "color": "FF66FF",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "outErrors[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "4",
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "FF6666",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "FCSErrors[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "5",
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "DDDD00",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "RxCodeErrors[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "6",
+                                        "drawtype": "BOLD_LINE",
+                                        "color": "EE0000",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "All.outputErrors[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "28590010e20b426895675f8370852320",
+                                "name": "IntTraffic: {#SNMPVALUE} -> ({#IFALIAS})",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "00C800",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "ifHCInOctets[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "C80000",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                                            "key": "ifHCOutOctets[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$AAA_TIMEOUT}",
+                        "value": "8"
+                    },
+                    {
+                        "macro": "{$ICMP_LOSS_WARN}",
+                        "value": "10"
+                    },
+                    {
+                        "macro": "{$MIKROTIK.NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                        "value": "^6$",
+                        "description": "Ignores `notPresent(6)`"
+                    },
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "oomoomee"
+                    },
+                    {
+                        "macro": "{$SSH_PORT}",
+                        "value": "2223"
+                    },
+                    {
+                        "macro": "{$SSH_TEST_CMD}",
+                        "value": "/system identity print"
+                    }
+                ]
+            }
+        ],
+        "triggers": [
+            {
+                "uuid": "e129ab37142a43b4b143b1280ed55ef4",
+                "expression": "(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.used.disk.space))>(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.total.disk.space)*0.95)",
+                "name": "{HOSTNAME} disk usage>95%",
+                "priority": "HIGH",
+                "manual_close": "YES"
+            },
+            {
+                "uuid": "54dce4609c0a424a8080ea77435f3d80",
+                "expression": "(avg(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.used.memory,300s))>(last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.total.memory)*0.8)",
+                "name": "{HOSTNAME} memory usage>80%",
+                "priority": "HIGH",
+                "manual_close": "YES"
+            },
+            {
+                "uuid": "725e3508bfda4d4d90ba946e7681d40b",
+                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.scripts.walk.sentinel_execute)<>1 and ( find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/INV_HOSTNAME,#1,\"regexp\",\"@Mikrotik_Sentinel_Ignored_hostnames\")=0 )",
+                "name": "{HOSTNAME} Sentinel script [sentinel_execute] doesn't exist",
+                "priority": "AVERAGE",
+                "dependencies": [
+                    {
+                        "name": "{HOSTNAME} SNMP not available (timeout)",
+                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/zabbix[host,snmp,available],#5)<>1"
+                    }
+                ]
+            },
+            {
+                "uuid": "35590d97624e4d0596298460e707d5c2",
+                "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.queue_names.walk.sentinelLastRun.num)<>1 and ( find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/INV_HOSTNAME,#1,\"regexp\",\"@Mikrotik_Sentinel_Ignored_hostnames\")=0 )",
+                "name": "{HOSTNAME} Sentinel script [sentinel_execute] never executed",
+                "priority": "AVERAGE",
+                "dependencies": [
+                    {
+                        "name": "{HOSTNAME} Sentinel script [sentinel_execute] doesn't exist",
+                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/mikrotik.scripts.walk.sentinel_execute)<>1 and ( find(/ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER/INV_HOSTNAME,#1,\"regexp\",\"@Mikrotik_Sentinel_Ignored_hostnames\")=0 )"
+                    }
+                ]
+            }
+        ],
+        "graphs": [
+            {
+                "uuid": "b1fd2355864c467c9e7b2383e30625f7",
+                "name": "Board - CPU usage",
+                "show_work_period": "NO",
+                "graph_items": [
+                    {
+                        "drawtype": "GRADIENT_LINE",
+                        "color": "FF3333",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.cpu.load"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "b4fa51fa7af941d486191845b0a17232",
+                "name": "Board - Disk usage",
+                "show_work_period": "NO",
+                "graph_items": [
+                    {
+                        "drawtype": "BOLD_LINE",
+                        "color": "EE00EE",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.total.disk.space"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "drawtype": "GRADIENT_LINE",
+                        "color": "00CC00",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.used.disk.space"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "d41cbc1128434e4ab86e9daca813bcbd",
+                "name": "Board - Memory usage",
+                "show_work_period": "NO",
+                "graph_items": [
+                    {
+                        "drawtype": "FILLED_REGION",
+                        "color": "00C800",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.total.memory"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "drawtype": "FILLED_REGION",
+                        "color": "FFCC00",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.used.memory"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "fd521b09187e444ebf2ee0b4b99282af",
+                "name": "Board - System temperature",
+                "ymin_type_1": "FIXED",
+                "graph_items": [
+                    {
+                        "drawtype": "FILLED_REGION",
+                        "color": "C80000",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.processor.temperature"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "drawtype": "FILLED_REGION",
+                        "color": "00C800",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.system.temperature"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "4ca567ce4e72460fad8645d8e50fb584",
+                "name": "Board - Uptime",
+                "graph_items": [
+                    {
+                        "color": "2774A4",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_MIKROTIK_ROUTER",
+                            "key": "mikrotik.uptime"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

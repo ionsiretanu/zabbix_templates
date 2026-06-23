@@ -1,0 +1,120 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "2b0a5433b02c4be9b24f74d90f380bae",
+                "template": "MikroTik - MAC Monitor",
+                "name": "MikroTik - MAC Monitor",
+                "description": "Monitors IP to MAC bindings via SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "6873b6ce24c4412c807976c8b4d0deae",
+                        "name": "Get interface data",
+                        "type": "SSH",
+                        "key": "ssh.run[getmactable,{HOST.IP}]",
+                        "delay": "5m",
+                        "value_type": "TEXT",
+                        "params": "interface/bridge/host/print proplist=mac-address,interface where !local mac-address",
+                        "username": "netdiscover",
+                        "password": "{$SECRET_PASS}",
+                        "description": "Get MAC table information.",
+                        "timeout": "30",
+                        "tags": [
+                            {
+                                "tag": "componet",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "b762a2ff622040b69663fb6ee86d54e8",
+                        "name": "MAC table discovery",
+                        "type": "DEPENDENT",
+                        "key": "mac.table.discovery",
+                        "item_prototypes": [
+                            {
+                                "uuid": "d1706fda384a4c1c980c4bca3bc30280",
+                                "name": "MAC on [{#MACIF}] - {#MACADDR}",
+                                "type": "DEPENDENT",
+                                "key": "mac.interface[{#MACADDR}]",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var lines = value.split('\\n');\nvar targetMAC = '{#MACADDR}';\n\nfor (var i = 0; i < lines.length; i++) {\n    var line = lines[i];\n    \n    if (line.indexOf(targetMAC) > -1 && line.match(/^\\s*[0-9]+\\s+D/)) {\n        var parts = line.trim().split(/\\s+/);\n        \n        if (parts.length >= 4 && parts[2] === targetMAC) {\n            return parts[3];  // Returns interface name\n        }\n    }\n}\n\nreturn 'unknown';"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ssh.run[getmactable,{HOST.IP}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "interface",
+                                        "value": "{#MACIF}"
+                                    },
+                                    {
+                                        "tag": "mac_address",
+                                        "value": "{#MACADDR}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ssh.run[getmactable,{HOST.IP}]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar result = { \"data\": [] };\nvar macsFound = {};\n\nfor (var i = 0; i < lines.length; i++) {\n    var line = lines[i];\n    \n    // Look for MAC address pattern (xx:xx:xx:xx:xx:xx)\n    var macMatch = line.match(/([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2})/i);\n    \n    if (macMatch) {\n        var mac = macMatch[1];\n        \n        // Look for interface name after the MAC\n        // Interface names are typically: ether1, ether2, ether3, br-trunk, wifi2, etc.\n        var interfaceMatch = line.match(/(ether[0-9]+|br-trunk|bridge|wifi[0-9]+|vlan[0-9]+)/i);\n        \n        var interface_name = interfaceMatch ? interfaceMatch[1] : \"unknown\";\n        \n        // Avoid duplicates\n        if (!macsFound[mac]) {\n            macsFound[mac] = true;\n            result.data.push({\n                \"{#MACADDR}\": mac,\n                \"{#MACIF}\": interface_name\n            });\n        }\n    }\n}\n\nreturn JSON.stringify(result);"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SECRET_PASS}",
+                        "value": "ly00YU03w4KT"
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ]
+            }
+        ]
+    }
+}

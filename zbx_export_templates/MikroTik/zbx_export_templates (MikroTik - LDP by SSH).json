@@ -1,0 +1,117 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "a8d563e4060b4a9d91db08b2d54beee7",
+                "template": "Mikrotik - LDP by SSH",
+                "name": "Mikrotik - LDP by SSH",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "58930b03592740af998984d1bc4a4e6b",
+                        "name": "Discover LDP Operational Peers",
+                        "type": "SSH",
+                        "key": "ssh.run[mikrotik.ldp.peers.discovery]",
+                        "delay": "1h",
+                        "params": "/mpls ldp neighbor print proplist=peer",
+                        "username": "{$MIKROTIK_SSH_USER}",
+                        "password": "{$SECRET_PASS}",
+                        "lifetime": "31d",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "30d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "73c4aeb84e804700aaa48dccfda05b98",
+                                "name": "LDP Peer Operational Status: {#PEER}",
+                                "type": "SSH",
+                                "key": "ssh.run[mikrotik.ldp.peer_status[{#PEER}]",
+                                "params": ":local peer \"{#PEER}\"; :local fullPeer ($peer . \":0\"); :local found 0; :foreach n in=[/mpls ldp neighbor find] do={ :if ([/mpls ldp neighbor get $n peer] = $fullPeer) do={ :set found 1 } }; :put $found",
+                                "username": "{$MIKROTIK_SSH_USER}",
+                                "password": "{$SECRET_PASS}",
+                                "valuemap": {
+                                    "name": "Peer Status"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "peer",
+                                        "value": "{#PEER}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "5835fe6b0150408c9f65d33b5b56f57d",
+                                        "expression": "last(/Mikrotik - LDP by SSH/ssh.run[mikrotik.ldp.peer_status[{#PEER}])=0",
+                                        "name": "LDP session to {#PEER} Down",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar peers = [];\nfor (var i = 0; i < lines.length; i++) {\n    var line = lines[i];\n    // Look for lines containing an IP address with colon (e.g., \"10.100.0.4:0\")\n    var match = line.match(/([0-9.]+):/);\n    if (match) {\n        peers.push(match[1]);   // store only the IP part\n    }\n}\nvar lld = { \"data\": [] };\nfor (var j = 0; j < peers.length; j++) {\n    lld.data.push({ \"{#PEER}\": peers[j] });\n}\nreturn JSON.stringify(lld);"
+                                ]
+                            },
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.data"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "7e38c4273b9040a9b6d397078e61cc65",
+                        "name": "Peer Status",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "Up"
+                            },
+                            {
+                                "value": "0",
+                                "newvalue": "Down"
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ]
+            }
+        ]
+    }
+}

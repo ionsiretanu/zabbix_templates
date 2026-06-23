@@ -1,0 +1,247 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "host_groups": [
+            {
+                "uuid": "7fb7c803b8cf485b90652fe0dd0a3714",
+                "name": "openwifi"
+            }
+        ],
+        "hosts": [
+            {
+                "host": "OpenWifi - Controller 4.0",
+                "name": "OpenWifi - Controller 4.0",
+                "monitored_by": "PROXY_GROUP",
+                "proxy_group": {
+                    "name": "openwifi"
+                },
+                "groups": [
+                    {
+                        "name": "openwifi"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "useip": "NO",
+                        "ip": "100.100.101.200",
+                        "dns": "openwifi-prov.andrena.io",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "items": [
+                    {
+                        "name": "OpenWifi - Entity Raw Inventory",
+                        "type": "HTTP_AGENT",
+                        "key": "openwifi.v.4.0.entity.raw",
+                        "delay": "1h",
+                        "history": "1d",
+                        "value_type": "TEXT",
+                        "url": "https://openwifi-prov.andrena.io/api/v1/entity",
+                        "query_fields": [
+                            {
+                                "name": "limit",
+                                "value": "1"
+                            }
+                        ],
+                        "headers": [
+                            {
+                                "name": "X-API-KEY",
+                                "value": "{$TOKEN}"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "OpenWifi - Venue Raw Inventory",
+                        "type": "HTTP_AGENT",
+                        "key": "openwifi.v.4.0.venue.raw",
+                        "delay": "1h",
+                        "history": "1d",
+                        "value_type": "TEXT",
+                        "url": "https://openwifi-prov.andrena.io/api/v1/venue",
+                        "query_fields": [
+                            {
+                                "name": "limit",
+                                "value": "250"
+                            }
+                        ],
+                        "headers": [
+                            {
+                                "name": "X-API-KEY",
+                                "value": "{$TOKEN}"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "name": "{#VENUE_NAME} AP Discovery",
+                        "type": "DEPENDENT",
+                        "key": "ap.discovery.[{#VENUE_ID}]",
+                        "host_prototypes": [
+                            {
+                                "host": "{#VENUE_NAME} - {#AP_NAME} - {#AP_SERIAL}",
+                                "name": "{#VENUE_NAME} - {#AP_NAME} - {#AP_SERIAL}",
+                                "group_links": [
+                                    {
+                                        "group": {
+                                            "name": "openwifi"
+                                        }
+                                    }
+                                ],
+                                "group_prototypes": [
+                                    {
+                                        "name": "Entity - {#AP_ENTITY_NAME}"
+                                    },
+                                    {
+                                        "name": "Venue - {#AP_VENUE_NAME}"
+                                    }
+                                ],
+                                "templates": [
+                                    {
+                                        "name": "Template-OpenWifi-AP"
+                                    }
+                                ],
+                                "macros": [
+                                    {
+                                        "macro": "{$AP_NAME}",
+                                        "value": "{#AP_NAME}"
+                                    },
+                                    {
+                                        "macro": "{$AP_SERIAL}",
+                                        "value": "{#AP_SERIAL}"
+                                    },
+                                    {
+                                        "macro": "{$VENUE_NAME}",
+                                        "value": "{#VENUE_NAME}"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "AP_NAME",
+                                        "value": "{#AP_NAME}"
+                                    },
+                                    {
+                                        "tag": "AP_SERIAL",
+                                        "value": "{#AP_SERIAL}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "parent_discovery_rule": {
+                            "key": "venue.discovery"
+                        },
+                        "master_item": {
+                            "key": "openwifi.venue.inventory[{#VENUE_ID}]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.taglist[*]"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var aps = JSON.parse(value);\nvar result = [];\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    result.push({\n        \"{#AP_NAME}\":    ap.name,\n        \"{#AP_SERIAL}\":  ap.serialNumber,\n        \"{#AP_TYPE}\":    ap.deviceType,\n        \"{#AP_ID}\":      ap.id,\n        \"{#AP_VENUE_ID}\":   ap.venue,\n        \"{#AP_VENUE_NAME}\":   ap.venueName,\n        \"{#AP_ENTITY_NAME}\":   ap.entityName\n    });\n}\nreturn JSON.stringify(result);"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Entity Discovery",
+                        "type": "DEPENDENT",
+                        "key": "entity.discovery",
+                        "status": "DISABLED",
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "master_item": {
+                            "key": "openwifi.v.4.0.entity.raw"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.entities[*]"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "try {\n    // 1. Parse the master item's JSON (the entity list)\n    var entities = JSON.parse(value);\n\n    // If the response does not contain an 'entities' array, wrap it.\n    // This ensures the script works whether the JSON root is an object or an array.\n    if (!entities.hasOwnProperty('entities') && Array.isArray(entities)) {\n        entities = { 'entities': entities };\n    }\n\n    // 2. Prepare the final output array for LLD\n    var results = [];\n    var baseUrl = \"https://openwifi-prov.andrena.io/api/v1\";\n    var authToken = \"{$TOKEN}\";\n\n    // 3. Iterate through each entity in the 'entities' array.\n    for (var e = 0; e < entities.entities.length; e++) {\n        var entity = entities.entities[e];\n        var entityId = entity.id;\n        var entityName = entity.name;\n        var venueIds = entity.venues || [];\n\n        // 4. For each venue ID, make an HTTP request to get its details.\n        for (var v = 0; v < venueIds.length; v++) {\n            var venueId = venueIds[v];\n            var venueName = \"\";\n            var venueApiUrl = baseUrl + \"/venue/\" + venueId;\n\n            // Create an HttpRequest object for the API call.\n            var request = new HttpRequest();\n            request.addHeader(\"Authorization: Bearer \" + authToken);\n            request.addHeader(\"Accept: application/json\");\n\n            try {\n                var response = request.get(venueApiUrl);\n                if (request.getStatus() == 200) {\n                    try {\n                        var venueData = JSON.parse(response);\n                        // The 'name' field is expected in the venue details.\n                        venueName = venueData.name ? venueData.name : \"\";\n                    } catch(parseError) {\n                        // Handle parsing errors if the response is not valid JSON.\n                        Zabbix.log(3, \"[Venue Discovery] Failed to parse JSON for venue \" + venueId + \": \" + parseError);\n                    }\n                } else {\n                    // Log non-200 responses for debugging.\n                    Zabbix.log(3, \"[Venue Discovery] Failed to get venue \" + venueId + \". Status: \" + request.getStatus());\n                }\n            } catch(networkError) {\n                // Log network or request errors.\n                Zabbix.log(3, \"[Venue Discovery] Network error for venue \" + venueId + \": \" + networkError);\n            } finally {\n                // If the SDK provides a cleanup method, use it here. Otherwise, just let it be.\n                request = null;\n            }\n\n            // Add the enriched data to the final results.\n            results.push({\n                \"{#ENTITY_ID}\": entityId,\n                \"{#ENTITY_NAME}\": entityName,\n                \"{#VENUE_ID}\": venueId,\n                \"{#VENUE_NAME}\": venueName\n            });\n        }\n    }\n\n    // 5. Return the result as a JSON string for Zabbix LLD to process.\n    return JSON.stringify(results);\n} catch (error) {\n    // Catch any top-level errors and log them.\n    Zabbix.log(3, \"[Venue Discovery] Fatal error: \" + error);\n    return \"[]\";\n}"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Venue Discovery",
+                        "type": "DEPENDENT",
+                        "key": "venue.discovery",
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "item_prototypes": [
+                            {
+                                "name": "{#PARENT5_NAME} : {#PARENT4_NAME} : {#PARENT1_NAME} : {#PARENT2_NAME} : {#ENTITY_NAME} : {#VENUE_NAME} - Inventory - Raw Inventory",
+                                "type": "HTTP_AGENT",
+                                "key": "openwifi.venue.inventory[{#VENUE_ID}]",
+                                "delay": "12h",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nif (data.taglist && Array.isArray(data.taglist)) {\n    for (var i = 0; i < data.taglist.length; i++) {\n        data.taglist[i].venueName = \"{#VENUE_NAME}\";\n        data.taglist[i].entityName = \"{#ENTITY_NAME}\";\n    }\n}\nreturn JSON.stringify(data);"
+                                        ]
+                                    }
+                                ],
+                                "interface_ref": "if1",
+                                "url": "https://{HOST.DNS}/api/v1/inventory",
+                                "query_fields": [
+                                    {
+                                        "name": "venue",
+                                        "value": "{#VENUE_ID}"
+                                    }
+                                ],
+                                "headers": [
+                                    {
+                                        "name": "X-API-KEY",
+                                        "value": "{$TOKEN}"
+                                    },
+                                    {
+                                        "name": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "openwifi.v.4.0.venue.raw"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.venues[*]"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "// ----- Configuration -----\nvar maxParents = 5;                     // number of parent levels to report\nvar rootParentUUID = \"0000-0000-0000\";  // sentinel for root\nvar entityLimit = 2000;                 // fetch up to 2000 entities\n\n// ----- Helper: fetch all entities (with pagination) -----\nfunction fetchAllEntities(apiKey) {\n    var allEntities = [];\n    var offset = 0;\n    var pageSize = 500;\n    var baseUrl = \"https://openwifi-prov.andrena.io/api/v1/entity\";\n\n    while (true) {\n        var url = baseUrl + \"?limit=\" + pageSize + \"&offset=\" + offset;\n        var req = new HttpRequest();\n        req.addHeader(\"X-API-Key: \" + apiKey);\n        req.addHeader(\"Accept: application/json\");\n        var resp = req.get(url);\n        if (req.getStatus() != 200) {\n            Zabbix.log(3, \"[Venue Discovery] Failed to fetch entities: \" + req.getStatus());\n            return null;\n        }\n        var data = JSON.parse(resp);\n        var entities = data.entities || [];\n        allEntities = allEntities.concat(entities);\n        if (entities.length < pageSize) break;\n        offset += pageSize;\n    }\n    return allEntities;\n}\n\n// ----- Main -----\ntry {\n    // 1. Parse the input (array of venues)\n    var venues = JSON.parse(value);\n    if (!Array.isArray(venues)) {\n        throw \"Expected array of venues, got \" + typeof venues;\n    }\n\n    // 2. Get the authentication token from the macro (passed via user macro {$TOKEN})\n    //    Note: In Zabbix preprocessing, we can read the macro as a global variable?\n    //    Workaround: the script runs in the context of the host, macros are not directly accessible.\n    //    Therefore we must embed the token as a string. Better to store it in a global variable or pass via item key parameter.\n    //    For simplicity, we assume the token is hardcoded here \u2013 you must replace it with your actual token.\n    var token = \"{$TOKEN}\";  // This will NOT be expanded inside JavaScript. Zabbix does not expand macros in preprocessing scripts.\n    //    To work around, define a user macro on the host and reference it in the URL? Not possible.\n    //    Instead, create a separate master item that stores the token as text and use dependent item? Too complex.\n    //    Practical solution: hardcode the token in the script (less secure) or fetch it from a Zabbix API call \u2013 not recommended.\n    //    Better: Use the same token that the master item uses. Since the master item already sends the token in its headers,\n    //    we can extract it from the master item's configuration? Not possible.\n    //    Therefore, you MUST hardcode the token in the script below, replacing `YOUR_TOKEN_HERE` with the actual bearer token.\n    var apiKey = \"62531dd61031ac9a79ab67fdd37750f22ce855fa63d47b4b3bc009bccdc263a9\"; // <<< REPLACE WITH YOUR TOKEN\n\n    // 3. Fetch all entities (once)\n    var entityList = fetchAllEntities(apiKey);\n    if (!entityList) {\n        return \"[]\";\n    }\n\n    // 4. Build lookup tables: entity id -> {name, parent}\n    var entityMap = {};\n    for (var i = 0; i < entityList.length; i++) {\n        var e = entityList[i];\n        entityMap[e.id] = {\n            name: e.name,\n            parent: e.parent\n        };\n    }\n\n    // 5. Prepare result array for LLD\n    var lldResults = [];\n\n    // 6. Process each venue\n    for (var v = 0; v < venues.length; v++) {\n        var venue = venues[v];\n        var venueId = venue.id;\n        var venueName = venue.name;\n        var entityId = venue.entity;\n\n        if (!entityId || !entityMap[entityId]) {\n            Zabbix.log(3, \"[Venue Discovery] Skipping venue \" + venueId + \" \u2013 missing entity mapping\");\n            continue;\n        }\n\n        // Entity details\n        var entityName = entityMap[entityId].name;\n\n        // Build parent chain (up to maxParents)\n        var parentIds = [];\n        var parentNames = [];\n        var currentId = entityMap[entityId].parent;\n        var depth = 0;\n        while (currentId && currentId !== \"\" && currentId !== rootParentUUID && depth < maxParents) {\n            var parentObj = entityMap[currentId];\n            if (!parentObj) break;\n            parentIds.push(currentId);\n            parentNames.push(parentObj.name);\n            currentId = parentObj.parent;\n            depth++;\n        }\n        // Fill empty slots for missing levels\n        while (parentIds.length < maxParents) {\n            parentIds.push(\"\");\n            parentNames.push(\"\");\n        }\n\n        // Build macro object\n        var lldEntry = {\n            \"{#VENUE_ID}\": venueId,\n            \"{#VENUE_NAME}\": venueName,\n            \"{#ENTITY_ID}\": entityId,\n            \"{#ENTITY_NAME}\": entityName\n        };\n        for (var i = 1; i <= maxParents; i++) {\n            lldEntry[\"{#PARENT\" + i + \"_ID}\"] = parentIds[i-1];\n            lldEntry[\"{#PARENT\" + i + \"_NAME}\"] = parentNames[i-1];\n        }\n        lldResults.push(lldEntry);\n    }\n\n    return JSON.stringify(lldResults);\n} catch (e) {\n    Zabbix.log(3, \"[Venue Discovery] Fatal error: \" + e);\n    return \"[]\";\n}"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$TOKEN}",
+                        "value": "62531dd61031ac9a79ab67fdd37750f22ce855fa63d47b4b3bc009bccdc263a9"
+                    },
+                    {
+                        "macro": "{$URL}",
+                        "value": "andrena.io"
+                    }
+                ]
+            }
+        ]
+    }
+}

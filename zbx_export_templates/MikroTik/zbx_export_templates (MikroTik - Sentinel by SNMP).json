@@ -1,0 +1,1012 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "a92a1c786554486b9d008e6c750ef438",
+                "template": ".MikroTik - Sentinel by SNMP",
+                "name": ".MikroTik - Sentinel by SNMP",
+                "description": "Monitors MikroTik Sentinel — a third-party ISP automation and monitoring framework.\n\nArchitecture: three master SNMP walk items poll the queue tree, simple queues, and scripts tables. All discovery rules and item prototypes are dependent on these masters (no redundant SNMP polls).\n\nLinkage: standalone — link to .MikroTik Router or apply directly to hosts.",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "b06f08a4a57d43a9847882e233aef8b6",
+                        "name": "Sentinel: Queue tree walk",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.2.2.1.2,1.3.6.1.4.1.14988.1.1.2.2.1.3]",
+                        "key": "sentinel.queue_tree.walk",
+                        "delay": "{$SENTINEL.POLL_INT}",
+                        "history": "0",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "description": "Master SNMP walk of MikroTik queue tree table. Collects queue names (.2) and raw values (.3) in one poll. All Sentinel discovery rules and their item prototypes depend on this item.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "9477b234703d4c5ab984f645719b1edc",
+                        "name": "Sentinel: Simple queues walk",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.2.1.1.2,1.3.6.1.4.1.14988.1.1.2.1.1.8,1.3.6.1.4.1.14988.1.1.2.1.1.9]",
+                        "key": "sentinel.simple_queues.walk",
+                        "delay": "{$SENTINEL.QUEUE.POLL_INT}",
+                        "history": "0",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "description": "Master SNMP walk of MikroTik simple queue table. Collects queue names (.2), received bytes (.8), and sent bytes (.9). Simple queue download/upload discovery depends on this item.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d6165265e0004d769f6c9001b979c5bb",
+                        "name": "Sentinel: Scripts walk",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.8.1.1.2]",
+                        "key": "sentinel.scripts.walk",
+                        "delay": "{$SENTINEL.CHECK.INTERVAL}",
+                        "history": "0",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "description": "Master SNMP walk of MikroTik scripts table (name column). Used by dependent items to verify presence of required Sentinel scripts on the router.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4b7ffb15806f402d866c6bd062da8eac",
+                        "name": "Sentinel: Script [sentinel_execute] exists",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.check.script[sentinel_execute]",
+                        "delay": "0",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "UNSIGNED",
+                        "description": "Returns 1 if the 'sentinel_execute' script is present on the router, 0 if missing. This is the main Sentinel agent script; absence means Sentinel is not installed.",
+                        "master_item": {
+                            "key": "sentinel.scripts.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) return 0;\nreturn value.indexOf('sentinel_execute') !== -1 ? 1 : 0;"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "sentinel"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "02391078828247c5a65f537399997a1b",
+                        "name": "Sentinel: Script [update_queues] exists",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.check.script[update_queues]",
+                        "delay": "0",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "UNSIGNED",
+                        "description": "Returns 1 if the 'update_queues' or 'queue_updater_execute' script is present, 0 if missing. This script reads Sentinel state and writes metrics into the MikroTik queue tree for SNMP export.",
+                        "master_item": {
+                            "key": "sentinel.scripts.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) return 0;\nreturn (value.includes('queue_updater_execute') || value.includes('update_queues')) ? 1 : 0;"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "sentinel"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "6922b2b16fd44dbdb7f95c72c8eadd2b",
+                                "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.check.script[update_queues])<>1",
+                                "name": "{HOSTNAME} Queues script [update_queues] doesn't exist",
+                                "priority": "AVERAGE"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4605904305064e0393c1479ad8bb7798",
+                        "name": "Sentinel: Last run queue exists",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.check.lastrun",
+                        "delay": "0",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "UNSIGNED",
+                        "description": "Returns 1 if the 'sentinel.Stats.LastRun.num' entry is present in the queue tree, 0 if absent. Absence means sentinel_execute has never run successfully and no monitoring data has been written to queues.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "if (!value) return 0;\nreturn value.indexOf('sentinel.Stats.LastRun.num') !== -1 ? 1 : 0;"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "sentinel"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "3252d87840e549a4a5a9461917bc05b2",
+                        "name": "Sentinel numeric values discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.numvalues",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "FORMULA",
+                            "formula": "A and B and C",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.NUMVAL.MATCHES}",
+                                    "formulaid": "A"
+                                },
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.BWTEST.MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX",
+                                    "formulaid": "B"
+                                },
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.POOLS.MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX",
+                                    "formulaid": "C"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers all Sentinel numeric (.num) queues except bandwidth test and pool utilization queues. Includes routing stats, BGP sessions, ARP entries, error counters, and the scheduler timestamp.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "ebd1c59466db4c0da733287917dec552",
+                                "name": "Sentinel metric: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.numvalue[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "trends": "0",
+                                "value_type": "FLOAT",
+                                "description": "Numeric Sentinel metric stored in queue '{#QUEUE_NAME}'. Sentinel writes monitoring counters, timestamps, and status values into MikroTik queue tree entries, which are then read via SNMP.",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "NumValues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "db982b7f1f9f4d80895705285a6e9284",
+                                        "expression": "({#QUEUE_NAME}=\"sentinel.Mon.NAT.br-nat.available.num\") and last(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}])>=4",
+                                        "name": "{HOSTNAME} Sentinel - excessive public IPs allocation (br-nat)",
+                                        "priority": "INFO"
+                                    },
+                                    {
+                                        "uuid": "ee49749dcadc4dfea76e07058e2471c6",
+                                        "expression": "({#QUEUE_NAME}=\"sentinel.Mon.BGP.[io-iBGP].sessions.num\") and last(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}])<>1",
+                                        "name": "{HOSTNAME} Sentinel - missing io-iBGP session",
+                                        "priority": "WARNING"
+                                    },
+                                    {
+                                        "uuid": "6e1dd232275e48ab91b9a483da1b5957",
+                                        "expression": "({#QUEUE_NAME}=\"sentinelError.num\" or {#QUEUE_NAME}=\"sentinel.Stats.Error.num\") and last(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}])<>0",
+                                        "name": "{HOSTNAME} Sentinel ERROR — investigate on the router",
+                                        "priority": "HIGH"
+                                    },
+                                    {
+                                        "uuid": "aeb9d1be95174b329c643e0eb116b76a",
+                                        "expression": "({#QUEUE_NAME}=\"sentinelLastRun.num\" or {#QUEUE_NAME}=\"sentinel.Stats.LastRun.num\") and last(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}],#11)=last(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}])",
+                                        "name": "{HOSTNAME} Sentinel not running in scheduler",
+                                        "priority": "WARNING"
+                                    },
+                                    {
+                                        "uuid": "574e2d12cdf3425293cfed098b9b52c7",
+                                        "expression": "({#QUEUE_NAME}=\"sentinelTraceClosestNodeHops.num\" or {#QUEUE_NAME}=\"sentinel.Mon.Traceroute.[ClosestNodeHops].num\") and changecount(/.MikroTik - Sentinel by SNMP/sentinel.queue.numvalue[{#QUEUE_NAME}],#15,\"all\")>3",
+                                        "name": "{HOSTNAME} Sentinel routing path unstable",
+                                        "priority": "INFO"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "dad32d170d684770aabc8f9275b0899f",
+                        "name": "Sentinel string values discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.strvalues",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.STRVAL.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers all Sentinel string (.str) queues: version strings, IPv6 allocation state, debug output, and other text-based metrics.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "d0414a9174e04990a2a679c6839bf618",
+                                "name": "Sentinel string: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.strvalue[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "description": "String Sentinel metric stored in queue '{#QUEUE_NAME}'. Used for version strings (sentinel.Stats.Version.str), IPv6 allocation status, pool names, and debug/runtime info.",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "StrValues"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "a95e9385db2b4d8f8c60248fae8ecebc",
+                                        "expression": "({#QUEUE_NAME}=\"sentinel.global.IPv6.Allocation.str\") and last(/.MikroTik - Sentinel by SNMP/sentinel.queue.strvalue[{#QUEUE_NAME}])=\"UNALLOCATED\"",
+                                        "name": "{HOSTNAME} IPv6 not allocated [SENTINEL]",
+                                        "priority": "INFO"
+                                    },
+                                    {
+                                        "uuid": "e7104f117c7f4c99ac299f259353b3a9",
+                                        "expression": "({#QUEUE_NAME}=\"sentinelVersion.str\" or {#QUEUE_NAME}=\"sentinel.Stats.Version.str\") and find(/.MikroTik - Sentinel by SNMP/sentinel.queue.strvalue[{#QUEUE_NAME}],#1,\"regexp\",\"{$SENTINEL_REQUIRED_VER}\")=0",
+                                        "name": "{HOSTNAME} Sentinel version outdated",
+                                        "priority": "HIGH"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4fb9280c527d4bc5990237f95d405ff3",
+                        "name": "Sentinel toggles and arrays discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.toggles",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.TOGGLE.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers Sentinel toggle queues (on-monitoring-toggle) and array queues (.array). Toggles indicate which monitoring modules are active (BGP, ARP, OSPF, Routes, Traceroute). Arrays hold structured data like hop lists.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "c4f8db84d1694b3ea82b8d45c1e7a822",
+                                "name": "Sentinel toggle: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.toggle[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "value_type": "CHAR",
+                                "trends": "0",
+                                "description": "Toggle or array value from queue '{#QUEUE_NAME}'. Sentinel writes '1'/'0' to on-monitoring-toggle queues to enable/disable monitoring modules, and structured data to .array queues (e.g. traceroute hop counts).",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$ITEM_HEARTBEAT}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "Toggles"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "27bbbd7887b04b6582f1eebde372c4d6",
+                        "name": "Sentinel bandwidth test queues discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.bwtest",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.BWTEST.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers Sentinel bandwidth test result queues. Sentinel runs periodic speed tests and writes the measured bandwidth in bps to these queues. Queue names typically match the pattern '^sentinelBw'.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "8f2720307ab14d13a7c7965909a2a157",
+                                "name": "Sentinel BW test: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.bwtest[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "history": "90d",
+                                "units": "bps",
+                                "description": "Bandwidth test result from Sentinel for direction '{#QUEUE_NAME}'. Sentinel periodically runs a bandwidth measurement and writes the result in bits per second to this queue entry. Zero indicates the test is not running or returned an error.",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "BWtest"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "429d6b49edd94be4bcb578a0150ef454",
+                                        "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.queue.bwtest[{#QUEUE_NAME}])=0",
+                                        "name": "{HOSTNAME} {#QUEUE_NAME} — speedtest not running or invalid",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "AVERAGE"
+                                    },
+                                    {
+                                        "uuid": "b9047ccc3e99439a9cd15f3dae760665",
+                                        "expression": "avg(/.MikroTik - Sentinel by SNMP/sentinel.queue.bwtest[{#QUEUE_NAME}],#6)<{$EXPECTED_BW}",
+                                        "name": "{HOSTNAME} {#QUEUE_NAME} — speedtest underperforming",
+                                        "status": "DISABLED",
+                                        "discover": "NO_DISCOVER",
+                                        "priority": "AVERAGE",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} {#QUEUE_NAME} — speedtest not running or invalid",
+                                                "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.queue.bwtest[{#QUEUE_NAME}])=0"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "64f87049bd7c46df8abaea9d10fa84d1",
+                        "name": "Sentinel IP pool utilization discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.pools",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.POOLS.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers Sentinel IP address pool utilization queues (sentinel.Mon.Pools.*). Sentinel periodically samples each pool and writes utilization*100 as an integer; the item applies a 0.01 multiplier to recover the percentage.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "6d27dee971434225b80533ad4763e4e7",
+                                "name": "Sentinel pool utilization: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.pool_util[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "description": "IP address pool utilization percentage for '{#QUEUE_NAME}'. Sentinel stores the value as integer*100 in the queue tree; the 0.01 multiplier converts it back to a percentage. Full pool means no IPs available for new subscribers.",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "Pools"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "99b82aaeb2474461a5680057167db569",
+                                        "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.queue.pool_util[{#QUEUE_NAME}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}",
+                                        "name": "{HOSTNAME} Pool {#QUEUE_NAME} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}%",
+                                        "priority": "DISASTER",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "24ee5fbac5a8469b82989a51cc5182f3",
+                                        "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.queue.pool_util[{#QUEUE_NAME}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_HIGH}",
+                                        "name": "{HOSTNAME} Pool {#QUEUE_NAME} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_HIGH}%",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "{HOSTNAME} Pool {#QUEUE_NAME} utilization above {$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}%",
+                                                "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.queue.pool_util[{#QUEUE_NAME}])>{$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "08bd158834d44ccda52fb0d43402b864",
+                        "name": "Sentinel 1-to-1 NAT queues discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.nat1to1",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.1TO1.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers Sentinel 1-to-1 NAT subscriber queues. Each discovered subscriber gets a packet-rate item; stale (orphaned) queues trigger an alert after {$SENTINEL_ORPHANED_1TO1} of silence. Filter pattern is site-specific — set {$SENTINEL.QUEUE.1TO1.MATCHES} accordingly.",
+                        "master_item": {
+                            "key": "sentinel.queue_tree.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.2.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "27fb6b61c0ea432a88a9b4842002b092",
+                                "name": "Sentinel 1-to-1 NAT: {#QUEUE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "sentinel.queue.nat1to1[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "units": "pps",
+                                "description": "1-to-1 NAT traffic counter for subscriber queue '{#QUEUE_NAME}'. Sentinel tracks the queue byte counter; CHANGE_PER_SECOND converts it to a packet rate. A non-zero value confirms the subscriber's NAT session is active.",
+                                "master_item": {
+                                    "key": "sentinel.queue_tree.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.2.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "CHANGE_PER_SECOND"
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "sentinel"
+                                    },
+                                    {
+                                        "tag": "Sentinel",
+                                        "value": "NAT1to1"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "a65d944c2b31472d9001d820c2621c2b",
+                                        "expression": "nodata(/.MikroTik - Sentinel by SNMP/sentinel.queue.nat1to1[{#QUEUE_NAME}],{$SENTINEL_ORPHANED_1TO1})=1",
+                                        "name": "{HOSTNAME} Sentinel orphaned 1-to-1 {#QUEUE_NAME}",
+                                        "priority": "INFO"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "f125f7b174c1431ba3ada3d32f882394",
+                        "name": "Simple queues discovery",
+                        "type": "DEPENDENT",
+                        "key": "sentinel.discovery.simple_queues",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND_OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#QUEUE_NAME}",
+                                    "value": "{$SENTINEL.QUEUE.SIMPLE.MATCHES}",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "description": "Discovers MikroTik simple queues and monitors their download and upload traffic rates. Simple queues are used for per-subscriber or per-VLAN bandwidth shaping.",
+                        "master_item": {
+                            "key": "sentinel.simple_queues.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#QUEUE_NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.2.1.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "e1e251afb7ef4e1788f8c54923584e31",
+                                "name": "Queue {#QUEUE_NAME}: Download",
+                                "type": "DEPENDENT",
+                                "key": "net.queue.traffic.in[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "history": "90d",
+                                "units": "bps",
+                                "description": "Received (download) traffic rate for simple queue '{#QUEUE_NAME}'. Counts bytes received through this queue per second and multiplies by 8 to convert to bits per second.",
+                                "master_item": {
+                                    "key": "sentinel.simple_queues.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.1.1.8.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "CHANGE_PER_SECOND"
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "queue"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "68542c544e4d42f2a60a9bf926db894e",
+                                "name": "Queue {#QUEUE_NAME}: Upload",
+                                "type": "DEPENDENT",
+                                "key": "net.queue.traffic.out[{#QUEUE_NAME}]",
+                                "delay": "0",
+                                "history": "90d",
+                                "units": "bps",
+                                "description": "Transmitted (upload) traffic rate for simple queue '{#QUEUE_NAME}'. Counts bytes sent through this queue per second and multiplies by 8 to convert to bits per second.",
+                                "master_item": {
+                                    "key": "sentinel.simple_queues.walk"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.2.1.1.9.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "CHANGE_PER_SECOND"
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "queue"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "fcb4d816fe6c4ae68f3041d5fe23a456",
+                                "name": "Queue traffic: {#QUEUE_NAME}",
+                                "ymin_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "00C800",
+                                        "item": {
+                                            "host": ".MikroTik - Sentinel by SNMP",
+                                            "key": "net.queue.traffic.in[{#QUEUE_NAME}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "C80000",
+                                        "item": {
+                                            "host": ".MikroTik - Sentinel by SNMP",
+                                            "key": "net.queue.traffic.out[{#QUEUE_NAME}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$EXPECTED_BW}",
+                        "value": "100000000",
+                        "description": "Expected minimum bandwidth test result (bps). Default 100 Mbps."
+                    },
+                    {
+                        "macro": "{$GLOBAL_PERCENT_POOL4_UTILIZATION_DISASTER}",
+                        "value": "95",
+                        "description": "IPv4 pool utilization threshold for DISASTER alert (%)."
+                    },
+                    {
+                        "macro": "{$GLOBAL_PERCENT_POOL4_UTILIZATION_HIGH}",
+                        "value": "85",
+                        "description": "IPv4 pool utilization threshold for HIGH alert (%)."
+                    },
+                    {
+                        "macro": "{$ITEM_HEARTBEAT}",
+                        "value": "1d",
+                        "description": "Max silence before DISCARD_UNCHANGED_HEARTBEAT forces a value update."
+                    },
+                    {
+                        "macro": "{$SENTINEL.CHECK.INTERVAL}",
+                        "value": "5m",
+                        "description": "Polling interval for script existence checks (sentinel.scripts.walk)."
+                    },
+                    {
+                        "macro": "{$SENTINEL.POLL_INT}",
+                        "value": "60s",
+                        "description": "Polling interval for the queue tree master walk."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.1TO1.MATCHES}",
+                        "value": "CHANGE_IF_NEEDED",
+                        "description": "Regex filter for 1-to-1 NAT subscriber queues. Pattern is site-specific — set to match your Sentinel NAT queue naming."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.BWTEST.MATCHES}",
+                        "value": "^sentinelBw",
+                        "description": "Regex matching Sentinel bandwidth test queues (sentinelBwUp.num, sentinelBwDown.num)."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.NUMVAL.MATCHES}",
+                        "value": "\\.num$",
+                        "description": "Regex suffix matching all Sentinel numeric value queues."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.POOLS.MATCHES}",
+                        "value": "sentinel\\.Mon\\.Pools\\.",
+                        "description": "Regex matching Sentinel IP pool utilization queues (sentinel.Mon.Pools.*)."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.SIMPLE.MATCHES}",
+                        "value": ".+",
+                        "description": "Regex filter for simple queue discovery. Default matches all queues."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.STRVAL.MATCHES}",
+                        "value": "\\.str$",
+                        "description": "Regex suffix matching all Sentinel string value queues."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.TOGGLE.MATCHES}",
+                        "value": "(on-monitoring-toggle|\\.array$)",
+                        "description": "Regex matching Sentinel monitoring toggle and array queues."
+                    },
+                    {
+                        "macro": "{$SENTINEL.QUEUE.POLL_INT}",
+                        "value": "60s",
+                        "description": "Polling interval for the simple queue master walk."
+                    },
+                    {
+                        "macro": "{$SENTINEL_ORPHANED_1TO1}",
+                        "value": "25m",
+                        "description": "Time with no data after which a 1-to-1 NAT queue is considered orphaned."
+                    },
+                    {
+                        "macro": "{$SENTINEL_REQUIRED_VER}",
+                        "value": ".+",
+                        "description": "Regex for the required Sentinel version string. Set to enforce a minimum version, e.g. '^3\\.'. Default matches any version (alert disabled in effect)."
+                    }
+                ]
+            }
+        ],
+        "triggers": [
+            {
+                "uuid": "3ae1e8a9cdea45759d8217d8bd6acdf2",
+                "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.check.script[sentinel_execute])<>1",
+                "name": "{HOSTNAME} Sentinel script [sentinel_execute] doesn't exist",
+                "priority": "AVERAGE",
+                "dependencies": []
+            },
+            {
+                "uuid": "719b36de00e644b2b2b26add7c1e2cfc",
+                "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.check.lastrun)<>1",
+                "name": "{HOSTNAME} Sentinel script [sentinel_execute] never executed",
+                "priority": "AVERAGE",
+                "dependencies": [
+                    {
+                        "name": "{HOSTNAME} Sentinel script [sentinel_execute] doesn't exist",
+                        "expression": "last(/.MikroTik - Sentinel by SNMP/sentinel.check.script[sentinel_execute])<>1"
+                    }
+                ]
+            }
+        ]
+    }
+}

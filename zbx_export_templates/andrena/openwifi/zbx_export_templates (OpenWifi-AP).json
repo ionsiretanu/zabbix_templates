@@ -1,0 +1,1908 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "9b4f54efd7fe43c29499579d95b153db",
+                "name": "ITcare"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "91d34d6868834fd790f204c05e09b7c6",
+                "template": "Template-OpenWifi-AP",
+                "name": "Template-OpenWifi-AP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "3441878250794e98b07e906e808c215c",
+                        "name": "AP Certificate Expiry",
+                        "type": "DEPENDENT",
+                        "key": "ap.certexpiry[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.certificateExpiryDate"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "f1586c953f2c4fa4893eeea06cc26151",
+                        "name": "AP Certificate Issuer",
+                        "type": "DEPENDENT",
+                        "key": "ap.certissuer[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.certificateIssuerName"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "2a8a65bdf92c4033b52cf923e9945160",
+                        "name": "AP Certificate Status",
+                        "type": "DEPENDENT",
+                        "key": "ap.certstatus[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.verifiedCertificate"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "unknown"
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "ce6222bd823e46f18c7097af95709db9",
+                        "name": "AP Clients 2G",
+                        "type": "DEPENDENT",
+                        "key": "ap.clients2g[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.associations_2G"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "006a2a92ac904ce29bc441d38607f0db",
+                        "name": "AP Clients 5G",
+                        "type": "DEPENDENT",
+                        "key": "ap.clients5g[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.associations_5G"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "78c8f8d8b2144882b877eb145253d32f",
+                        "name": "AP Clients 6G",
+                        "type": "DEPENDENT",
+                        "key": "ap.clients6g[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.associations_6G"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "16820641091a4ffea78deab116050179",
+                        "name": "AP Connected",
+                        "type": "DEPENDENT",
+                        "key": "ap.connected[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.connected"
+                                ]
+                            },
+                            {
+                                "type": "BOOL_TO_DECIMAL"
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "e4556a895fa04c6f8eea1e7509627d8d",
+                        "name": "AP Connection Completion Time",
+                        "type": "DEPENDENT",
+                        "key": "ap.connectioncompletion[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "units": "ms",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.connectionCompletionTime"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "c39ecfa24a7442468f985801395d31b6",
+                        "name": "AP Connection Time",
+                        "type": "DEPENDENT",
+                        "key": "ap.connectiontime[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "units": "s",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.totalConnectionTime"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "fc67aa0bb0b842f390d85ec02230afd0",
+                        "name": "AP Connect Reason",
+                        "type": "DEPENDENT",
+                        "key": "ap.connectreason[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.connectReason"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "unknown"
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "08ef4c8e7b01431fad7fce38d454fba0",
+                        "name": "AP Created Timestamp",
+                        "type": "DEPENDENT",
+                        "key": "ap.created[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.createdTimestamp"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "85481be156f44e7d914ca2a8ed61c9e0",
+                        "name": "AP Device Type",
+                        "type": "DEPENDENT",
+                        "key": "ap.devicetype[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.deviceType"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "0d87e7b1b30c4ae2a2348e1c6bf91023",
+                        "name": "device raw",
+                        "type": "HTTP_AGENT",
+                        "key": "ap.device[{$AP_SERIAL}]",
+                        "delay": "5m",
+                        "history": "1d",
+                        "value_type": "TEXT",
+                        "url": "https://openwifi-gw.{$URL}/api/v1/device/{$AP_SERIAL}",
+                        "headers": [
+                            {
+                                "name": "X-API-KEY",
+                                "value": "{$TOKEN}"
+                            },
+                            {
+                                "name": "Accept",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "01ff4a7d41b74b0087ef4a111d7b5d38",
+                        "name": "AP Firmware",
+                        "type": "DEPENDENT",
+                        "key": "ap.firmware[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.firmware"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "fa35d589726a49378d085cc785b727b0",
+                        "name": "AP IP Address",
+                        "type": "DEPENDENT",
+                        "key": "ap.ip[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.ipAddress"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "0c4c6131954f4e058c325319d73e7173",
+                        "name": "AP Kafka Clients",
+                        "type": "DEPENDENT",
+                        "key": "ap.kafkaclients[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.kafkaClients"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "e99f5e0481a94eb2b4e7b66f8dbbe1a8",
+                        "name": "AP Kafka Packets",
+                        "type": "DEPENDENT",
+                        "key": "ap.kafkapackets[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.kafkaPackets"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "565c51c993c340bea41d10c0baa92954",
+                        "name": "AP Last Config Change",
+                        "type": "DEPENDENT",
+                        "key": "ap.lastconfigchange[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.lastConfigurationChange"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "cc8f308c97ec4e3094e3d80c0e9163d2",
+                        "name": "AP Last Config Download",
+                        "type": "DEPENDENT",
+                        "key": "ap.lastconfigdownload[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.lastConfigurationDownload"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "3ee43120571e4acdad426e5f726a31c8",
+                        "name": "AP Last FW Update",
+                        "type": "DEPENDENT",
+                        "key": "ap.lastfwupdate[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.lastFWUpdate"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "81e6a584975e42e391d2475b09af72d6",
+                        "name": "AP Last Recorded Contact",
+                        "type": "DEPENDENT",
+                        "key": "ap.lastrecordedcontact[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.lastRecordedContact"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "7effe8b02e4e4a85a0468b960124863b",
+                        "name": "AP CPU Load",
+                        "type": "DEPENDENT",
+                        "key": "ap.load[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.load"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "e06244b3bac143bcb5dd5978f9eb4687",
+                        "name": "AP Locale",
+                        "type": "DEPENDENT",
+                        "key": "ap.locale[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.locale"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "6cf42f300a854c1fa9a83cba1c331d0e",
+                        "name": "AP MAC Address",
+                        "type": "DEPENDENT",
+                        "key": "ap.mac[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.macAddress"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        },
+                        "tags": [
+                            {
+                                "tag": "AP",
+                                "value": "{$MAC_ADDRESS}"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "541d2f2d4f8e4405acfadebd269f2102",
+                        "name": "AP Manufacturer",
+                        "type": "DEPENDENT",
+                        "key": "ap.manufacturer[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.manufacturer"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "fcc7bb694bf64a3f82b335c9e7cec58e",
+                        "name": "AP Memory Used %",
+                        "type": "DEPENDENT",
+                        "key": "ap.memory[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "30d",
+                        "units": "%",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.memoryUsed"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "3f370707562a4fddaa15878bbeb09d15",
+                        "name": "AP Model",
+                        "type": "DEPENDENT",
+                        "key": "ap.model[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.compatible"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "404c40da0f0149128c85a0e6523e5ca4",
+                        "name": "AP Modified Timestamp",
+                        "type": "DEPENDENT",
+                        "key": "ap.modified[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.modified"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "0fa578d6f1ff4a6a9e144b1389bf9e75",
+                        "name": "AP Message Count",
+                        "type": "DEPENDENT",
+                        "key": "ap.msgcount[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.messageCount"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "01901babb84f48409373b2e95c138070",
+                        "name": "AP RADIUS Sessions",
+                        "type": "DEPENDENT",
+                        "key": "ap.radius[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.hasRADIUSSessions"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "5ec999d82fa54222b120b859e84f4012",
+                        "name": "AP RX Bytes",
+                        "type": "DEPENDENT",
+                        "key": "ap.rxbytes[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.rxBytes"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "496b754f3b21440ba5e1d2be0879a814",
+                        "name": "AP Sanity Status",
+                        "type": "DEPENDENT",
+                        "key": "ap.sanity[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.sanity"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "db33facc14394c5e8c8fced4668b2dea",
+                        "name": "AP Serial Number",
+                        "type": "DEPENDENT",
+                        "key": "ap.serial[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.serialNumber"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "068b2ce4eebf45d2a98d75ece6ab5860",
+                        "name": "AP Session ID",
+                        "type": "DEPENDENT",
+                        "key": "ap.sessionid[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.sessionId"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "e999663b1f1840219964ece0d647d204",
+                        "name": "AP Session Started",
+                        "type": "DEPENDENT",
+                        "key": "ap.started[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "0",
+                        "units": "unixtime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.started"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "eb5c47dd6f6f44748bef770dbd1a6754",
+                        "name": "status raw",
+                        "type": "HTTP_AGENT",
+                        "key": "ap.status[{$AP_SERIAL}]",
+                        "delay": "5m",
+                        "history": "1d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var data = JSON.parse(value);\nif (data.connected === false && !data.hasOwnProperty(\"load\")) {\n    data.load = 0;\n    data.memoryUsed = 0;\n    data.associations_2G = 0;\n    data.associations_5G = 0;\n    data.associations_6G = 0;\n    data.rxBytes = 0;\n    data.txBytes = 0;\n    data.lastContact = 0;\n    data.totalConnectionTime = 0;\n    data.firmware = \"unknown\";\n    data.ipAddress = \"unknown\";\n    data.certificateExpiryDate = 0;\n    data.temperature = 0;\n    data.started = 0;\n    data.connectReason = \"unknown\";\n    data.verifiedCertificate = \"unknown\";\n    data.messageCount = 0;\n    data.sessionId = 0;\n    data.certificateIssuerName = \"unknown\";\n    data.hasRADIUSSessions = 0;\n    data.kafkaClients = 0;\n    data.kafkaPackets = 0;\n    data.webSocketClients = 0;\n    data.websocketPackets = 0;\n    data.connectionCompletionTime = 0;\n    data.sanity = 0;\n}\nreturn JSON.stringify(data);"
+                                ]
+                            }
+                        ],
+                        "url": "https://openwifi-gw.{$URL}/api/v1/device/{$AP_SERIAL}?completeInfo=true",
+                        "headers": [
+                            {
+                                "name": "X-API-KEY",
+                                "value": "{$TOKEN}"
+                            },
+                            {
+                                "name": "Accept",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d968f97327db4cc980e071b94bbb1c9a",
+                        "name": "AP Temperature",
+                        "type": "DEPENDENT",
+                        "key": "ap.temperature[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "30d",
+                        "units": "C",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.temperature"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "fa0d04157a1343dba0b36f386e8af0b0",
+                        "name": "AP TX Bytes",
+                        "type": "DEPENDENT",
+                        "key": "ap.txbytes[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "units": "B",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.txBytes"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "3c4e19f1cdd8478d9106cad05a28188a",
+                        "name": "AP Venue",
+                        "type": "DEPENDENT",
+                        "key": "ap.venue[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.venue"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.device[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "b2d2118e88554e22b710524a2d4d97b1",
+                        "name": "AP WebSocket Clients",
+                        "type": "DEPENDENT",
+                        "key": "ap.websocketclients[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.webSocketClients"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "6d77a1dbed0648768f9df51a4c43ab1f",
+                        "name": "AP WebSocket Packets",
+                        "type": "DEPENDENT",
+                        "key": "ap.websocketpackets[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "trends": "30d",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connectionInfo.websocketPackets"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    },
+                    {
+                        "uuid": "b550212f906148ae8eafdc2f45463e0f",
+                        "name": "Stats Info Radios raw",
+                        "type": "DEPENDENT",
+                        "key": "statsinfo.radios[{$AP_SERIAL}]",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "[]"
+                            },
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.statsInfo.radios"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        }
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "1b81b5652f6645769e5e416cac0bec04",
+                        "name": "Discover Associated Clients",
+                        "type": "DEPENDENT",
+                        "key": "ap.discovery.clients[{$AP_SERIAL}]",
+                        "lifetime": "3d",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "1h",
+                        "item_prototypes": [
+                            {
+                                "uuid": "c1f9fe5cde3f427694783fdc7b965bf1",
+                                "name": "Client {#CLIENT_MAC} BAND",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.band[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar val = null;\n\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station.toLowerCase() === mac)\n                            val = ssid.band;\n                    });\n                }\n            });\n        }\n    });\n}\n\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8745cff1904d4543b34c4e442fd82959",
+                                "name": "Client {#CLIENT_MAC} Connected Time",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.connected[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "s",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.connected;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4094fd46a78a4855ba3e54df69135494",
+                                "name": "Client {#CLIENT_MAC} IP Address",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.ip[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\n  var mac = '{#CLIENT_MAC}';\n  var val = null;\n  if (data.statsInfo && data.statsInfo.interfaces) {\n      data.statsInfo.interfaces.forEach(function(iface) {\n          if (iface.ssids) {\n              iface.ssids.forEach(function(ssid) {\n                  if (ssid.associations) {\n                      ssid.associations.forEach(function(c) {\n                          if (c.station === mac && c.ipaddr_v4) val = c.ipaddr_v4;\n                      });\n                  }\n              });\n          }\n      });\n  }\n  if (!val) throw 'Client not found or no IP address';\n  return val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "32e76a4202f242ecb70479d69f976208",
+                                "name": "Client {#CLIENT_MAC} RSSI",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.rssi[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar rssi = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) rssi = c.rssi;\n                    });\n                }\n            });\n        }\n    });\n}\nif (rssi === null) throw 'not found';\nreturn rssi;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8fee3667901c44e6b6f4a0232f3ef797",
+                                "name": "Client {#CLIENT_MAC} RX MCS",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.rx.mcs[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar val = null;\n\ndata.statsInfo.interfaces.forEach(function(iface) {\n    if (iface.ssids) {\n        iface.ssids.forEach(function(ssid) {\n            if (ssid.associations) {\n                ssid.associations.forEach(function(c) {\n                    if (c.station.toLowerCase() === mac) {\n                        if (c.rx_rate && c.rx_rate.mcs !== undefined)\n                            val = c.rx_rate.mcs;\n                    }\n                });\n            }\n        });\n    }\n});\n\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "39a7633969374e8688889c5c61352737",
+                                "name": "Client {#CLIENT_MAC} RX Bytes",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.rxbytes[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "B",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.rx_bytes;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8467f069bfca4874968f3a8e7bb75cb7",
+                                "name": "Client {#CLIENT_MAC} RX Rate (Kbps)",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.rxrate[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac && c.rx_rate) val = c.rx_rate.bitrate;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1000"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7dbccc601ddf4a83946b7200cce44eb1",
+                                "name": "Client {#CLIENT_MAC} SNR",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.snr[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar rssi = null;\nvar noise = null;\n\ndata.statsInfo.interfaces.forEach(function(iface) {\n    if (iface.ssids) {\n        iface.ssids.forEach(function(ssid) {\n            if (ssid.associations) {\n                ssid.associations.forEach(function(c) {\n                    if (c.station.toLowerCase() === mac) {\n                        rssi = c.rssi;\n                    }\n                });\n            }\n        });\n    }\n});\n\nif (data.statsInfo.radios && data.statsInfo.radios.length > 0) {\n    noise = data.statsInfo.radios[0].survey[0].noise;\n}\n\nif (rssi === null || noise === null) throw 'not found';\n\nreturn rssi - noise;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "09c95dad95414bc88670a3de44623557",
+                                "name": "Client {#CLIENT_MAC} SSID",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.ssid[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station.toLowerCase() === mac)\n                            val = ssid.ssid;\n                    });\n                }\n            });\n        }\n    });\n}\n\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "aea803baa4414499b66becaed94581cf",
+                                "name": "Client {#CLIENT_MAC} Station",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.station[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar val = null;\n\ndata.statsInfo.interfaces.forEach(function(iface) {\n    if (iface.ssids) {\n        iface.ssids.forEach(function(ssid) {\n            if (ssid.associations) {\n                ssid.associations.forEach(function(c) {\n                    if (c.station.toLowerCase() === mac) {\n                        val = c.station;\n                    }\n                });\n            }\n        });\n    }\n});\n\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "24f29234c3ed40b7ac2e50b77c04e8bc",
+                                "name": "Client {#CLIENT_MAC} Status",
+                                "type": "CALCULATED",
+                                "key": "ap.client.status[{#CLIENT_MAC}]",
+                                "delay": "5m",
+                                "history": "7d",
+                                "trends": "30d",
+                                "params": "count(//ap.client.rssi[{#CLIENT_MAC}],10m)",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "05e7c85731c94308b12e5a41e36c073b",
+                                "name": "Client {#CLIENT_MAC} TX MCS",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.tx.mcs[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}'.toLowerCase();\nvar val = null;\n\ndata.statsInfo.interfaces.forEach(function(iface) {\n    if (iface.ssids) {\n        iface.ssids.forEach(function(ssid) {\n            if (ssid.associations) {\n                ssid.associations.forEach(function(c) {\n                    if (c.station.toLowerCase() === mac) {\n                        if (c.tx_rate && c.tx_rate.mcs !== undefined)\n                            val = c.tx_rate.mcs;\n                    }\n                });\n            }\n        });\n    }\n});\n\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e82533cb2b3045319c81248401d8a38e",
+                                "name": "Client {#CLIENT_MAC} TX Bytes",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.txbytes[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "B",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHECK_NOT_SUPPORTED",
+                                        "parameters": [
+                                            "-1"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "0"
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.tx_bytes;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4be0dd49fb084be99c0daf696392e0ce",
+                                "name": "Client {#CLIENT_MAC} TX Failed",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.txfailed[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.tx_failed;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b41a17ed9a9243e89302395aeecbd77d",
+                                "name": "Client {#CLIENT_MAC} TX Rate (Kbps)",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.txrate[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac && c.tx_rate) val = c.tx_rate.bitrate;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1000"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1ceddfbdc6d44c7c954d3d534528d0a0",
+                                "name": "Client {#CLIENT_MAC} TX Retries",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.txretries[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.tx_retries;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "55d337bff0aa40118fa2496ae1424416",
+                                "name": "Client {#CLIENT_MAC} VLAN",
+                                "type": "DEPENDENT",
+                                "key": "ap.client.vlan[{#CLIENT_MAC}]",
+                                "history": "7d",
+                                "trends": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var data = JSON.parse(value);\nvar mac = '{#CLIENT_MAC}';\nvar val = null;\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(c) {\n                        if (c.station === mac) val = c.dynamic_vlan || 0;\n                    });\n                }\n            });\n        }\n    });\n}\nif (val === null) throw 'not found';\nreturn val;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "ap.status[{$AP_SERIAL}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "CLIENT_IP",
+                                        "value": "{#CLIENT_IP}"
+                                    },
+                                    {
+                                        "tag": "CLIENT_MAC",
+                                        "value": "{#CLIENT_MAC}"
+                                    },
+                                    {
+                                        "tag": "SSID",
+                                        "value": "{#CLIENT_SSID}"
+                                    },
+                                    {
+                                        "tag": "VLAN",
+                                        "value": "{#CLIENT_VLAN}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7e98610bb96942bc9caf5d34dc734081",
+                                "name": "Client {#CLIENT_MAC} Vendor",
+                                "type": "EXTERNAL",
+                                "key": "mac_vendor.sh[{#CLIENT_MAC}]",
+                                "delay": "5m",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "timeout": "5s"
+                            }
+                        ],
+                        "master_item": {
+                            "key": "ap.status[{$AP_SERIAL}]"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var data = JSON.parse(value);\nvar clients = [];\nif (data.statsInfo && data.statsInfo.interfaces) {\n    data.statsInfo.interfaces.forEach(function(iface) {\n        if (iface.ssids) {\n            iface.ssids.forEach(function(ssid) {\n                if (ssid.associations) {\n                    ssid.associations.forEach(function(client) {\n                        clients.push({\n                            \"{#CLIENT_MAC}\": client.station,\n                            \"{#CLIENT_IP}\": client.ipaddr_v4 || \"\",\n                            \"{#CLIENT_SSID}\": ssid.ssid,\n                            \"{#CLIENT_BAND}\": ssid.band,\n                            \"{#CLIENT_VLAN}\": client.dynamic_vlan ? client.dynamic_vlan.toString() : \"0\"\n                        });\n                    });\n                }\n            });\n        }\n    });\n}\nreturn JSON.stringify({data: clients});"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "f6c64c47361e4ed2ac827841babc90a5",
+                        "name": "Stats Info Radios Band Discovery",
+                        "type": "DEPENDENT",
+                        "key": "statsinfo.radios.band.discovery",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4d36d9dc7d77469aac9fcc3a1d0f9a97",
+                                "name": "AP Radio {#BAND} Busy Time",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.busy.time[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "ms",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].survey[0].busy"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "808260ac35374c5ba5163f499a9c515d",
+                                "name": "AP Radio {#BAND} Channel Utilization",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.channel.utilization[{#BAND}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "%",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].chanUtil"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "e18f951b8c19428bac5a72e0b144d410",
+                                "name": "AP Radio {#BAND} Frequency",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.frequency[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "Hz",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].frequency[0]"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "bb60027b48034a9e9eed5ca71386af74",
+                                "name": "AP Radio {#BAND} Noise Floor",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.noise.floor[{#BAND}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "trends": "30d",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].survey[0].noise"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "c91ffdd0bbae45efb68d96d61d2afa6c",
+                                "name": "AP Radio {#BAND} RX Airtime",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.rx.artime[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "ms",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].survey[0].time_rx"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "249fcde6d41047fe9b5353c3b0919085",
+                                "name": "AP Radio {#BAND} Survey Time",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.survey.time[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "ms",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].survey[0].time"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "42ae54e822644aba9cdb5697269da14b",
+                                "name": "AP Radio {#BAND} TX Airtime",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.tx.artime[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "ms",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].survey[0].time_tx"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "acb6b6387e18463fa9868db4f938e206",
+                                "name": "AP Radio {#BAND} TX Power",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.tx.power[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "dBm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].tx_power"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "f5ee7fba399d4136af9eb067ec958cd6",
+                                "name": "AP Radio {#BAND} Channel Width",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel.width[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "MHz",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].channel_width"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            },
+                            {
+                                "uuid": "4e4148e09ee54193a0301038631aa43c",
+                                "name": "AP Radio {#BAND} Channel",
+                                "type": "DEPENDENT",
+                                "key": "radio.channel[{#BAND}]",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[?(@.band[0]==\"{#BAND}\")].channel"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$[0]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "statsinfo.radios[{$AP_SERIAL}]"
+                                }
+                            }
+                        ],
+                        "master_item": {
+                            "key": "statsinfo.radios[{$AP_SERIAL}]"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#BAND}",
+                                "path": "$.band[0]"
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$TOKEN}",
+                        "value": "62531dd61031ac9a79ab67fdd37750f22ce855fa63d47b4b3bc009bccdc263a9"
+                    },
+                    {
+                        "macro": "{$URL}",
+                        "value": "andrena.io"
+                    }
+                ]
+            }
+        ]
+    }
+}

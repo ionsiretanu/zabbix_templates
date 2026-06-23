@@ -1,0 +1,558 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "66d0fd980ba046ef8a7b9f0a7ead717d",
+                "template": ".MikroTik - Optical interfaces by SNMP",
+                "name": ".MikroTik - Optical interfaces by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "965e48e83746486ab537e0e6fd3f972e",
+                        "name": "SNMP walk optical interfaces",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.19.1.1.2,1.3.6.1.4.1.14988.1.1.19.1.1.10,1.3.6.1.4.1.14988.1.1.19.1.1.9,1.3.6.1.4.1.14988.1.1.19.1.1.6,1.3.6.1.4.1.14988.1.1.19.1.1.3,1.3.6.1.4.1.14988.1.1.19.1.1.4,1.3.6.1.4.1.14988.1.1.19.1.1.5,1.3.6.1.4.1.14988.1.1.19.1.1.11]",
+                        "key": "opt.if.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Discovering optical interfaces from IF-MIB.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "89a4453737124d6d8cd735faa65ef46b",
+                        "name": "Optical interfaces discovery",
+                        "type": "DEPENDENT",
+                        "key": "opt.if.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#IFNAME}",
+                                    "value": "{$OPT.IF.NAME.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#RXLASER}",
+                                    "value": "{$OPT.IF.RXLASER.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                },
+                                {
+                                    "macro": "{#TXLASER}",
+                                    "value": "{$OPT.IF.TXLASER.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime": "{$TRENDS}",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "{$HISTORY}",
+                        "description": "Discovering interfaces from IF-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "8e64a31fe550431b8830ce2269a635a1",
+                                "name": "SFP [{#IFNAME}]: Optical RX Loss",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalRxLoss.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "Optical receive loss (likely attenuation or signal degradation in dB/dBm).",
+                                "valuemap": {
+                                    "name": "IF-MIB::ifOptical"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "1cce0894bc954fb1a90781234c17a5b1",
+                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxLoss.[{#SNMPINDEX}]) <> 0",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: Optical RX Loss Detected",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b1aef7ba6b174e00954bf1459300e1f2",
+                                "name": "SFP [{#IFNAME}]: RX Laser Power",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalRxPower.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Measured received optical power in dBm. Indicates signal strength at the receiver.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.10.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.001"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "laser",
+                                        "value": "RX"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "367849ca94b64ed7af29b2055decefd0",
+                                        "expression": "avg(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})>{$SFP_HIGH_LIGHT}",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: High Light Level",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "dcff1020a0ff4694905848e2aa499374",
+                                        "expression": "avg(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})<{$SFP_LOW_LIGHT}",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: Low Light Level",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "5391b15a439e4242a58e0ddf0e7ca977",
+                                "name": "SFP [{#IFNAME}]: Module Temperature",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalTemperature.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "°C",
+                                "description": "Temperature of the optical module in degrees Celsius (°C).",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.6.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "try {\n    var temp = parseInt(value);\n    \n    // Convert from unsigned to signed if needed\n    if (temp > 2147483647) {\n        temp = temp - 4294967296;\n    }\n    \n    // Optional: Validate temperature range (adjust limits as needed)\n    // This helps catch any unexpected values\n    if (temp < -50 || temp > 150) {\n        Zabbix.log(4, 'Temperature out of expected range: ' + temp);\n        // You could return error here or keep the value\n    }\n    \n    return temp.toString();\n} catch (error) {\n    return value;\n}"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "d6b273e70a3545bc9c4ea88857b902c9",
+                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                        "opdata": "Current temperature: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "d20975c0b7d7477e9f9e3e18947353dd",
+                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.WARN}",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Warning ({ITEM.LASTVALUE})",
+                                        "opdata": "Current temperature: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                                "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ee491b320a8b48a49ed8357245245f56",
+                                "name": "SFP [{#IFNAME}]: Optical TX Fault",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalTxFault.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "Transmit fault flag (e.g., 1 = fault detected, 0 = no fault). Indicates issues like laser failure.",
+                                "valuemap": {
+                                    "name": "IF-MIB::ifOptical"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.4.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "c2fd5b3939a54f8699c5d7ce749adb12",
+                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTxFault.[{#SNMPINDEX}]) <> 0",
+                                        "name": "MikroTik: SFP [{#IFNAME}]: Optical TX Fault Detected",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4b3cff75808f4929bc93fc0db55e401e",
+                                "name": "SFP [{#IFNAME}]: TX Laser Power",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalTxPower.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Measured transmitted optical power in dBm. Indicates output signal strength.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.9.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.001"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "laser",
+                                        "value": "TX"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "22332d9dbe664eb188e31ef6404b13db",
+                                "name": "SFP [{#IFNAME}]: Vendor Name",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalVendor.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.11.{#SNMPINDEX}",
+                                            "0"
+                                        ],
+                                        "error_handler": "CUSTOM_VALUE",
+                                        "error_handler_params": "unknown"
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "160ef4ee9ccd4937aad4a259ce47ad07",
+                                "name": "SFP [{#IFNAME}]: Wavelength",
+                                "type": "DEPENDENT",
+                                "key": "mtxrOpticalWavelength.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "units": "!nm",
+                                "description": "Wavelength of the optical signal in nanometers (nm).",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.19.1.1.5.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "opt.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "opt.if.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#IFNAME}",
+                                    "1.3.6.1.4.1.14988.1.1.19.1.1.2",
+                                    "0",
+                                    "{#RXLASER}",
+                                    "1.3.6.1.4.1.14988.1.1.19.1.1.10",
+                                    "0",
+                                    "{#TXLASER}",
+                                    "1.3.6.1.4.1.14988.1.1.19.1.1.9",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$AVERAGE_TRIGGER_INT}",
+                        "value": "5m",
+                        "description": "How far back to calculate average value for triggers"
+                    },
+                    {
+                        "macro": "{$OPT.IF.NAME.MATCHES}",
+                        "value": "^(sfp|combo)"
+                    },
+                    {
+                        "macro": "{$OPT.IF.RXLASER.NOT_MATCHES}",
+                        "value": "^0$"
+                    },
+                    {
+                        "macro": "{$OPT.IF.TXLASER.NOT_MATCHES}",
+                        "value": "^0$"
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.ALARM}",
+                        "value": "85"
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.WARN}",
+                        "value": "75"
+                    },
+                    {
+                        "macro": "{$SFP_HIGH_LIGHT}",
+                        "value": "0.5",
+                        "description": "Minimum overload threshold for SFP modules"
+                    },
+                    {
+                        "macro": "{$SFP_LOW_LIGHT}",
+                        "value": "-18",
+                        "description": "Maximum stressed sensitivity for SFP modules"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "c2cc79971d864ae3ad5fae9c5c587b90",
+                        "name": "IF-MIB::ifOptical",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "fault detected"
+                            },
+                            {
+                                "value": "0",
+                                "newvalue": "no fault"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

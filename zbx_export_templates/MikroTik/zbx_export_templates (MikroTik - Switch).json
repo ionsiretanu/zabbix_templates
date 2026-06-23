@@ -1,0 +1,61 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "cbd98a21c53b4990a5575157a6f2aa09",
+                "template": ".MikroTik Switch",
+                "name": ".MikroTik Switch",
+                "description": "[netbox]\nmanufacturer = [ \"MikroTik\" ]\ndevice_role = [\"Access Switch\", \"Aggregation Switch\"]",
+                "templates": [
+                    {
+                        "name": ".Generic by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik - Optical interfaces by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik - POE monitoring by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik Generic by SNMP"
+                    },
+                    {
+                        "name": ".Network Interfaces by SNMP"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ]
+            }
+        ]
+    }
+}

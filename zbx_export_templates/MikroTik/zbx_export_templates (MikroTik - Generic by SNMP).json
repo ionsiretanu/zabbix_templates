@@ -1,0 +1,1233 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "61d2996fed2a465495ecfc847c126c3a",
+                "template": ".MikroTik Generic by SNMP",
+                "name": ".MikroTik Generic by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "d32cd063fd6d44d88d768677bc73b950",
+                        "name": "SNMP walk CPU temperature sensors",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.3.11]",
+                        "key": "sensor.cpu.temp.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "MIB: MIKROTIK-MIB\nDiscovering CPU temperature sensors.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "250fadc4c66948b5b941fcb42d3ffa18",
+                        "name": "SNMP walk system health sensors",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.3.100.1]",
+                        "key": "sensor.system.health.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "82cf7a35efe74b219fd40c277704fc76",
+                        "name": "SNMP walk temperature sensors",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.3.10]",
+                        "key": "sensor.temp.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "MIB: MIKROTIK-MIB\nDiscovering temperature sensors.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "61612566f6ed4d348dbed4d9dde56d4a",
+                        "name": "SNMP walk system CPUs",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.25.3.3.1.1,1.3.6.1.2.1.25.3.3.1.2]",
+                        "key": "system.cpu.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "MIB: HOST-RESOURCES-MIB\nDiscovering system CPUs.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "0a1a9478c8fb414ca136742ef2967159",
+                        "name": "Firmware version",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.14988.1.1.7.4.0",
+                        "key": "system.hw.firmware",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: MIKROTIK-MIB\nCurrent firmware version.",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "a545a57fe7a94afdab7cb7f313a84181",
+                                "expression": "last(/.MikroTik Generic by SNMP/system.hw.firmware,#1)<>last(/.MikroTik Generic by SNMP/system.hw.firmware,#2) and length(last(/.MikroTik Generic by SNMP/system.hw.firmware))>0",
+                                "name": "MikroTik: Firmware has changed",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "INFO",
+                                "description": "Firmware version has changed. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "3ddf7c0dd19b467ca7624291c918b1d5",
+                        "name": "Hardware model name",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.1.1.0",
+                        "key": "system.hw.model",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "inventory_link": "MODEL",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "6b882f12de9741a582f27cf9612da3bd",
+                        "name": "Hardware serial number",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.14988.1.1.7.3.0",
+                        "key": "system.hw.serialnumber",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: MIKROTIK-MIB\nRouterBOARD serial number.",
+                        "inventory_link": "SERIALNO_A",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "bd5babec44fb4510a1e92038dc632e06",
+                                "expression": "last(/.MikroTik Generic by SNMP/system.hw.serialnumber,#1)<>last(/.MikroTik Generic by SNMP/system.hw.serialnumber,#2) and length(last(/.MikroTik Generic by SNMP/system.hw.serialnumber))>0",
+                                "name": "MikroTik: Device has been replaced",
+                                "event_name": "MikroTik: Device has been replaced (new serial number received)",
+                                "priority": "INFO",
+                                "description": "Device serial number has changed. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b5ffda26ea2741b7957fe9427be03a2b",
+                        "name": "Operating system",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.14988.1.1.4.4.0",
+                        "key": "system.sw.os[mtxrLicVersion.0]",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: MIKROTIK-MIB\nSoftware version.",
+                        "inventory_link": "OS",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "os"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "8019c50a2a374c118886dae6266708b5",
+                                "expression": "last(/.MikroTik Generic by SNMP/system.sw.os[mtxrLicVersion.0],#1)<>last(/.MikroTik Generic by SNMP/system.sw.os[mtxrLicVersion.0],#2) and length(last(/.MikroTik Generic by SNMP/system.sw.os[mtxrLicVersion.0]))>0",
+                                "name": "MikroTik: Operating system description has changed",
+                                "priority": "INFO",
+                                "description": "The description of the operating system has changed. Possible reasons are that the system has been updated or replaced. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "676b1a211f3548eebb7cb8e6d61d8b2d",
+                        "name": "SNMP walk mounted filesystems",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.25.2.3.1.3,1.3.6.1.2.1.25.2.3.1.4,1.3.6.1.2.1.25.2.3.1.2,1.3.6.1.2.1.25.2.3.1.6,1.3.6.1.2.1.25.2.3.1.5]",
+                        "key": "vfs.fs.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "MIB: HOST-RESOURCES-MIB\nDiscovering mounted filesystems.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "958ef8f12f0f49d8a55158d09d1d6149",
+                        "name": "Total memory",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.25.2.3.1.5.65536",
+                        "key": "vm.memory.total[hrStorageSize.Memory]",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "units": "B",
+                        "description": "MIB: HOST-RESOURCES-MIB\nThe size of the storage represented by this entry, in\nunits of hrStorageAllocationUnits. This object is\nwritable to allow remote configuration of the size of\nthe storage area in those cases where such an\noperation makes sense and is possible on the\nunderlying system. For example, the amount of main\nmemory allocated to a buffer pool might be modified or\nthe amount of disk space allocated to virtual memory\nmight be modified.",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e4c20afeb7fd4f7fafbd23be823cc4ce",
+                        "name": "Used memory",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.25.2.3.1.6.65536",
+                        "key": "vm.memory.used[hrStorageUsed.Memory]",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "units": "B",
+                        "description": "MIB: HOST-RESOURCES-MIB\nThe amount of the storage represented by this entry that is allocated, in units of hrStorageAllocationUnits.",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1024"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "22f74438d63c4d9ba46b01466ee0f56f",
+                        "name": "Memory utilization",
+                        "type": "CALCULATED",
+                        "key": "vm.memory.util[memoryUsedPercentage.Memory]",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "FLOAT",
+                        "trends": "{$TRENDS}",
+                        "units": "%",
+                        "params": "last(//vm.memory.used[hrStorageUsed.Memory])/last(//vm.memory.total[hrStorageSize.Memory])*100",
+                        "description": "Memory utilization in %.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "memory"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "90cb15cfb4fc4d19a19a2f8c197dee35",
+                                "expression": "min(/.MikroTik Generic by SNMP/vm.memory.util[memoryUsedPercentage.Memory],5m)>{$MEMORY.UTIL.MAX}",
+                                "name": "MikroTik: High memory utilization",
+                                "event_name": "MikroTik: High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)",
+                                "priority": "AVERAGE",
+                                "description": "The system is running out of free memory.",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "capacity"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "performance"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "26fab06108e941b080b43460c066cb22",
+                        "name": "CPU discovery",
+                        "type": "DEPENDENT",
+                        "key": "hrProcessorLoad.discovery",
+                        "description": "HOST-RESOURCES-MIB::hrProcessorTable discovery.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4b6403b4846f481e84b978830652c57a",
+                                "name": "#{#SNMPINDEX}: CPU utilization",
+                                "type": "DEPENDENT",
+                                "key": "system.cpu.util[hrProcessorLoad.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "%",
+                                "description": "MIB: HOST-RESOURCES-MIB\nThe average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.25.3.3.1.2.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "system.cpu.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "cpu"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "db419025410e427cbddd2d9281e21ec3",
+                                        "expression": "min(/.MikroTik Generic by SNMP/system.cpu.util[hrProcessorLoad.{#SNMPINDEX}],5m)>{$CPU.UTIL.CRIT}",
+                                        "name": "MikroTik: #{#SNMPINDEX}: High CPU utilization",
+                                        "event_name": "MikroTik: #{#SNMPINDEX}: High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)",
+                                        "opdata": "Current utilization: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "description": "CPU utilization is too high. The system might be slow to respond.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "8f1509ad2a7f41008643955e93d7570d",
+                                "name": "#{#SNMPINDEX}: CPU utilization",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": ".MikroTik Generic by SNMP",
+                                            "key": "system.cpu.util[hrProcessorLoad.{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "system.cpu.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.2.1.25.3.3.1.1",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "acf264849d664d0aadeb0b64f1505ab4",
+                        "name": "Temperature CPU discovery",
+                        "type": "DEPENDENT",
+                        "key": "mtxrHlProcessorTemperature.discovery",
+                        "description": "MIKROTIK-MIB::mtxrHlProcessorTemperature\nSince temperature of CPU is not available on all Mikrotik hardware, this is done to avoid unsupported items.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "b60510af9df146af87dc2798ab85d0e5",
+                                "name": "CPU: Temperature",
+                                "type": "DEPENDENT",
+                                "key": "sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "°C",
+                                "description": "MIB: MIKROTIK-MIB\nmtxrHlProcessorTemperature Processor temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.3.11.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3m"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "sensor.cpu.temp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "89f85268146b4e68ae88c2c2847d299d",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT_LOW:\"CPU\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "min(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT_LOW:\"CPU\"}+3",
+                                        "name": "MikroTik: CPU: Temperature is too low",
+                                        "event_name": "MikroTik: CPU: Temperature is too low: <{$TEMP_CRIT_LOW:\"CPU\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "45b02e46eb5047bcb931bf71f340b8c0",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"CPU\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"CPU\"}-3",
+                                        "name": "MikroTik: CPU: Temperature {ITEM.LASTVALUE1} is above critical threshold",
+                                        "event_name": "MikroTik: CPU: Temperature {ITEM.LASTVALUE1} is above critical threshold: >{$TEMP_CRIT:\"CPU\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "This trigger uses temperature sensor values as well as temperature sensor status if available.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "fd3c76992c8540b28a34d1d39672fd25",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)>{$TEMP_WARN:\"CPU\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)<{$TEMP_WARN:\"CPU\"}-3",
+                                        "name": "MikroTik: CPU: Temperature {ITEM.LASTVALUE1} is above warning threshold",
+                                        "event_name": "MikroTik: CPU: Temperature {ITEM.LASTVALUE1} is above warning threshold: >{$TEMP_WARN:\"CPU\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "description": "This trigger uses temperature sensor values as well as temperature sensor status if available.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "MikroTik: CPU: Temperature {ITEM.LASTVALUE1} is above critical threshold",
+                                                "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"CPU\"}",
+                                                "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlProcessorTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"CPU\"}-3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "sensor.cpu.temp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.14988.1.1.3.11",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "1ebdf41150c242e696c208711fded917",
+                        "name": "Temperature sensor discovery",
+                        "type": "DEPENDENT",
+                        "key": "mtxrHlTemperature.discovery",
+                        "description": "MIKROTIK-MIB::mtxrHlTemperature\nSince temperature sensor is not available on all Mikrotik hardware, this is done to avoid unsupported items.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "168c430c80ed437f8f09faa0e8d057ea",
+                                "name": "Device: Temperature",
+                                "type": "DEPENDENT",
+                                "key": "sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "°C",
+                                "description": "MIB: MIKROTIK-MIB\nmtxrHlTemperature Device temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).\n\nReference: http://wiki.mikrotik.com/wiki/Manual:SNMP",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.3.10.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3m"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "sensor.temp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "cb9d303efa054b3498c27c0bdc026976",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"Device\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"Device\"}-3",
+                                        "name": "MikroTik: Device: Temperature is above critical threshold",
+                                        "event_name": "MikroTik: Device: Temperature is above critical threshold: >{$TEMP_CRIT:\"Device\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "This trigger uses temperature sensor values as well as temperature sensor status if available.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "655e60c60d5741c2ac797be7acef5a23",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)>{$TEMP_WARN:\"Device\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)<{$TEMP_WARN:\"Device\"}-3",
+                                        "name": "MikroTik: Device: Temperature is above warning threshold",
+                                        "event_name": "MikroTik: Device: Temperature is above warning threshold: >{$TEMP_WARN:\"Device\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "description": "This trigger uses temperature sensor values as well as temperature sensor status if available.",
+                                        "dependencies": [
+                                            {
+                                                "name": "MikroTik: Device: Temperature is above critical threshold",
+                                                "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"Device\"}",
+                                                "recovery_expression": "max(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"Device\"}-3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "2ea22c21b18743a0bc16a018115a6186",
+                                        "expression": "avg(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)<{$TEMP_CRIT_LOW:\"Device\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "min(/.MikroTik Generic by SNMP/sensor.temp.value[mtxrHlTemperature.{#SNMPINDEX}],5m)>{$TEMP_CRIT_LOW:\"Device\"}+3",
+                                        "name": "MikroTik: Device: Temperature is too low",
+                                        "event_name": "MikroTik: Device: Temperature is too low: <{$TEMP_CRIT_LOW:\"Device\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "sensor.temp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.14988.1.1.3.10",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8eafcff0aaf34864a493786e3a978429",
+                        "name": "System health sensors discovery",
+                        "type": "DEPENDENT",
+                        "key": "sensor.system.health.discovery",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#NAME}",
+                                    "value": "{$HEALTH_SENSOR_NAME}"
+                                }
+                            ]
+                        },
+                        "lifetime": "{$HISTORY}",
+                        "item_prototypes": [
+                            {
+                                "uuid": "0df7ea3efeeb455da31fad105f583d01",
+                                "name": "Sensor [{#NAME}]: status",
+                                "type": "DEPENDENT",
+                                "key": "sensor.health.status[\"{#NAME}\"]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "valuemap": {
+                                    "name": "System health sensors"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "sensor.system.health.walk"
+                                },
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "8a1e5abfa21d4ae4ae63ec2e970e501a",
+                                        "expression": "last(/.MikroTik Generic by SNMP/sensor.health.status[\"{#NAME}\"])<>0",
+                                        "name": "Mikrotik: Sensor [{#NAME}]: Failure",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "sensor.system.health.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#NAME}",
+                                    "1.3.6.1.4.1.14988.1.1.3.100.1.2",
+                                    "0"
+                                ]
+                            }
+                        ],
+                        "overrides": [
+                            {
+                                "name": "FAN state TAG",
+                                "step": "1",
+                                "filter": {
+                                    "conditions": [
+                                        {
+                                            "macro": "{#NAME}",
+                                            "value": "^(fan-state)$"
+                                        }
+                                    ]
+                                },
+                                "operations": [
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "fan",
+                                        "tags": [
+                                            {
+                                                "tag": "component",
+                                                "value": "fan"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "PSU state TAG",
+                                "step": "2",
+                                "filter": {
+                                    "conditions": [
+                                        {
+                                            "macro": "{#NAME}",
+                                            "value": "^psu[1-4]-state$"
+                                        }
+                                    ]
+                                },
+                                "operations": [
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "psu",
+                                        "tags": [
+                                            {
+                                                "tag": "component",
+                                                "value": "power"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "eb6684b0fe4343f2a6e25f5007d77c36",
+                        "name": "Storage discovery",
+                        "type": "DEPENDENT",
+                        "key": "storage.discovery",
+                        "filter": {
+                            "evaltype": "OR",
+                            "conditions": [
+                                {
+                                    "macro": "{#STORAGE_TYPE}",
+                                    "value": ".+4$"
+                                },
+                                {
+                                    "macro": "{#STORAGE_TYPE}",
+                                    "value": ".+hrStorageFixedDisk"
+                                }
+                            ]
+                        },
+                        "description": "HOST-RESOURCES-MIB::hrStorage discovery with storage filter.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "45c2126a75654c749a02fd8774533aed",
+                                "name": "Disk-{#SNMPINDEX}: Space utilization",
+                                "type": "CALCULATED",
+                                "key": "vfs.fs.pused[hrStorageSize.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "%",
+                                "params": "(last(//vfs.fs.used[hrStorageSize.{#SNMPINDEX}])/last(//vfs.fs.total[hrStorageSize.{#SNMPINDEX}]))*100",
+                                "description": "The space utilization expressed in % for Disk-{#SNMPINDEX}.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "storage"
+                                    },
+                                    {
+                                        "tag": "filesystem",
+                                        "value": "{#FSNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3dcbe6a0e70b45cbbaa49a8b71386d06",
+                                "name": "Disk-{#SNMPINDEX}: Total space",
+                                "type": "DEPENDENT",
+                                "key": "vfs.fs.total[hrStorageSize.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "B",
+                                "description": "MIB: HOST-RESOURCES-MIB\nThe size of the storage represented by this entry, in\nunits of hrStorageAllocationUnits. This object is\nwritable to allow remote configuration of the size of\nthe storage area in those cases where such an\noperation makes sense and is possible on the\nunderlying system. For example, the amount of main\nmemory allocated to a buffer pool might be modified or\nthe amount of disk space allocated to virtual memory\nmight be modified.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.25.2.3.1.5.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1024"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "vfs.fs.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "storage"
+                                    },
+                                    {
+                                        "tag": "filesystem",
+                                        "value": "{#FSNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "cc1b70ae96b242ba8fdb94aafcbc7b1d",
+                                "name": "Disk-{#SNMPINDEX}: Used space",
+                                "type": "DEPENDENT",
+                                "key": "vfs.fs.used[hrStorageSize.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "B",
+                                "description": "MIB: HOST-RESOURCES-MIB\nThe amount of the storage represented by this entry that is allocated, in units of hrStorageAllocationUnits.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.25.2.3.1.6.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1024"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "vfs.fs.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "storage"
+                                    },
+                                    {
+                                        "tag": "filesystem",
+                                        "value": "{#FSNAME}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "511f40cb611d4eb8a5a910c12084fd5c",
+                                "expression": "last(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.CRIT:\"Disk-{#SNMPINDEX}\"} and\n((last(/.MikroTik Generic by SNMP/vfs.fs.total[hrStorageSize.{#SNMPINDEX}])-last(/.MikroTik Generic by SNMP/vfs.fs.used[hrStorageSize.{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.CRIT:\"Disk-{#SNMPINDEX}\"} or timeleft(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}],1h,100)<1d)",
+                                "name": "MikroTik: Disk-{#SNMPINDEX}: Disk space is critically low",
+                                "event_name": "MikroTik: Disk-{#SNMPINDEX}: Disk space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:\"Disk-{#SNMPINDEX}\"}%)",
+                                "opdata": "Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})",
+                                "priority": "AVERAGE",
+                                "description": "Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.CRIT:\"Disk-{#SNMPINDEX}\"}.\n Second condition should be one of the following:\n - The disk free space is less than {$VFS.FS.FREE.MIN.CRIT:\"Disk-{#SNMPINDEX}\"}.\n - The disk will be full in less than 24 hours.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "capacity"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "53ebb41bc0444ca882c808ae2b05398b",
+                                "expression": "last(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.WARN:\"Disk-{#SNMPINDEX}\"} and\n((last(/.MikroTik Generic by SNMP/vfs.fs.total[hrStorageSize.{#SNMPINDEX}])-last(/.MikroTik Generic by SNMP/vfs.fs.used[hrStorageSize.{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.WARN:\"Disk-{#SNMPINDEX}\"} or timeleft(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}],1h,100)<1d)",
+                                "name": "MikroTik: Disk-{#SNMPINDEX}: Disk space is low",
+                                "event_name": "MikroTik: Disk-{#SNMPINDEX}: Disk space is low (used > {$VFS.FS.PUSED.MAX.WARN:\"Disk-{#SNMPINDEX}\"}%)",
+                                "opdata": "Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})",
+                                "priority": "WARNING",
+                                "description": "Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.WARN:\"Disk-{#SNMPINDEX}\"}.\n Second condition should be one of the following:\n - The disk free space is less than {$VFS.FS.FREE.MIN.WARN:\"Disk-{#SNMPINDEX}\"}.\n - The disk will be full in less than 24 hours.",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "MikroTik: Disk-{#SNMPINDEX}: Disk space is critically low",
+                                        "expression": "last(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.CRIT:\"Disk-{#SNMPINDEX}\"} and\n((last(/.MikroTik Generic by SNMP/vfs.fs.total[hrStorageSize.{#SNMPINDEX}])-last(/.MikroTik Generic by SNMP/vfs.fs.used[hrStorageSize.{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.CRIT:\"Disk-{#SNMPINDEX}\"} or timeleft(/.MikroTik Generic by SNMP/vfs.fs.pused[hrStorageSize.{#SNMPINDEX}],1h,100)<1d)"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
+                                    },
+                                    {
+                                        "tag": "scope",
+                                        "value": "capacity"
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "8fedb1452db147fc8f860ba318c4bbe8",
+                                "name": "Disk-{#SNMPINDEX}: Disk space usage",
+                                "width": "600",
+                                "height": "340",
+                                "type": "PIE",
+                                "show_3d": "YES",
+                                "graph_items": [
+                                    {
+                                        "color": "969696",
+                                        "calc_fnc": "LAST",
+                                        "type": "GRAPH_SUM",
+                                        "item": {
+                                            "host": ".MikroTik Generic by SNMP",
+                                            "key": "vfs.fs.total[hrStorageSize.{#SNMPINDEX}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "C80000",
+                                        "calc_fnc": "LAST",
+                                        "item": {
+                                            "host": ".MikroTik Generic by SNMP",
+                                            "key": "vfs.fs.used[hrStorageSize.{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "vfs.fs.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#FSNAME}",
+                                    "1.3.6.1.2.1.25.2.3.1.3",
+                                    "0",
+                                    "{#ALLOC_UNITS}",
+                                    "1.3.6.1.2.1.25.2.3.1.4",
+                                    "0",
+                                    "{#STORAGE_TYPE}",
+                                    "1.3.6.1.2.1.25.2.3.1.2",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$CPU.UTIL.CRIT}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$HEALTH_SENSOR_NAME}",
+                        "value": "^.*(-state)$"
+                    },
+                    {
+                        "macro": "{$IF.ERRORS.WARN}",
+                        "value": "2",
+                        "description": "Warning threshold of error packet rate. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$IF.UTIL.MAX}",
+                        "value": "90",
+                        "description": "Used as a threshold in the interface utilization trigger."
+                    },
+                    {
+                        "macro": "{$IFCONTROL}",
+                        "value": "1",
+                        "description": "Link status trigger will be fired only for interfaces where the context macro equals \"1\"."
+                    },
+                    {
+                        "macro": "{$MEMORY.UTIL.MAX}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+                        "value": "^.*",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+                        "value": "^2$",
+                        "description": "Ignore `down(2)` administrative status"
+                    },
+                    {
+                        "macro": "{$NET.IF.IFALIAS.MATCHES}",
+                        "value": ".*",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFALIAS.NOT_MATCHES}",
+                        "value": "CHANGE_IF_NEEDED",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFDESCR.MATCHES}",
+                        "value": ".*",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFDESCR.NOT_MATCHES}",
+                        "value": "CHANGE_IF_NEEDED",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFNAME.MATCHES}",
+                        "value": "^.*$",
+                        "description": "Used for network interface discovery. Can be overridden on the host or linked template level."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFNAME.NOT_MATCHES}",
+                        "value": "^(?i)(loopback).*$",
+                        "description": "Filters out `loopbacks`, `nulls`, docker `veth` links and `docker0 bridge` by default."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+                        "value": "^.*$",
+                        "description": "Used for network interface discovery. Can be overridden on the host or linked template level."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                        "value": "^6$",
+                        "description": "Ignore `notPresent(6)`"
+                    },
+                    {
+                        "macro": "{$NET.IF.IFTYPE.MATCHES}",
+                        "value": ".*",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$NET.IF.IFTYPE.NOT_MATCHES}",
+                        "value": "CHANGE_IF_NEEDED",
+                        "description": "Used in network interface discovery rule filters."
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT}",
+                        "value": "85"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:\"CPU\"}",
+                        "value": "95"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT_LOW}",
+                        "value": "5"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN}",
+                        "value": "75"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:\"CPU\"}",
+                        "value": "85"
+                    },
+                    {
+                        "macro": "{$VFS.FS.FREE.MIN.CRIT}",
+                        "value": "95"
+                    },
+                    {
+                        "macro": "{$VFS.FS.FREE.MIN.WARN}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$VFS.FS.PUSED.MAX.CRIT}",
+                        "value": "95"
+                    },
+                    {
+                        "macro": "{$VFS.FS.PUSED.MAX.WARN}",
+                        "value": "90"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "e462a1067ef843e49c6d392827bb3eed",
+                        "name": "System health sensors",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "ok"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "fail"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,817 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "71853926fdd3478ea0e8d7b5275602aa",
+                "name": "Juniper"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "58985932132c4559813ce2d87f80629d",
+                "template": ".Juniper - Optical interfaces by SNMP",
+                "name": ".Juniper - Optical interfaces by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "Juniper"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "e811fc68e8604ee69108e5b90dfbec6d",
+                        "name": "SNMP walk digital optical monitoring",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.2.1.31.1.1.1.1,{$OID_PREFIX}5,{$OID_PREFIX}7,{$OID_PREFIX}8,{$OID_PREFIX}9,{$OID_PREFIX}10,{$OID_PREFIX}11,{$OID_PREFIX}12,{$OID_PREFIX}17,{$OID_PREFIX}18,{$OID_PREFIX}19,{$OID_PREFIX}20]",
+                        "key": "juniper.dom.snmp.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Scanning `JUNIPER-DOM-MIB::jnxDomCurrentTable` about Digital Optical Monitoring for this interfaces on this router.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "optics"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "ec1379bca2754ef7be78e7f44ca01b7f",
+                        "name": "Optical interfaces discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.dom.lane.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#IFNAME}",
+                                    "value": "^(ge-|xe-|et-)"
+                                },
+                                {
+                                    "macro": "{#LASERTEMP}",
+                                    "operator": "EXISTS"
+                                },
+                                {
+                                    "macro": "{#RXLASER}",
+                                    "value": "^0$",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                },
+                                {
+                                    "macro": "{#RXLASER}",
+                                    "operator": "EXISTS"
+                                }
+                            ]
+                        },
+                        "description": "Used for information about Digital Optical Monitoring of an SFP optical module, as defined in JUNIPER-DOM-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "03f1e9d3b99d47edb0d5c57dcd27084a",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power High Alarm Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.rx.high.alarm[jnxDomCurrentRxLaserPowerHighAlarmThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Receiver laser power high alarm threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.9.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "fbb5e3dd6efd45b0bd5f5386c86b4609",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power High Warning Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.rx.high.warn[jnxDomCurrentRxLaserPowerHighWarningThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Receiver laser power high warning threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.11.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2f5264a7bdb844958e17bf231b04b1f2",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Receiver laser power.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.5.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "laser",
+                                        "value": "RX"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "493a0dcc57cd4439a78fb52f6a76a052",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power Low Alarm Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.rx.low.alarm[jnxDomCurrentRxLaserPowerLowAlarmThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Receiver laser power low alarm threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.10.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "07a7030907b34b8989a598cf09462e5a",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power Low Warning Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.rx.low.warn[jnxDomCurrentRxLaserPowerLowWarningThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Receiver laser power low warning threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.12.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "574c3c2a28264885a71468d39cfffe52",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: Module Temperature",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.temp[jnxDomCurrentModuleTemperature.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "\u00b0C",
+                                "description": "Module temperature.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.8.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "212d58f32268478289d6165547e6c491",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.temp[jnxDomCurrentModuleTemperature.{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "fe8fd3b8f94d45008ec0337a044e43a5",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.temp[jnxDomCurrentModuleTemperature.{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.WARN}",
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: Temperature High Warning ({ITEM.LASTVALUE})",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.temp[jnxDomCurrentModuleTemperature.{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "6aea1d204ce24cdbbca62c5b5cf52d06",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power High Alarm Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.tx.high.alarm[jnxDomCurrentTxLaserOutputPowerHighAlarmThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Transmitter laser power high alarm threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.17.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "2ac64b105c7a495fbf932f6f33c8d067",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power High Warning Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.tx.high.warn[jnxDomCurrentTxLaserOutputPowerHighWarningThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Transmitter laser power high warning threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.19.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "448774f8addd447f81d956d4277c8ed9",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Transmitter laser output power.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.7.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "laser",
+                                        "value": "TX"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d7c1e62038654e17b29c7c6093d15a35",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power Low Alarm Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.tx.low.alarm[jnxDomCurrentTxLaserOutputPowerLowAlarmThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Transmitter laser power low alarm threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.18.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "318cec8c952948f9bcd60f682ef55094",
+                                "name": "SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power Low Warning Threshold",
+                                "type": "DEPENDENT",
+                                "key": "juniper.dom.tx.low.warn[jnxDomCurrentTxLaserOutputPowerLowWarningThreshold.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "Transmitter laser power low warning threshold.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.60.1.1.1.1.20.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.dom.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "alias",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    },
+                                    {
+                                        "tag": "sfp",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "01b464c6a6df4e9f89a2ddbf7757408c",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.high.alarm[jnxDomCurrentRxLaserPowerHighAlarmThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power High Alarm",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "f5321df664174f5ab2396a0cc064ef56",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.high.warn[jnxDomCurrentRxLaserPowerHighWarningThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power High Warning",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power High Alarm",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.high.alarm[jnxDomCurrentRxLaserPowerHighAlarmThreshold.{#SNMPINDEX}])"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "28b9393eac4442599d21870315b139ea",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.low.alarm[jnxDomCurrentRxLaserPowerLowAlarmThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power Low Alarm {ITEM.LASTVALUE}",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "1f92c2229add4da88801e83e85f0ce55",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.low.warn[jnxDomCurrentRxLaserPowerLowWarningThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power Low Warning",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: RX Laser Power Low Alarm {ITEM.LASTVALUE}",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.lane.laser[jnxDomCurrentLaneRxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.rx.low.alarm[jnxDomCurrentRxLaserPowerLowAlarmThreshold.{#SNMPINDEX}])"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7ebe5b7a94a64b509c788835eaff2f98",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.high.alarm[jnxDomCurrentTxLaserOutputPowerHighAlarmThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power High Alarm",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "a6076550d88345cfb1e9754253e69e60",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.high.warn[jnxDomCurrentTxLaserOutputPowerHighWarningThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power High Warning",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power High Alarm",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) > \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.high.alarm[jnxDomCurrentTxLaserOutputPowerHighAlarmThreshold.{#SNMPINDEX}])"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "6b57f1f5362d429cb8e24a4117e445d3",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.low.alarm[jnxDomCurrentTxLaserOutputPowerLowAlarmThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power Low Alarm",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            },
+                            {
+                                "uuid": "c6fea87b0787448288c295c6e49ed614",
+                                "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.low.warn[jnxDomCurrentTxLaserOutputPowerLowWarningThreshold.{#SNMPINDEX}])",
+                                "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power Low Warning",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Juniper: SFP [{#IFNAME}][{#IFALIAS}]: TX Laser Power Low Alarm",
+                                        "expression": "last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.lane.laser[jnxDomCurrentLaneTxLaserPower.{#SNMPINDEX}]) < \n  last(/.Juniper - Optical interfaces by SNMP/juniper.dom.tx.low.alarm[jnxDomCurrentTxLaserOutputPowerLowAlarmThreshold.{#SNMPINDEX}])"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.dom.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#IFNAME}",
+                                    "1.3.6.1.2.1.31.1.1.1.1",
+                                    "0",
+                                    "{#IFALIAS}",
+                                    "1.3.6.1.2.1.31.1.1.1.18",
+                                    "0",
+                                    "{#LASERTEMP}",
+                                    "1.3.6.1.4.1.2636.3.60.1.1.1.1.8",
+                                    "0",
+                                    "{#RXLASER}",
+                                    "1.3.6.1.4.1.2636.3.60.1.1.1.1.5",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "juniper"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.ALARM}",
+                        "value": "95"
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.WARN}",
+                        "value": "85"
+                    }
+                ]
+            }
+        ]
+    }
+}

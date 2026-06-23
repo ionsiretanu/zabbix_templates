@@ -1,0 +1,996 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "71853926fdd3478ea0e8d7b5275602aa",
+                "name": "Juniper"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "5ad988a112ec4823a7eb937f3b910562",
+                "template": ".Juniper Generic by SNMP",
+                "name": ".Juniper Generic by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "Juniper"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "ea5f5b27fbe245dba4d995aaa30bd798",
+                        "name": "SNMP walk Operating Table",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.2636.3.1.13.1.5, 1.3.6.1.4.1.2636.3.1.13.1.7, 1.3.6.1.4.1.2636.3.1.13.1.8, 1.3.6.1.4.1.2636.3.1.13.1.5.2, 1.3.6.1.4.1.2636.3.1.13.1.5.4, 1.3.6.1.4.1.2636.3.1.13.1.6.4, 1.3.6.1.4.1.2636.3.1.13.1.6.2, 1.3.6.1.4.1.2636.3.1.13.1.11]",
+                        "key": "juniper.operating.snmp.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Scanning `JUNIPER-MIB::jnxOperatingTable` for CPU, Memory, Temperature, and Fans.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "2166c94e56444693a5872e37711e2daf",
+                        "name": "SNMP walk Redundancy Table",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.2636.3.1.14.1.5, 1.3.6.1.4.1.2636.3.1.14.1.6, 1.3.6.1.4.1.2636.3.1.14.1.10, 1.3.6.1.4.1.2636.3.1.14.1.16, 1.3.6.1.4.1.2636.3.1.14.1.7]",
+                        "key": "juniper.redundancy.table.snmp.walk",
+                        "delay": "{$HEALTH_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Scanning `JUNIPER-MIB::jnxRedundancyTable` for Router Redundancy.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b00d08fcfa84441a8d6cf4b8dbcb4b4f",
+                        "name": "Hardware model name",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.2636.3.1.2.0",
+                        "key": "juniper.system.hw.model",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: JUNIPER-MIB\nThe name, model, or detailed description of the device, indicating which product it represents, for example, `M40`.",
+                        "inventory_link": "MODEL",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "cda2ec26467b4d369ebe3d9a99541548",
+                        "name": "Hardware serial number",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.2636.3.1.3.0",
+                        "key": "juniper.system.hw.serialnumber",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: JUNIPER-MIB\nThe serial number of this subject, blank if unknown or unavailable.",
+                        "inventory_link": "SERIALNO_A",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "06b5fa2babed4ea5a9c6d9554df59502",
+                                "expression": "last(/.Juniper Generic by SNMP/juniper.system.hw.serialnumber,#1)<>last(/.Juniper Generic by SNMP/juniper.system.hw.serialnumber,#2) and length(last(/.Juniper Generic by SNMP/juniper.system.hw.serialnumber))>0",
+                                "name": "Juniper: Device has been replaced",
+                                "event_name": "Device has been replaced (new serial number received)",
+                                "priority": "INFO",
+                                "description": "Device serial number has changed. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "17782429e4204234aa57bb1aa844a292",
+                        "name": "Operating system",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.1.1.0",
+                        "key": "juniper.system.sw.os[sysDescr.0]",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: SNMPv2-MIB",
+                        "inventory_link": "OS",
+                        "preprocessing": [
+                            {
+                                "type": "REGEX",
+                                "parameters": [
+                                    "kernel (JUNOS [0-9a-zA-Z\\.\\-]+)",
+                                    "\\1"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "os"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "233c8ab1bad647cea6f475ff64951efa",
+                                "expression": "last(/.Juniper Generic by SNMP/juniper.system.sw.os[sysDescr.0],#1)<>last(/.Juniper Generic by SNMP/juniper.system.sw.os[sysDescr.0],#2) and length(last(/.Juniper Generic by SNMP/juniper.system.sw.os[sysDescr.0]))>0",
+                                "name": "Juniper: Operating system description has changed",
+                                "priority": "INFO",
+                                "description": "Operating system description has changed. Possible reasons - system has been updated or replaced. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "6273d97c70174d53a6e9f16f989035d3",
+                        "name": "CPU and Memory discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.cpu.mem.discovery",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "FPC.*"
+                                },
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "Routing Engine.*"
+                                }
+                            ]
+                        },
+                        "description": "Scanning `JUNIPER-MIB::jnxOperatingTable` for CPU and Memory.\nhttp://kb.juniper.net/InfoCenter/index?page=content&id=KB17526&actp=search. Filter limits results to Routing Engines.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "ab2dd1a0e9bc4f22a278fc9a95c95086",
+                                "name": "System [{#SNMPVALUE}]: CPU utilization",
+                                "type": "DEPENDENT",
+                                "key": "juniper.cpu.util[jnxOperatingCPU.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "%",
+                                "description": "MIB: JUNIPER-MIB\nThe CPU utilization, in percent, of this subject. Zero if unavailable or inapplicable.\nReference: http://kb.juniper.net/library/CUSTOMERSERVICE/GLOBAL_JTAC/BK26199/SRX%20SNMP%20Monitoring%20Guide_v1.1.pdf",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.13.1.8.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3m"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.operating.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "cpu"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "1ea3cbca312142939e85fdd510818a4f",
+                                        "expression": "min(/.Juniper Generic by SNMP/juniper.cpu.util[jnxOperatingCPU.{#SNMPINDEX}],5m)>{$JUNIPER.CPU.UTIL.CRIT}",
+                                        "name": "Juniper: System [{#SNMPVALUE}]: High CPU utilization",
+                                        "event_name": "Juniper MX: System [{#SNMPVALUE}]: High CPU utilization (over {$JUNIPER.CPU.UTIL.CRIT}% for 5m)",
+                                        "opdata": "Current utilization: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "The CPU utilization is too high. The system might be slow to respond.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "572e32c354fa4cffb85bb610731a17bd",
+                                "name": "System [{#SNMPVALUE}]: Memory utilization",
+                                "type": "DEPENDENT",
+                                "key": "vm.memory.util[jnxOperatingBuffer.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "%",
+                                "description": "MIB: JUNIPER-MIB\nThe buffer pool utilization, in percent, of this subject. Zero if unavailable or inapplicable.\nReference: http://kb.juniper.net/library/CUSTOMERSERVICE/GLOBAL_JTAC/BK26199/SRX%20SNMP%20Monitoring%20Guide_v1.1.pdf",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.13.1.11.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "3m"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.operating.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "cbdae39630f3470fad7e7e7d9b95765d",
+                                        "expression": "min(/.Juniper Generic by SNMP/vm.memory.util[jnxOperatingBuffer.{#SNMPINDEX}],5m)>{$JUNIPER.MEMORY.UTIL.MAX}",
+                                        "name": "Juniper: System [{#SNMPVALUE}]: High memory utilization",
+                                        "event_name": "Juniper MX: System [{#SNMPVALUE}]: High memory utilization (>{$JUNIPER.MEMORY.UTIL.MAX}% for 5m)",
+                                        "opdata": "Current utilization: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "The system is running out of free memory.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "capacity"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "2ed40590805c444c943eaf9ca67fe680",
+                                "name": "Juniper MX: System [{#SNMPVALUE}]: CPU utilization",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": ".Juniper Generic by SNMP",
+                                            "key": "juniper.cpu.util[jnxOperatingCPU.{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ecd45748e9984e7ea60fe8e3283f3121",
+                                "name": "Juniper MX: System [{#SNMPVALUE}]: Memory utilization",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "199C0D",
+                                        "item": {
+                                            "host": ".Juniper Generic by SNMP",
+                                            "key": "vm.memory.util[jnxOperatingBuffer.{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.operating.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.2636.3.1.13.1.5",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "6844bd1b68bb4c409af0dc8bb9de56d5",
+                        "name": "FAN discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.fans.discovery",
+                        "description": "Scanning `JUNIPER-MIB::jnxOperatingTable` for Fans.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "c6d2ed354ee04a53925e0cb2e9906c0a",
+                                "name": "Sensor [{#SNMPVALUE}]: Fan status",
+                                "type": "DEPENDENT",
+                                "key": "juniper.sensor.fan.status[jnxOperatingState.4.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: JUNIPER-MIB\nCurrent status of the Fan tray.",
+                                "valuemap": {
+                                    "name": "JUNIPER-MIB::jnxOperatingState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.13.1.6.4.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.operating.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "fan"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "bf7e43954acc4eecb7631d8ef6a46099",
+                                        "expression": "count(/.Juniper Generic by SNMP/juniper.sensor.fan.status[jnxOperatingState.4.{#SNMPINDEX}],#1,\"eq\",\"{$JUNIPER.FAN_CRIT_STATUS}\")=1",
+                                        "name": "Juniper: Sensor [{#SNMPVALUE}]: Fan is in critical state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "Please check the Fan unit.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.operating.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.2636.3.1.13.1.5.4",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "daaa229988e44e0696b459a517a253be",
+                        "name": "PSU discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.psu.discovery",
+                        "description": "Scanning `JUNIPER-MIB::jnxOperatingTable` for Power Supplies.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "b29792b7ae7d4dce95c298addeca4aa6",
+                                "name": "Sensor [{#SNMPVALUE}]: Power supply status",
+                                "type": "DEPENDENT",
+                                "key": "juniper.sensor.psu.status[\"{#SNMPINDEX}\"]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: JUNIPER-MIB\nIf are using DC power supplies, there is a known issue on PR 1064039 where the fans do not detect the temperature correctly and fail to cool the power supply causing shutdown to occur.\nThis is fixed in Junos 13.3R7 https://forums.juniper.net/t5/Routing/PEM-0-not-OK-MX104/m-p/289644#M14122",
+                                "valuemap": {
+                                    "name": "JUNIPER-MIB::jnxOperatingState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.13.1.6.2.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.operating.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "power"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "8b7194be026b45969296ad92732e1a9a",
+                                        "expression": "count(/.Juniper Generic by SNMP/juniper.sensor.psu.status[\"{#SNMPINDEX}\"],#1,\"eq\",\"{$JUNIPER.PSU_CRIT_STATUS}\")=1",
+                                        "name": "Juniper: Sensor [{#SNMPVALUE}]: Power supply is in critical state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "Please check the power supply unit for errors.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.operating.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.2636.3.1.13.1.5.2",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d57c57f7f2e5495b8787d57fc0425a78",
+                        "name": "Redundancy discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.redundancy.discovery",
+                        "description": "Scanning `JUNIPER-MIB::jnxRedundancyTable`.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "2064fca51cfa4d73a8e5897341e72e93",
+                                "name": "Redundancy [{#SNMPVALUE}][{#CHASSISDESCR}]: Current running state",
+                                "type": "DEPENDENT",
+                                "key": "juniper.redundancy.state[\"{#SNMPINDEX}\"]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: JUNIPER-MIB\nThe current running state for the `Redundancy [{#SNMPVALUE}][{#CHASSISDESCR}]` subject.",
+                                "valuemap": {
+                                    "name": "JUNIPER-MIB::jnxRedundancyState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.14.1.7.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.redundancy.table.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "redundancy"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0de0d4054ffb47f5be830c040225f78b",
+                                "name": "Redundancy [{#SNMPVALUE}][{#CHASSISDESCR}]: Reason of the last switchover",
+                                "type": "DEPENDENT",
+                                "key": "juniper.redundancy.switchover.reason[\"{#SNMPINDEX}\"]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: JUNIPER-MIB\nThe reason of the last switchover for the `Redundancy [{#SNMPVALUE}][{#CHASSISDESCR}]` subject.",
+                                "valuemap": {
+                                    "name": "JUNIPER-MIB::jnxRedundancySwitchoverReason"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.14.1.10.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "4h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.redundancy.table.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "redundancy"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.redundancy.table.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.2636.3.1.14.1.5",
+                                    "0",
+                                    "{#CHASSISDESCR}",
+                                    "1.3.6.1.4.1.2636.3.1.14.1.16",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "70776ba53c614892b4d239c3341d773e",
+                        "name": "Temperature discovery",
+                        "type": "DEPENDENT",
+                        "key": "juniper.temperature.discovery",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "[^0]+"
+                                }
+                            ]
+                        },
+                        "description": "Scanning `JUNIPER-MIB::jnxOperatingTable` for Temperature.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "c548736dddd54554b32553197c2b6587",
+                                "name": "Sensor [{#SENSOR_INFO}]: Temperature",
+                                "type": "DEPENDENT",
+                                "key": "sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "\u00b0C",
+                                "description": "MIB: JUNIPER-MIB\nThe temperature in Celsius of [{#SENSOR_INFO}].",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.2636.3.1.13.1.7.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "juniper.operating.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "b4f2169837ac448cadb8af8aed4317db",
+                                        "expression": "avg(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)>{$JUNIPER.TEMP_CRIT:\"{#SENSOR_INFO}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)<{$JUNIPER.TEMP_CRIT:\"{#SENSOR_INFO}\"}-3",
+                                        "name": "Juniper: Sensor [{#SENSOR_INFO}]: Temperature is above critical threshold",
+                                        "event_name": "Juniper MX: Sensor [{#SENSOR_INFO}]: Temperature is above critical threshold: >{$JUNIPER.TEMP_CRIT:\"Juniper MX: Sensor [{#SENSOR_INFO}]\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "This trigger uses temperature sensor values as well as the temperature sensor status if available.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "3c4d8ca02b994218b02ab55f86e80e4b",
+                                        "expression": "avg(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)>{$JUNIPER.TEMP_WARN:\"{#SENSOR_INFO}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)<{$JUNIPER.TEMP_WARN:\"{#SENSOR_INFO}\"}-3",
+                                        "name": "Juniper: Sensor [{#SENSOR_INFO}]: Temperature is above warning threshold",
+                                        "event_name": "Juniper MX: Sensor [{#SENSOR_INFO}]: Temperature is above warning threshold: >{$JUNIPER.TEMP_WARN:\"Juniper MX: Sensor [{#SENSOR_INFO}]\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "WARNING",
+                                        "description": "This trigger uses temperature sensor values as well as the temperature sensor status if available.",
+                                        "dependencies": [
+                                            {
+                                                "name": "Juniper: Sensor [{#SENSOR_INFO}]: Temperature is above critical threshold",
+                                                "expression": "avg(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)>{$JUNIPER.TEMP_CRIT:\"{#SENSOR_INFO}\"}",
+                                                "recovery_expression": "max(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)<{$JUNIPER.TEMP_CRIT:\"{#SENSOR_INFO}\"}-3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "a6e74119da7041f094bf9d9af16a49a9",
+                                        "expression": "avg(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)<{$JUNIPER.TEMP_CRIT_LOW:\"{#SENSOR_INFO}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "min(/.Juniper Generic by SNMP/sensor.temp.value[jnxOperatingTemp.{#SNMPINDEX}],5m)>{$JUNIPER.TEMP_CRIT_LOW:\"{#SENSOR_INFO}\"}+3",
+                                        "name": "Juniper: Sensor [{#SENSOR_INFO}]: Temperature is too low",
+                                        "event_name": "Juniper MX: Sensor [{#SENSOR_INFO}]: Temperature is too low: <{$JUNIPER.TEMP_CRIT_LOW:\"Juniper MX: Sensor [{#SENSOR_INFO}]\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "This trigger uses temperature sensor values as well as the temperature sensor status if available.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "juniper.operating.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#SNMPVALUE}",
+                                    "1.3.6.1.4.1.2636.3.1.13.1.7",
+                                    "0",
+                                    "{#SENSOR_INFO}",
+                                    "1.3.6.1.4.1.2636.3.1.13.1.5",
+                                    "0"
+                                ],
+                                "error_handler": "DISCARD_VALUE"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "juniper"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$CRITICAL_HEALTH_INT}",
+                        "value": "30s",
+                        "description": "For uptime, agent availability"
+                    },
+                    {
+                        "macro": "{$DISCOVERY_INT}",
+                        "value": "1h",
+                        "description": "Discovery rules interval"
+                    },
+                    {
+                        "macro": "{$HEALTH_POLL_INT}",
+                        "value": "1m",
+                        "description": "ICMP checks, SNMP availability, device Health"
+                    },
+                    {
+                        "macro": "{$HEALTH_TRIGGER_INT}",
+                        "value": "5m",
+                        "description": "Trigger evaluation period for health items"
+                    },
+                    {
+                        "macro": "{$HISTORY}",
+                        "value": "7d"
+                    },
+                    {
+                        "macro": "{$ICMP_LOSS_WARN}",
+                        "value": "20",
+                        "description": "Warning threshold of ICMP packet loss in %."
+                    },
+                    {
+                        "macro": "{$ICMP_RESPONSE_TIME_WARN}",
+                        "value": "0.15",
+                        "description": "Warning threshold of the average ICMP response time in seconds."
+                    },
+                    {
+                        "macro": "{$INVENTORY_INT}",
+                        "value": "1h",
+                        "description": "Firmware, model, serial, OS"
+                    },
+                    {
+                        "macro": "{$JUNIPER.CPU.UTIL.CRIT}",
+                        "value": "90",
+                        "description": "Threshold of CPU utilization for trigger in %. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$JUNIPER.FAN_CRIT_STATUS}",
+                        "value": "6",
+                        "description": "Threshold of status sensor for trigger. All statuses defined in valuemap `JUNIPER-MIB::jnxOperatingState`."
+                    },
+                    {
+                        "macro": "{$JUNIPER.MEMORY.UTIL.MAX}",
+                        "value": "90",
+                        "description": "Threshold of memory utilization for trigger in %. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$JUNIPER.PSU_CRIT_STATUS}",
+                        "value": "6",
+                        "description": "Threshold of status sensor for trigger. All statuses defined in valuemap `JUNIPER-MIB::jnxOperatingState`."
+                    },
+                    {
+                        "macro": "{$JUNIPER.TEMP_CRIT}",
+                        "value": "80",
+                        "description": "Threshold of temperature sensor for trigger. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$JUNIPER.TEMP_CRIT:\"Routing Engine\"}",
+                        "value": "95",
+                        "description": "Threshold of temperature sensor for trigger. Used for Routing Engine."
+                    },
+                    {
+                        "macro": "{$JUNIPER.TEMP_CRIT_LOW}",
+                        "value": "5",
+                        "description": "Threshold of temperature sensor for trigger. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$JUNIPER.TEMP_WARN}",
+                        "value": "70",
+                        "description": "Threshold of temperature sensor for trigger. Can be used with interface name as context."
+                    },
+                    {
+                        "macro": "{$JUNIPER.TEMP_WARN:\"Routing Engine\"}",
+                        "value": "85",
+                        "description": "Threshold of temperature sensor for trigger. Used for Routing Engine."
+                    },
+                    {
+                        "macro": "{$NETWORK_POLL_INT}",
+                        "value": "1m",
+                        "description": "Network health and stats checks"
+                    },
+                    {
+                        "macro": "{$SNMP.TIMEOUT}",
+                        "value": "5m",
+                        "description": "Time interval for the SNMP availability trigger."
+                    },
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "dev"
+                    },
+                    {
+                        "macro": "{$SYSTEM_INFO_INT}",
+                        "value": "15m",
+                        "description": "System name, contact, location, object ID"
+                    },
+                    {
+                        "macro": "{$TRENDS}",
+                        "value": "31d"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "f745865fdb3446acb2b42a7fdcc42251",
+                        "name": "JUNIPER-MIB::jnxOperatingState",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "unknown"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "running"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "ready"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "reset"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "runningAtFullSpeed"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "down or off"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "standby"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b7ed5c3d2b334fb6be81d44302fa4903",
+                        "name": "JUNIPER-MIB::jnxRedundancyState",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "unknown"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "master"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "backup"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "disabled"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "notApplicable"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "e70096efb18140989929b26103e05863",
+                        "name": "JUNIPER-MIB::jnxRedundancySwitchoverReason",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "other"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "neverSwitched"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "userSwitched"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "autoSwitched"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

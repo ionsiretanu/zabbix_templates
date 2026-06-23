@@ -1,0 +1,144 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "9b4f54efd7fe43c29499579d95b153db",
+                "name": "ITcare"
+            }
+        ],
+        "host_groups": [
+            {
+                "uuid": "7fb7c803b8cf485b90652fe0dd0a3714",
+                "name": "openwifi"
+            },
+            {
+                "uuid": "c3d4e5f6a7b84c9d8e1f2a3b4c5d6e7f",
+                "name": "s0146.nwrk.nj :: 162N5"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "725d65543e714a53a3c5be78316641f4",
+                "template": "Template-OpenWifi-Venue",
+                "name": "Template-OpenWifi-Venue",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "85f71bf603a64e6c9e3bcc7286c9ac4c",
+                        "name": "{$VENUE_NAME}",
+                        "type": "HTTP_AGENT",
+                        "key": "openwifi.venue.raw.aps",
+                        "delay": "24h",
+                        "value_type": "TEXT",
+                        "url": "https://openwifi-prov.{$URL}/api/v1/inventory",
+                        "query_fields": [
+                            {
+                                "name": "venue",
+                                "value": "{$VENUE_ID}"
+                            }
+                        ],
+                        "headers": [
+                            {
+                                "name": "X-API-KEY",
+                                "value": "{$TOKEN}"
+                            },
+                            {
+                                "name": "Accept",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "f75c5e59cfdb4be2afb71dd1df3ac47e",
+                        "name": "AP Discovery",
+                        "type": "DEPENDENT",
+                        "key": "ap.discovery",
+                        "host_prototypes": [
+                            {
+                                "uuid": "4da97510a52e4b9981128508681ca738",
+                                "host": "{#AP_NAME} - {#AP_SERIAL}",
+                                "name": "{#AP_NAME} - {#AP_SERIAL}",
+                                "group_links": [
+                                    {
+                                        "group": {
+                                            "name": "openwifi"
+                                        }
+                                    },
+                                    {
+                                        "group": {
+                                            "name": "s0146.nwrk.nj :: 162N5"
+                                        }
+                                    }
+                                ],
+                                "group_prototypes": [
+                                    {
+                                        "name": "{#AP_NAME}"
+                                    }
+                                ],
+                                "templates": [
+                                    {
+                                        "name": "Template-OpenWifi-AP"
+                                    }
+                                ],
+                                "macros": [
+                                    {
+                                        "macro": "{$AP_NAME}",
+                                        "value": "{#AP_NAME}"
+                                    },
+                                    {
+                                        "macro": "{$AP_SERIAL}",
+                                        "value": "{#AP_SERIAL}"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "AP_NAME",
+                                        "value": "{#AP_NAME}"
+                                    },
+                                    {
+                                        "tag": "AP_SERIAL",
+                                        "value": "{#AP_SERIAL}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "openwifi.venue.raw.aps"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.taglist[*]"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var aps = JSON.parse(value);\nvar result = [];\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    result.push({\n        \"{#AP_NAME}\":    ap.name,\n        \"{#AP_SERIAL}\":  ap.serialNumber,\n        \"{#AP_TYPE}\":    ap.deviceType,\n        \"{#AP_ID}\":      ap.id,\n        \"{#VENUE_ID}\":   ap.venue\n    });\n}\nreturn JSON.stringify(result);"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$TOKEN}",
+                        "value": "62531dd61031ac9a79ab67fdd37750f22ce855fa63d47b4b3bc009bccdc263a9"
+                    },
+                    {
+                        "macro": "{$URL}",
+                        "value": "andrena.io"
+                    }
+                ]
+            }
+        ]
+    }
+}

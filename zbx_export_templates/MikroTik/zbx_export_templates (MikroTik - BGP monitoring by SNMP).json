@@ -1,0 +1,356 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "df861ad5eb284030a61f62a5ad772ea6",
+                "template": ".MikroTik - BGP monitoring by SNMP",
+                "name": ".MikroTik - BGP monitoring by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "efafbf462f8f41048390161e4d1446e7",
+                        "name": "SNMP walk BGP Peerdiscovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.15.3.1,1.3.6.1.2.1.25.1.1.0]",
+                        "key": "mikrotik.bgp.peer.discovery.snmp.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "try {\n    var lines = value.split('\\n');\n    var referenceValue = null;\n    var resultLines = [];\n    \n    // First pass: find the reference value and collect all lines\n    for (var i = 0; i < lines.length; i++) {\n        var line = lines[i].trim();\n        if (line === '') continue;\n        \n        // Check if this is the reference OID\n        if (line.startsWith('.1.3.6.1.2.1.25.1.1.0 = ')) {\n            var parts = line.split('= ');\n            if (parts.length === 2) {\n                var valuePart = parts[1].trim();\n                // Extract the numeric value (remove type prefix if present)\n                var match = valuePart.match(/\\d+$/);\n                if (match) {\n                    referenceValue = parseInt(match[0]);\n                }\n            }\n            // Don't add this line to result - it will be removed\n            continue;\n        }\n        \n        resultLines.push(line);\n    }\n    \n    // If reference value was found, process the target OIDs\n    if (referenceValue !== null) {\n        for (var j = 0; j < resultLines.length; j++) {\n            var line = resultLines[j];\n            \n            // Check if this is one of the target OIDs\n            if (line.includes('.1.3.6.1.2.1.15.3.1.16.')) {\n                var parts = line.split('= ');\n                if (parts.length === 2) {\n                    var oid = parts[0].trim();\n                    var valuePart = parts[1].trim();\n                    \n                    // Extract the current value\n                    var match = valuePart.match(/\\d+$/);\n                    if (match) {\n                        var currentValue = parseInt(match[0]);\n                        // Subtract: reference_value - target_value\n                        var newValue = referenceValue - currentValue;\n                        \n                        // Handle unsigned integer wrap-around for negative results\n                        if (newValue < 0) {\n                            newValue = 0xFFFFFFFF + newValue + 1; // 32-bit unsigned wrap-around\n                        }\n                        \n                        // Reconstruct the line with the new value\n                        var typePrefix = valuePart.replace(/\\d+$/, '').trim();\n                        resultLines[j] = oid + ' = ' + typePrefix + newValue;\n                    }\n                }\n            }\n        }\n    }\n    \n    // Join the result lines back together\n    return resultLines.join('\\n');\n} catch (error) {\n    return value; // Return original value if any error occurs\n}"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "bgp"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "3f6ee3eb4d04422085c34ae7d4e9162a",
+                        "name": "BGP Peer discovery",
+                        "type": "DEPENDENT",
+                        "key": "mikrotik.bgp.peer.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#BGP_PEER_ADMIN_STATUS}",
+                                    "value": "{$BGP.PEER.ADMIN.STATUS.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#BGP_PEER_ADMIN_STATUS}",
+                                    "value": "{$BGP.PEER.ADMIN.STATUS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime": "{$TRENDS}",
+                        "enabled_lifetime_type": "DISABLE_AFTER",
+                        "enabled_lifetime": "{$HISTORY}",
+                        "item_prototypes": [
+                            {
+                                "uuid": "2a65095b0c8e4f81aafc36930c075529",
+                                "name": "BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: Status",
+                                "type": "DEPENDENT",
+                                "key": "mikrotik.bgp.admin.satus.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The desired state of the BGP connection. A transition from 'stop' to 'start' will cause the BGP Manual Start Event to be generated. A transition from 'start' to 'stop' will cause the BGP Manual Stop Event to be generated. This parameter can be used to restart BGP peer connections. Care should be used in providing write access to this object without adequate authentication.",
+                                "valuemap": {
+                                    "name": "bgpPeerAdminStatus"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.15.3.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik.bgp.peer.discovery.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#SNMPINDEX}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGP_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4b8fd59a90ea4c919dcc21cf6a9831bf",
+                                "name": "BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: Established time",
+                                "type": "DEPENDENT",
+                                "key": "mikrotik.bgp.established.time.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "s",
+                                "description": "This timer indicates how long (in seconds) this peer has been in the established state or how long since this peer was last in the established state. It is set to zero when a new peer is configured or when the router is booted.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.15.3.1.16.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.01"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik.bgp.peer.discovery.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#SNMPINDEX}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGP_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "3bf0cbd28bfb4ed3a9ff6f9894f33814",
+                                "name": "BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: State",
+                                "type": "DEPENDENT",
+                                "key": "mikrotik.bgp.state.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "The BGP peer connection state",
+                                "valuemap": {
+                                    "name": "bgpPeerState"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.15.3.1.2.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik.bgp.peer.discovery.snmp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "address",
+                                        "value": "{#SNMPINDEX}"
+                                    },
+                                    {
+                                        "tag": "as",
+                                        "value": "{#BGP_PEER_REMOTE_AS}"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "bgp"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "1778c3d7b9404b7681814b2d180a649a",
+                                        "expression": "last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])<>6 and last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])=2",
+                                        "name": "MikroTik: BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: is down",
+                                        "opdata": "Current state: {ITEM.LASTVALUE1}, Status: {ITEM.LASTVALUE2}",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "e7b4c83ee08f46448dc1614c13c4b425",
+                                "expression": "last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) < {$ADJACENCY4T}\nand\nlast(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) > 0\nand\nlast(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}]) = 6",
+                                "name": "MikroTik: BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: uptime LOW",
+                                "opdata": "Uptime: {ITEM.LASTVALUE}",
+                                "priority": "INFO",
+                                "description": "BGP session with peer {#SNMPINDEX} (AS{#BGP_PEER_REMOTE_AS}) has been established for less than {$ADJACENCY4T}.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "mikrotik.bgp.peer.discovery.snmp.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#BGP_PEER_REMOTE_AS}",
+                                    "1.3.6.1.2.1.15.3.1.9",
+                                    "0",
+                                    "{#BGP_PEER_ADMIN_STATUS}",
+                                    "1.3.6.1.2.1.15.3.1.3",
+                                    "0"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "BGP instance is not running"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$BGP.PEER.ADMIN.STATUS.MATCHES}",
+                        "value": "^2$"
+                    },
+                    {
+                        "macro": "{$BGP.PEER.ADMIN.STATUS.NOT_MATCHES}",
+                        "value": "^1$"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "26fdf8c03cf3482ebdd1511c3d3c512b",
+                        "name": "bgpPeerAdminStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "stop"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "start"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "c9ecb05ec21c4164abb649ece9b16bf1",
+                        "name": "bgpPeerState",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "idle"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "connect"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "active"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "opensent"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "openconfirm"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "established"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

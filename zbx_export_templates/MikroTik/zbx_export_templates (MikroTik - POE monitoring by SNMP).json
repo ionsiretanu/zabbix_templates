@@ -1,0 +1,356 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "d9b99602246945198171c1c2f0d449db",
+                "template": ".MikroTik - POE monitoring by SNMP",
+                "name": ".MikroTik - POE monitoring by SNMP",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "420dd36857aa4ec2afce0134e439fad6",
+                        "name": "SNMP walk POE interfaces",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.4.1.14988.1.1.15.1.1]",
+                        "key": "poe.if.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Discovering POE interfaces from IF-MIB.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "0ff69d555a7c4a9f8220113110de498c",
+                        "name": "Poe interfaces discovery",
+                        "type": "DEPENDENT",
+                        "key": "poe.if.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#IFPOESTATUS}",
+                                    "value": "{$POE.IF.STATUS.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#IFPOESTATUS}",
+                                    "value": "{$POE.IF.STATUS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "description": "Discovering interfaces from IF-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "8c1a9ac03c404b7d9a7218fa86ccd6ad",
+                                "name": "POE [{#IFPOENAME}]: Current",
+                                "type": "DEPENDENT",
+                                "key": "mtxrPOECurrent.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "mA",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.15.1.1.5.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "poe.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "poe"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "d06ad6eff4da4152b47b667cd5d17527",
+                                "name": "POE [{#IFPOENAME}]: Power",
+                                "type": "DEPENDENT",
+                                "key": "mtxrPOEPower.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "W",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.15.1.1.6.{#SNMPINDEX}",
+                                            "2"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "poe.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "poe"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "31c1fde0469c440f893af887d2c479f8",
+                                "name": "POE [{#IFPOENAME}]: Status",
+                                "type": "DEPENDENT",
+                                "key": "mtxrPOEStatus.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "valuemap": {
+                                    "name": "IF-MIB::ifPoe"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.15.1.1.3.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "poe.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "poe"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "f71fd14528a043b8894714cfd7300f32",
+                                        "expression": "last(/.MikroTik - POE monitoring by SNMP/mtxrPOEStatus.[{#SNMPINDEX}]) > 3",
+                                        "name": "MikroTik: POE [{#IFPOENAME}] status: {ITEM.LASTVALUE}",
+                                        "opdata": "Current POE status: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "fbb6984cce654deaa96d3f1df1631b0c",
+                                "name": "POE [{#IFPOENAME}]: Voltage",
+                                "type": "DEPENDENT",
+                                "key": "mtxrPOEVoltage.[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "units": "V",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.15.1.1.4.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "0.1"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "poe.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "poe"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "poe.if.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#IFPOENAME}",
+                                    "1.3.6.1.4.1.14988.1.1.15.1.1.2",
+                                    "0",
+                                    "{#IFPOESTATUS}",
+                                    "1.3.6.1.4.1.14988.1.1.15.1.1.3",
+                                    "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$POE.IF.STATUS.MATCHES}",
+                        "value": "^(1[0-4]|[3-9])$"
+                    },
+                    {
+                        "macro": "{$POE.IF.STATUS.NOT_MATCHES}",
+                        "value": "^(1|2)$",
+                        "description": "disabled | waitingForLoad"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "bb05bc3f19104a5da4a8d38f1351d49e",
+                        "name": "IF-MIB::ifPoe",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "disabled"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "waitingForLoad"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "poweredOn"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "overload"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "shortCircuit"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "currentTooLow"
+                            },
+                            {
+                                "value": "8",
+                                "newvalue": "powerReset"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "voltageTooLow"
+                            },
+                            {
+                                "value": "9",
+                                "newvalue": "voltageTooHigh"
+                            },
+                            {
+                                "value": "10",
+                                "newvalue": "controllerError"
+                            },
+                            {
+                                "value": "11",
+                                "newvalue": "controllerUpgrade"
+                            },
+                            {
+                                "value": "12",
+                                "newvalue": "poeInDetected"
+                            },
+                            {
+                                "value": "13",
+                                "newvalue": "noValidPsu"
+                            },
+                            {
+                                "value": "14",
+                                "newvalue": "controllerInit"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

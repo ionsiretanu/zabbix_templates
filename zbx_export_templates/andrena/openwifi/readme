@@ -1,0 +1,17 @@
+Host: OpenWifi - Controller 4.0
+├── Item: openwifi.v.4.0.venue.raw (master for venue discovery)
+│   └── Discovery: venue.discovery
+│       ├── Preprocessing: extract venues, enrich with entity & parents
+│       └── Item Prototype: openwifi.venue.inventory[{#VENUE_ID}]
+│           └── HTTP request per venue (refresh 12h)
+│               └── Preprocessing: add venueName & entityName to each AP object
+│
+└── Discovery: ap.discovery.[{#VENUE_ID}]
+    ├── Parent discovery = venue.discovery
+    ├── Master item = openwifi.venue.inventory[{#VENUE_ID}]
+    ├── Preprocessing: extract taglist, transform to LLD rows with macros
+    └── Host Prototype: {#VENUE_NAME} - {#AP_NAME} - {#AP_SERIAL}
+        ├── Static group: openwifi
+        ├── Group prototypes: Entity - {#AP_ENTITY_NAME}, Venue - {#AP_VENUE_NAME}
+        ├── Macros: {$AP_NAME}, {$AP_SERIAL}, {$VENUE_NAME}
+        └── Template: Template-OpenWifi-AP
