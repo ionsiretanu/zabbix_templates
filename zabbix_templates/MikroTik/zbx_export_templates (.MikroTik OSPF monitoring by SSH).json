@@ -3,23 +3,23 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
         "templates": [
             {
                 "uuid": "030e6c535ea0482c87098bafd02697b3",
-                "template": ".MikroTik - OSPF monitoring by SSH",
-                "name": ".MikroTik - OSPF monitoring by SSH",
+                "template": ".MikroTik OSPF monitoring by SSH",
+                "name": ".MikroTik OSPF monitoring by SSH",
                 "groups": [
                     {
                         "name": "ITcare"
@@ -113,7 +113,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "172f67fdad3349548ce27153edbde49d",
-                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#1)<>last(/.MikroTik - OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#2)",
+                                        "expression": "last(/.MikroTik OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#1)<>last(/.MikroTik OSPF monitoring by SSH/ospf.IfMetric[{#INTERFACE}],#2)",
                                         "recovery_mode": "NONE",
                                         "name": "MikroTik: Cost change to {ITEM.VALUE} for int:\"{#INTERFACE}\"",
                                         "priority": "INFO",
@@ -189,7 +189,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "a73fd04345ce445d8b355dd809e40c18",
-                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrAdjacency[{#INTERFACE}])<{$ADJACENCY4T}",
+                                        "expression": "last(/.MikroTik OSPF monitoring by SSH/ospfNbrAdjacency[{#INTERFACE}])<{$ADJACENCY4T}",
                                         "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" uptime LOW",
                                         "priority": "INFO",
                                         "description": "OSPF adjacency with neighbor with address \"{#ADDRESS}\" and router id \"{#ROUTERID}\" is lower than {$ADJACENCY4T}",
@@ -230,9 +230,9 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "1f907d1232fe429cb48957c86cf2e142",
-                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}]) - avg(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],4h) > {$STATECHANGES4T}",
+                                        "expression": "last(/.MikroTik OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}]) - avg(/.MikroTik OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],4h) > {$STATECHANGES4T}",
                                         "recovery_mode": "RECOVERY_EXPRESSION",
-                                        "recovery_expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#1) = last(/.MikroTik - OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#2)",
+                                        "recovery_expression": "last(/.MikroTik OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#1) = last(/.MikroTik OSPF monitoring by SSH/ospfNbrEvents[{#INTERFACE}],#2)",
                                         "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" have {ITEM.LASTVALUE} state changes",
                                         "opdata": "Number of relationship changes: {ITEM.LASTVALUE}",
                                         "priority": "WARNING",
@@ -305,7 +305,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "5d6a87dd7e6c49d4ace0f2f03c6c963b",
-                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#1)<>\"Full\" and last(/.MikroTik - OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#2)<>\"Full\"",
+                                        "expression": "last(/.MikroTik OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#1)<>\"Full\" and last(/.MikroTik OSPF monitoring by SSH/ospfNbrState[{#INTERFACE}],#2)<>\"Full\"",
                                         "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" state is not FULL",
                                         "opdata": "Current state: {ITEM.LASTVALUE}",
                                         "priority": "HIGH",
@@ -347,7 +347,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "015fa0e630074ef48043124e758d8036",
-                                        "expression": "last(/.MikroTik - OSPF monitoring by SSH/ospfNbrUp[{#INTERFACE}],#1)=0",
+                                        "expression": "last(/.MikroTik OSPF monitoring by SSH/ospfNbrUp[{#INTERFACE}],#1)=0",
                                         "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" is DOWN",
                                         "priority": "DISASTER",
                                         "description": "OSPF neighbor with router id \"{#ROUTERID}\" and address \"{#ADDRESS}\" went DOWN.",
@@ -426,11 +426,11 @@
                     },
                     {
                         "macro": "{$MIKROTIK_SSH_PORT}",
-                        "value": "22"
+                        "value": "2223"
                     },
                     {
                         "macro": "{$MIKROTIK_SSH_USER}",
-                        "value": "hora"
+                        "value": "ansible"
                     },
                     {
                         "macro": "{$OSPF_INTERFACE_EXCLUDE}",

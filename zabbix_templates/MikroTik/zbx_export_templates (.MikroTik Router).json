@@ -3,15 +3,15 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
@@ -21,23 +21,6 @@
                 "template": ".MikroTik Router",
                 "name": ".MikroTik Router",
                 "description": "[netbox]\nmanufacturer = [ \"MikroTik\" ]\ndevice_type = [ \"CCR2004-16G-2S+\", \"CHR\" ]\ndevice_role = [\"Core Router\", \"Edge Router\", \"Border Router\", \"Customer Premises Equipment Router\"]",
-                "templates": [
-                    {
-                        "name": ".Generic by SNMP"
-                    },
-                    {
-                        "name": ".MikroTik - BGP monitoring by SNMP"
-                    },
-                    {
-                        "name": ".MikroTik - OSPF monitoring by SSH"
-                    },
-                    {
-                        "name": ".MikroTik Generic by SNMP"
-                    },
-                    {
-                        "name": ".Network Interfaces by SNMP"
-                    }
-                ],
                 "groups": [
                     {
                         "name": "ITcare"

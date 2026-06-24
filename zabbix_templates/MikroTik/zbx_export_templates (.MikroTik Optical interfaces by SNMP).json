@@ -3,23 +3,23 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
         "templates": [
             {
                 "uuid": "66d0fd980ba046ef8a7b9f0a7ead717d",
-                "template": ".MikroTik - Optical interfaces by SNMP",
-                "name": ".MikroTik - Optical interfaces by SNMP",
+                "template": ".MikroTik Optical interfaces by SNMP",
+                "name": ".MikroTik Optical interfaces by SNMP",
                 "groups": [
                     {
                         "name": "ITcare"
@@ -126,7 +126,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "1cce0894bc954fb1a90781234c17a5b1",
-                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxLoss.[{#SNMPINDEX}]) <> 0",
+                                        "expression": "last(/.MikroTik Optical interfaces by SNMP/mtxrOpticalRxLoss.[{#SNMPINDEX}]) <> 0",
                                         "name": "MikroTik: SFP [{#IFNAME}]: Optical RX Loss Detected",
                                         "priority": "AVERAGE",
                                         "manual_close": "YES"
@@ -182,7 +182,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "367849ca94b64ed7af29b2055decefd0",
-                                        "expression": "avg(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})>{$SFP_HIGH_LIGHT}",
+                                        "expression": "avg(/.MikroTik Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})>{$SFP_HIGH_LIGHT}",
                                         "name": "MikroTik: SFP [{#IFNAME}]: High Light Level",
                                         "opdata": "Current value: {ITEM.LASTVALUE1}",
                                         "priority": "AVERAGE",
@@ -190,7 +190,7 @@
                                     },
                                     {
                                         "uuid": "dcff1020a0ff4694905848e2aa499374",
-                                        "expression": "avg(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})<{$SFP_LOW_LIGHT}",
+                                        "expression": "avg(/.MikroTik Optical interfaces by SNMP/mtxrOpticalRxPower.[{#SNMPINDEX}],{$AVERAGE_TRIGGER_INT})<{$SFP_LOW_LIGHT}",
                                         "name": "MikroTik: SFP [{#IFNAME}]: Low Light Level",
                                         "opdata": "Current value: {ITEM.LASTVALUE1}",
                                         "priority": "AVERAGE",
@@ -206,8 +206,8 @@
                                 "history": "{$HISTORY}",
                                 "value_type": "FLOAT",
                                 "trends": "{$TRENDS}",
-                                "units": "°C",
-                                "description": "Temperature of the optical module in degrees Celsius (°C).",
+                                "units": "\u00b0C",
+                                "description": "Temperature of the optical module in degrees Celsius (\u00b0C).",
                                 "preprocessing": [
                                     {
                                         "type": "SNMP_WALK_VALUE",
@@ -253,7 +253,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "d6b273e70a3545bc9c4ea88857b902c9",
-                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
+                                        "expression": "last(/.MikroTik Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
                                         "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Alarm ({ITEM.LASTVALUE})",
                                         "opdata": "Current temperature: {ITEM.LASTVALUE}",
                                         "priority": "HIGH",
@@ -261,7 +261,7 @@
                                     },
                                     {
                                         "uuid": "d20975c0b7d7477e9f9e3e18947353dd",
-                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.WARN}",
+                                        "expression": "last(/.MikroTik Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.WARN}",
                                         "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Warning ({ITEM.LASTVALUE})",
                                         "opdata": "Current temperature: {ITEM.LASTVALUE}",
                                         "priority": "WARNING",
@@ -269,7 +269,7 @@
                                         "dependencies": [
                                             {
                                                 "name": "MikroTik: SFP [{#IFNAME}]: Temperature High Alarm ({ITEM.LASTVALUE})",
-                                                "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}"
+                                                "expression": "last(/.MikroTik Optical interfaces by SNMP/mtxrOpticalTemperature.[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}"
                                             }
                                         ]
                                     }
@@ -321,7 +321,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "c2fd5b3939a54f8699c5d7ce749adb12",
-                                        "expression": "last(/.MikroTik - Optical interfaces by SNMP/mtxrOpticalTxFault.[{#SNMPINDEX}]) <> 0",
+                                        "expression": "last(/.MikroTik Optical interfaces by SNMP/mtxrOpticalTxFault.[{#SNMPINDEX}]) <> 0",
                                         "name": "MikroTik: SFP [{#IFNAME}]: Optical TX Fault Detected",
                                         "priority": "AVERAGE",
                                         "manual_close": "YES"

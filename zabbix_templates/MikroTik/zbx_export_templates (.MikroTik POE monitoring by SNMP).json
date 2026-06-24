@@ -3,23 +3,23 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
         "templates": [
             {
                 "uuid": "d9b99602246945198171c1c2f0d449db",
-                "template": ".MikroTik - POE monitoring by SNMP",
-                "name": ".MikroTik - POE monitoring by SNMP",
+                "template": ".MikroTik POE monitoring by SNMP",
+                "name": ".MikroTik POE monitoring by SNMP",
                 "groups": [
                     {
                         "name": "ITcare"
@@ -193,7 +193,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "f71fd14528a043b8894714cfd7300f32",
-                                        "expression": "last(/.MikroTik - POE monitoring by SNMP/mtxrPOEStatus.[{#SNMPINDEX}]) > 3",
+                                        "expression": "last(/.MikroTik POE monitoring by SNMP/mtxrPOEStatus.[{#SNMPINDEX}]) > 3",
                                         "name": "MikroTik: POE [{#IFPOENAME}] status: {ITEM.LASTVALUE}",
                                         "opdata": "Current POE status: {ITEM.LASTVALUE}",
                                         "priority": "WARNING",

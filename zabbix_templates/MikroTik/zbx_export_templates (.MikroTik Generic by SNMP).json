@@ -3,15 +3,15 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
@@ -468,7 +468,7 @@
                                 "history": "{$HISTORY}",
                                 "value_type": "FLOAT",
                                 "trends": "{$TRENDS}",
-                                "units": "°C",
+                                "units": "\u00b0C",
                                 "description": "MIB: MIKROTIK-MIB\nmtxrHlProcessorTemperature Processor temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).",
                                 "preprocessing": [
                                     {
@@ -612,7 +612,7 @@
                                 "history": "{$HISTORY}",
                                 "value_type": "FLOAT",
                                 "trends": "{$TRENDS}",
-                                "units": "°C",
+                                "units": "\u00b0C",
                                 "description": "MIB: MIKROTIK-MIB\nmtxrHlTemperature Device temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).\n\nReference: http://wiki.mikrotik.com/wiki/Manual:SNMP",
                                 "preprocessing": [
                                     {

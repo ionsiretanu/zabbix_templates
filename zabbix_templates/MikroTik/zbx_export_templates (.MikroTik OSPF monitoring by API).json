@@ -1,0 +1,460 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "name": "ITcare"
+            },
+            {
+                "name": "MikroTik"
+            },
+            {
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "20fcfbf2889440bbb261930d765455b8",
+                "template": ".MikroTik OSPF monitoring by API",
+                "name": ".MikroTik OSPF monitoring by API",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "6159b82705384d19924efcb72c9ee52f",
+                        "name": "OSPF - Neighbor JSON",
+                        "type": "EXTERNAL",
+                        "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]",
+                        "delay": "5m",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "OSPF JSONs"
+                            },
+                            {
+                                "tag": "component",
+                                "value": "ospf"
+                            },
+                            {
+                                "tag": "componet",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "3026ee0dadc14d979a19c06a89fd2398",
+                        "name": "OSPF - Neighbor Discovery",
+                        "type": "EXTERNAL",
+                        "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]",
+                        "delay": "1h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#INTERFACE}",
+                                    "value": "{$OSPF_INTERFACE_EXCLUDE}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var obj = JSON.parse(value);\nvar out = [];\nfor (var k in obj) {\n    var e = obj[k];\n    out.push({\n        \"{#NUMBER}\":       k,\n        \"{#INTERFACE}\":    e.INTERFACE    || \"\",\n        \"{#NETWORKS}\":     e.NETWORKS     || \"\",\n        \"{#COST}\":         e.COST         || \"\",\n        \"{#AREA}\":         e.AREA         || \"\",\n        \"{#FLAGS}\":        e.FLAGS        || \"0\",\n        \"{#HASNEIGHBOR}\":  e.HASNEIGHBOR  || \"0\",\n        \"{#ADDRESS}\":      e.ADDRESS      || \"\",\n        \"{#ROUTERID}\":     e.ROUTERID     || \"\",\n        \"{#STATEOSPF}\":    e.STATEOSPF    || \"\",\n        \"{#ADJACENCY}\":    e.ADJACENCY    || \"\",\n        \"{#STATECHANGES}\": e.STATECHANGES || \"0\"\n    });\n}\nreturn JSON.stringify({\"data\": out});"
+                                ]
+                            }
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "573b9a77e9c74117a4a5fdbdb7fec5aa",
+                                "name": "Cost on OSPF interface {#ROUTERID} - \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospf.IfMetric[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.COST"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "ede44ec7ffbd4debb5476f6df0968549",
+                                        "expression": "last(/.MikroTik OSPF monitoring by API/ospf.IfMetric[{#INTERFACE},{#AREA}],#1)<>last(/.MikroTik OSPF monitoring by API/ospf.IfMetric[{#INTERFACE},{#AREA}],#2)",
+                                        "recovery_mode": "NONE",
+                                        "name": "MikroTik: Cost change to {ITEM.VALUE} for int:\"{#INTERFACE}\"",
+                                        "priority": "INFO",
+                                        "description": "Neighbor address \"{#ADDRESS}\" and neighbor router id \"{#ROUTERID}\"\nAcknowledge to close the problem.",
+                                        "type": "MULTIPLE",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "551b77eb19ea42afbf72d00a8518507d",
+                                "name": "OSPF interface {#ROUTERID} admin status \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfIfAdminStat[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "trends": "30d",
+                                "description": "FLAGS:\n0 = enabled\n1 = disabled\n2 = inactive",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.FLAGS"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ee2e0dcae4014fa18f378b1b258b8a65",
+                                "name": "OSPF neighbor {#ADDRESS} adjacency \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrAdjacency[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "trends": "30d",
+                                "units": "s",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.ADJACENCY"
+                                        ]
+                                    },
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "var timeParts = value.split(/\\D+/).map(Number).reverse();\nvar seconds = timeParts[0] || 0;\nvar minutes = timeParts[1] || 0;\nvar hours   = timeParts[2] || 0;\nvar days    = timeParts[3] || 0;\nvar weeks   = timeParts[4] || 0;\nvar years   = timeParts[5] || 0;\nreturn seconds + minutes*60 + hours*3600 + days*86400 + weeks*604800 + years*31536000;"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "1e3c95b64ee94a05a6d58ad4cdf77270",
+                                        "expression": "last(/.MikroTik OSPF monitoring by API/ospfNbrAdjacency[{#INTERFACE},{#AREA}])<{$ADJACENCY4T}",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" uptime LOW",
+                                        "priority": "INFO",
+                                        "description": "OSPF adjacency with neighbor address \"{#ADDRESS}\" and router id \"{#ROUTERID}\" is lower than {$ADJACENCY4T}",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "becba9cc93d44a5585e59a51bb5b6836",
+                                "name": "OSPF neighbor {#ADDRESS} number of relationship changes \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrEvents[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.STATECHANGES"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "c08b044ec1ef43b08bdad798a36c12ac",
+                                        "expression": "last(/.MikroTik OSPF monitoring by API/ospfNbrEvents[{#INTERFACE},{#AREA}]) - avg(/.MikroTik OSPF monitoring by API/ospfNbrEvents[{#INTERFACE},{#AREA}],4h) > {$STATECHANGES4T}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "last(/.MikroTik OSPF monitoring by API/ospfNbrEvents[{#INTERFACE},{#AREA}],#1) = last(/.MikroTik OSPF monitoring by API/ospfNbrEvents[{#INTERFACE},{#AREA}],#2)",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" have {ITEM.LASTVALUE} state changes",
+                                        "opdata": "Number of relationship changes: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "The relationship with OSPF neighbor address \"{#ADDRESS}\" and router id \"{#ROUTERID}\" has a high state change rate (threshold: {$STATECHANGES4T})",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "7e0283fae9cf424298fc7181e9fa52a0",
+                                "name": "OSPF neighbor {#ADDRESS} router id \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrRtrId[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.ROUTERID"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c25687240d0242148478d4451c810939",
+                                "name": "OSPF neighbor {#ADDRESS} relationship state \"{#INTERFACE}\"",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrState[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.STATEOSPF"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "0807593284fd4434bb0b67bad1fb9c03",
+                                        "expression": "last(/.MikroTik OSPF monitoring by API/ospfNbrState[{#INTERFACE},{#AREA}],#1)<>\"Full\" and last(/.MikroTik OSPF monitoring by API/ospfNbrState[{#INTERFACE},{#AREA}],#2)<>\"Full\"",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" state is not FULL",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "description": "OSPF neighbor with router id \"{#ROUTERID}\" is not in Full state.\n\nThe state down represents the initial state of a conversation when no information has been exchanged and retained between routers with the Hello Protocol.",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a66984980c8948ce96cdc8637581efe5",
+                                "name": "OSPF int.{#INTERFACE} has neighbor",
+                                "type": "DEPENDENT",
+                                "key": "ospfNbrUp[{#INTERFACE},{#AREA}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "trends": "30d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.{#NUMBER}.HASNEIGHBOR"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "ospf"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "4f33b60744fc42da80b829b5b001ee77",
+                                        "expression": "last(/.MikroTik OSPF monitoring by API/ospfNbrUp[{#INTERFACE},{#AREA}],#1)=0",
+                                        "name": "MikroTik: OSPF neighbor \"{#INTERFACE}\" is DOWN",
+                                        "priority": "DISASTER",
+                                        "description": "OSPF neighbor with router id \"{#ROUTERID}\" and address \"{#ADDRESS}\" went DOWN.",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "overrides": [
+                            {
+                                "name": "Exclude neighbor stats for disabled interfaces or with NoNeighbor",
+                                "step": "1",
+                                "filter": {
+                                    "evaltype": "OR",
+                                    "conditions": [
+                                        {
+                                            "macro": "{#FLAGS}",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "macro": "{#HASNEIGHBOR}",
+                                            "value": "0"
+                                        }
+                                    ]
+                                },
+                                "operations": [
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "adjacency",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "Cost on OSPF interface",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "number of relationship changes",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "relationship state",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    },
+                                    {
+                                        "operator": "LIKE",
+                                        "value": "router id",
+                                        "discover": "NO_DISCOVER",
+                                        "status": "DISABLED"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$ADJACENCY4T}",
+                        "value": "600",
+                        "description": "Trigger if adjacency below this value in seconds (default 10min=600s)"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_API_PASS}",
+                        "value": "",
+                        "type": "SECRET_TEXT",
+                        "description": "RouterOS API password"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_API_PORT}",
+                        "value": "8728",
+                        "description": "RouterOS API port (8728=plain, 8729=SSL)"
+                    },
+                    {
+                        "macro": "{$MIKROTIK_API_USER}",
+                        "value": "ansible",
+                        "description": "RouterOS API username"
+                    },
+                    {
+                        "macro": "{$OSPF_INTERFACE_EXCLUDE}",
+                        "value": "(?i)(Loopback|^lo$|mgmt|test|vlan900-|vlan901-|vlan999-)",
+                        "description": "Regex of interfaces to exclude from LLD"
+                    },
+                    {
+                        "macro": "{$STATECHANGES4T}",
+                        "value": "10",
+                        "description": "Trigger if state changes exceed 4h average by this amount"
+                    }
+                ]
+            }
+        ]
+    }
+}

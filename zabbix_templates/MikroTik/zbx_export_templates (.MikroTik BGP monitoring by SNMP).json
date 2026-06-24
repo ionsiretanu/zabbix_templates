@@ -3,23 +3,23 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
                 "name": "MikroTik"
             },
             {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
         "templates": [
             {
                 "uuid": "df861ad5eb284030a61f62a5ad772ea6",
-                "template": ".MikroTik - BGP monitoring by SNMP",
-                "name": ".MikroTik - BGP monitoring by SNMP",
+                "template": ".MikroTik BGP monitoring by SNMP",
+                "name": ".MikroTik BGP monitoring by SNMP",
                 "groups": [
                     {
                         "name": "ITcare"
@@ -230,7 +230,7 @@
                                 "trigger_prototypes": [
                                     {
                                         "uuid": "1778c3d7b9404b7681814b2d180a649a",
-                                        "expression": "last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])<>6 and last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])=2",
+                                        "expression": "last(/.MikroTik BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])<>6 and last(/.MikroTik BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}])=2",
                                         "name": "MikroTik: BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: is down",
                                         "opdata": "Current state: {ITEM.LASTVALUE1}, Status: {ITEM.LASTVALUE2}",
                                         "priority": "HIGH",
@@ -248,7 +248,7 @@
                         "trigger_prototypes": [
                             {
                                 "uuid": "e7b4c83ee08f46448dc1614c13c4b425",
-                                "expression": "last(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) < {$ADJACENCY4T}\nand\nlast(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) > 0\nand\nlast(/.MikroTik - BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}]) = 6",
+                                "expression": "last(/.MikroTik BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) < {$ADJACENCY4T}\nand\nlast(/.MikroTik BGP monitoring by SNMP/mikrotik.bgp.established.time.[{#SNMPINDEX}]) > 0\nand\nlast(/.MikroTik BGP monitoring by SNMP/mikrotik.bgp.state.[{#SNMPINDEX}]) = 6",
                                 "name": "MikroTik: BGP AS [{#BGP_PEER_REMOTE_AS}] Peer [{#SNMPINDEX}]: uptime LOW",
                                 "opdata": "Uptime: {ITEM.LASTVALUE}",
                                 "priority": "INFO",

@@ -3,15 +3,11 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
-                "name": "MikroTik"
-            },
-            {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
@@ -24,9 +20,6 @@
                 "groups": [
                     {
                         "name": "ITcare"
-                    },
-                    {
-                        "name": "MikroTik"
                     },
                     {
                         "name": "Templates/Network devices"
@@ -175,7 +168,7 @@
                 "tags": [
                     {
                         "tag": "target",
-                        "value": "mikrotik"
+                        "value": "generic"
                     }
                 ],
                 "macros": [

@@ -3,15 +3,11 @@
         "version": "7.4",
         "template_groups": [
             {
-                "uuid": "3bd32e85751a4fa79e9b6a87c4ca34ac",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
                 "name": "ITcare"
             },
             {
-                "uuid": "fb49cc98eec34086922f66c05a203bb3",
-                "name": "MikroTik"
-            },
-            {
-                "uuid": "36bff6c29af64692839d077febfc7079",
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
                 "name": "Templates/Network devices"
             }
         ],
@@ -24,9 +20,6 @@
                 "groups": [
                     {
                         "name": "ITcare"
-                    },
-                    {
-                        "name": "MikroTik"
                     },
                     {
                         "name": "Templates/Network devices"
@@ -54,7 +47,7 @@
                         "uuid": "24b5c854d25a468bba7a3cc232b11b00",
                         "name": "SNMP walk network interfaces",
                         "type": "SNMP_AGENT",
-                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.3,1.3.6.1.2.1.31.1.1.1.6,1.3.6.1.2.1.31.1.1.1.10,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20,1.3.6.1.2.1.2.2.1.19,1.3.6.1.2.1.2.2.1.13,1.3.6.1.2.1.31.1.1.1.15,1.3.6.1.2.1.31.1.1.1.7,1.3.6.1.2.1.31.1.1.1.9,1.3.6.1.2.1.31.1.1.1.8,1.3.6.1.2.1.31.1.1.1.13,1.3.6.1.2.1.31.1.1.1.12,1.3.6.1.2.1.31.1.1.1.11,1.3.6.1.2.1.2.2.1.9,1.3.6.1.4.1.14988.1.1.14.1.1.45,1.3.6.1.4.1.14988.1.1.14.1.1.52]",
+                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.3,1.3.6.1.2.1.31.1.1.1.6,1.3.6.1.2.1.31.1.1.1.10,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20,1.3.6.1.2.1.2.2.1.19,1.3.6.1.2.1.2.2.1.13,1.3.6.1.2.1.31.1.1.1.15,1.3.6.1.2.1.31.1.1.1.7,1.3.6.1.2.1.31.1.1.1.9,1.3.6.1.2.1.31.1.1.1.8,1.3.6.1.2.1.31.1.1.1.13,1.3.6.1.2.1.31.1.1.1.12,1.3.6.1.2.1.31.1.1.1.11]",
                         "key": "net.if.walk",
                         "delay": "{$NETWORK_POLL_INT}",
                         "history": "0",
@@ -747,174 +740,6 @@
                                         "value": "{#IFNAME}"
                                     }
                                 ]
-                            },
-                            {
-                                "uuid": "f9749032553045d9a132f9f8435edc14",
-                                "name": "Interface {#IFNAME}({#IFALIAS}): Last change",
-                                "type": "DEPENDENT",
-                                "key": "net.if.lastchange[ifLastChange.{#SNMPINDEX}]",
-                                "history": "{$HISTORY}",
-                                "trends": "0",
-                                "description": "MIB: IF-MIB\nThe value of sysUpTime at the time the interface entered its current operational state. A zero value means the state was entered before the last re-initialization of the management subsystem.",
-                                "preprocessing": [
-                                    {
-                                        "type": "SNMP_WALK_VALUE",
-                                        "parameters": [
-                                            "1.3.6.1.2.1.2.2.1.9.{#SNMPINDEX}",
-                                            "0"
-                                        ]
-                                    }
-                                ],
-                                "master_item": {
-                                    "key": "net.if.walk"
-                                },
-                                "tags": [
-                                    {
-                                        "tag": "component",
-                                        "value": "network"
-                                    },
-                                    {
-                                        "tag": "description",
-                                        "value": "{#IFALIAS}"
-                                    },
-                                    {
-                                        "tag": "interface",
-                                        "value": "{#IFNAME}"
-                                    }
-                                ],
-                                "trigger_prototypes": [
-                                    {
-                                        "uuid": "1156754e97dc450698bfd91874d7b423",
-                                        "expression": "change(/.Network Interfaces by SNMP/net.if.lastchange[ifLastChange.{#SNMPINDEX}])>0 and last(/.Network Interfaces by SNMP/net.if.lastchange[ifLastChange.{#SNMPINDEX}])>0",
-                                        "name": "Interface {#IFNAME}({#IFALIAS}): Link flapped",
-                                        "opdata": "Last change at sysUpTime: {ITEM.LASTVALUE1}",
-                                        "priority": "WARNING",
-                                        "description": "Interface operational state changed. Investigate the cause — could be a cable issue or a flapping link. Acknowledge to close manually.",
-                                        "manual_close": "YES",
-                                        "dependencies": [
-                                            {
-                                                "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
-                                                "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
-                                                "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
-                                            }
-                                        ],
-                                        "tags": [
-                                            {
-                                                "tag": "scope",
-                                                "value": "availability"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "uuid": "fef9ba103f734177881fafa4482881e8",
-                                "name": "Interface {#IFNAME}({#IFALIAS}): FCS errors",
-                                "type": "DEPENDENT",
-                                "key": "net.if.fcserrors[ifFCSErrors.{#SNMPINDEX}]",
-                                "history": "{$HISTORY}",
-                                "trends": "{$TRENDS}",
-                                "description": "MIB: MikroTik\nThe number of frames that contained a Frame Check Sequence (FCS) error. Persistent FCS errors indicate a layer-1 problem (bad cable, connector, or SFP). OID: .1.3.6.1.4.1.14988.1.1.14.1.1.45",
-                                "preprocessing": [
-                                    {
-                                        "type": "SNMP_WALK_VALUE",
-                                        "parameters": [
-                                            "1.3.6.1.4.1.14988.1.1.14.1.1.45.{#SNMPINDEX}",
-                                            "0"
-                                        ]
-                                    },
-                                    {
-                                        "type": "CHANGE_PER_SECOND"
-                                    }
-                                ],
-                                "master_item": {
-                                    "key": "net.if.walk"
-                                },
-                                "tags": [
-                                    {
-                                        "tag": "component",
-                                        "value": "network"
-                                    },
-                                    {
-                                        "tag": "description",
-                                        "value": "{#IFALIAS}"
-                                    },
-                                    {
-                                        "tag": "interface",
-                                        "value": "{#IFNAME}"
-                                    }
-                                ],
-                                "trigger_prototypes": [
-                                    {
-                                        "uuid": "cc8562f378e34cfa93559c20143f488c",
-                                        "expression": "min(/.Network Interfaces by SNMP/net.if.fcserrors[ifFCSErrors.{#SNMPINDEX}],5m)>{$IF.FCSERRORS.WARN:\"{#IFNAME}\"}",
-                                        "recovery_mode": "RECOVERY_EXPRESSION",
-                                        "recovery_expression": "max(/.Network Interfaces by SNMP/net.if.fcserrors[ifFCSErrors.{#SNMPINDEX}],5m)<{$IF.FCSERRORS.WARN:\"{#IFNAME}\"}*0.8",
-                                        "name": "Interface {#IFNAME}({#IFALIAS}): High FCS error rate",
-                                        "event_name": "Interface {#IFNAME}({#IFALIAS}): High FCS error rate (>{$IF.FCSERRORS.WARN:\"{#IFNAME}\"} for 5m)",
-                                        "opdata": "FCS errors/s: {ITEM.LASTVALUE1}",
-                                        "priority": "HIGH",
-                                        "description": "Sustained FCS errors indicate a layer-1 problem. Check cable, SFP, or connector on this interface. Recovers when below 80% of the threshold.",
-                                        "manual_close": "YES",
-                                        "dependencies": [
-                                            {
-                                                "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
-                                                "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
-                                                "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
-                                            }
-                                        ],
-                                        "tags": [
-                                            {
-                                                "tag": "scope",
-                                                "value": "availability"
-                                            },
-                                            {
-                                                "tag": "scope",
-                                                "value": "performance"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "uuid": "a0cce91eaf5d4145a71b55dde2b75840",
-                                "name": "Interface {#IFNAME}({#IFALIAS}): Rx code errors",
-                                "type": "DEPENDENT",
-                                "status": "DISABLED",
-                                "discover": "NO_DISCOVER",
-                                "key": "net.if.rxcodeerrors[ifRxCodeErrors.{#SNMPINDEX}]",
-                                "history": "{$HISTORY}",
-                                "trends": "{$TRENDS}",
-                                "description": "MIB: MikroTik\nThe number of received frames that contained a coding error (8b/10b or similar). OID: .1.3.6.1.4.1.14988.1.1.14.1.1.52",
-                                "preprocessing": [
-                                    {
-                                        "type": "SNMP_WALK_VALUE",
-                                        "parameters": [
-                                            "1.3.6.1.4.1.14988.1.1.14.1.1.52.{#SNMPINDEX}",
-                                            "0"
-                                        ]
-                                    },
-                                    {
-                                        "type": "CHANGE_PER_SECOND"
-                                    }
-                                ],
-                                "master_item": {
-                                    "key": "net.if.walk"
-                                },
-                                "tags": [
-                                    {
-                                        "tag": "component",
-                                        "value": "network"
-                                    },
-                                    {
-                                        "tag": "description",
-                                        "value": "{#IFALIAS}"
-                                    },
-                                    {
-                                        "tag": "interface",
-                                        "value": "{#IFNAME}"
-                                    }
-                                ]
                             }
                         ],
                         "trigger_prototypes": [
@@ -990,31 +815,6 @@
                                         "tag": "scope",
                                         "value": "availability"
                                     },
-                                    {
-                                        "tag": "scope",
-                                        "value": "performance"
-                                    }
-                                ]
-                            },
-                            {
-                                "uuid": "d3873fd61c584e8980b76351aaf866d2",
-                                "expression": "last(/.Network Interfaces by SNMP/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0 and last(/.Network Interfaces by SNMP/net.if.speed[ifHighSpeed.{#SNMPINDEX}])<{$NET.IF.SPEED.MIN:\"{#IFNAME}\"}",
-                                "recovery_mode": "RECOVERY_EXPRESSION",
-                                "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>={$NET.IF.SPEED.MIN:\"{#IFNAME}\"} or last(/.Network Interfaces by SNMP/net.if.speed[ifHighSpeed.{#SNMPINDEX}])=0",
-                                "name": "Interface {#IFNAME}({#IFALIAS}): Speed below {$NET.IF.SPEED.MIN:\"{#IFNAME}\"}",
-                                "event_name": "Interface {#IFNAME}({#IFALIAS}): Speed below {$NET.IF.SPEED.MIN:\"{#IFNAME}\"} (current: {ITEM.LASTVALUE1})",
-                                "opdata": "Current speed: {ITEM.LASTVALUE1}",
-                                "priority": "HIGH",
-                                "description": "Interface speed is below the expected minimum. This typically indicates an autonegotiation failure or a wrong cable. Set {$NET.IF.SPEED.MIN} context macro to 0 on interfaces where sub-gigabit speed is expected (e.g. 100M management ports).",
-                                "manual_close": "YES",
-                                "dependencies": [
-                                    {
-                                        "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
-                                        "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
-                                        "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
-                                    }
-                                ],
-                                "tags": [
                                     {
                                         "tag": "scope",
                                         "value": "performance"
@@ -1114,6 +914,30 @@
                                 "type": "DISCARD_UNCHANGED_HEARTBEAT",
                                 "parameters": [
                                     "1h"
+                                ]
+                            }
+                        ],
+                        "overrides": [
+                            {
+                                "name": "Access Ports",
+                                "step": "1",
+                                "filter": {
+                                    "conditions": [
+                                        {
+                                            "macro": "{#IFALIAS}",
+                                            "value": "@ZENTRO_REGEX_ACCESS_INTERFACES_INCLUDED_ALIAS"
+                                        }
+                                    ]
+                                },
+                                "operations": [
+                                    {
+                                        "discover": "DISCOVER",
+                                        "delay": "5m"
+                                    },
+                                    {
+                                        "operationobject": "TRIGGER_PROTOTYPE",
+                                        "discover": "NO_DISCOVER"
+                                    }
                                 ]
                             }
                         ]
@@ -1217,7 +1041,7 @@
                 "tags": [
                     {
                         "tag": "target",
-                        "value": "mikrotik"
+                        "value": "generic"
                     }
                 ],
                 "macros": [
@@ -1406,32 +1230,6 @@
                             "section_name": "Filters",
                             "label": "Filter network interface by type (exclude)",
                             "description": "Regex string to exclude discovered interface by type."
-                        }
-                    },
-                    {
-                        "macro": "{$IF.FCSERRORS.WARN}",
-                        "value": "2",
-                        "description": "Warning threshold of FCS error rate (errors/s). Can be used with interface name as context.",
-                        "config": {
-                            "type": "TEXT",
-                            "priority": "21",
-                            "section_name": "Thresholds",
-                            "label": "Threshold of FCS error rate",
-                            "description": "Warning threshold of FCS error rate. No less than 0.",
-                            "regex": "^-?([0-9]+|(([0-9]+)\\.([0-9]+)))$"
-                        }
-                    },
-                    {
-                        "macro": "{$NET.IF.SPEED.MIN}",
-                        "value": "1000000000",
-                        "description": "Minimum expected interface speed in bps. Trigger fires when speed is below this. Set to 0 per-interface context to disable.",
-                        "config": {
-                            "type": "TEXT",
-                            "priority": "21",
-                            "section_name": "Thresholds",
-                            "label": "Minimum expected interface speed",
-                            "description": "Minimum expected interface speed in bps (default: 1 Gbps). Set per-interface context to 0 to disable the check.",
-                            "regex": "^[0-9]+$"
                         }
                     }
                 ],
