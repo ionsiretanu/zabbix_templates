@@ -21,6 +21,26 @@
                 "template": ".MikroTik Switch",
                 "name": ".MikroTik Switch",
                 "description": "[netbox]\nmanufacturer = [ \"MikroTik\" ]\ndevice_role = [\"Access Switch\", \"Aggregation Switch\"]",
+                "templates": [
+                    {
+                        "name": ".Generic by SNMP"
+                    },
+                    {
+                        "name": ".Network Interfaces by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik Generic by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik Network Interfaces by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik Optical interfaces by SNMP"
+                    },
+                    {
+                        "name": ".MikroTik POE monitoring by SNMP"
+                    }
+                ],
                 "groups": [
                     {
                         "name": "ITcare"

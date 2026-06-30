@@ -1,0 +1,275 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4",
+                "name": "MikroTik"
+            },
+            {
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "0a41d92aa1bd47398337e22d361f7f8a",
+                "template": ".MikroTik Network Interfaces by SNMP",
+                "name": ".MikroTik Network Interfaces by SNMP",
+                "description": "MikroTik-specific interface error counters (FCS errors, RxCode errors).\nRequires .Network Interfaces by SNMP to be linked on the same host — triggers reference ifOperStatus items from that template.\n\nVerified OIDs on RouterOS 7.x:\n  FCS errors:    1.3.6.1.4.1.14988.1.1.14.1.1.45\n  RxCode errors: 1.3.6.1.4.1.14988.1.1.14.1.1.52",
+                "groups": [
+                    {
+                        "name": "ITcare"
+                    },
+                    {
+                        "name": "MikroTik"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "2925123291cf4f55b6542528afbb5d32",
+                        "name": "SNMP walk MikroTik interface error counters",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.4.1.14988.1.1.14.1.1.45,1.3.6.1.4.1.14988.1.1.14.1.1.52]",
+                        "key": "net.if.mtx.errors.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "MIB: MIKROTIK-MIB\nSingle bulk walk collecting ifName (index mapping), ifAlias, FCS errors (.45) and RxCode errors (.52) per interface.",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "34f67c1bdb2f477d8139d0686586ed7c",
+                        "name": "MikroTik interface errors discovery",
+                        "type": "DEPENDENT",
+                        "key": "net.if.mtx.errors.discovery",
+                        "description": "Discovers interfaces with MikroTik proprietary error counters.\nMIB: MIKROTIK-MIB\nReuses the same name/alias filter macros as .Network Interfaces by SNMP.",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#IFNAME}",
+                                    "value": "{$NET.IF.IFNAME.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#IFNAME}",
+                                    "value": "{$NET.IF.IFNAME.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                },
+                                {
+                                    "macro": "{#IFALIAS}",
+                                    "value": "{$NET.IF.IFALIAS.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#IFALIAS}",
+                                    "value": "{$NET.IF.IFALIAS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "item_prototypes": [
+                            {
+                                "uuid": "949ec07eac0b4af0bd6dcc3704da41d9",
+                                "name": "Interface {#IFNAME}({#IFALIAS}): FCS errors",
+                                "type": "DEPENDENT",
+                                "key": "net.if.in.fcs_errors[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "MIB: MIKROTIK-MIB (mtxrInterfaceStatsFCSErrors)\nOID: 1.3.6.1.4.1.14988.1.1.14.1.1.45\nFrame Check Sequence errors per second. High rate indicates physical layer problems: bad cable, faulty SFP, or duplex mismatch.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.14.1.1.45.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "CHANGE_PER_SECOND"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "net.if.mtx.errors.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "description",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "interface",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "2dd2f435c30c469ab3d2d09374f6e0cc",
+                                        "expression": "min(/.MikroTik Network Interfaces by SNMP/net.if.in.fcs_errors[{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:\"{#IFNAME}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Network Interfaces by SNMP/net.if.in.fcs_errors[{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:\"{#IFNAME}\"}*0.8",
+                                        "name": "Interface {#IFNAME}({#IFALIAS}): High FCS error rate",
+                                        "event_name": "Interface {#IFNAME}({#IFALIAS}): High FCS error rate (>{$IF.ERRORS.WARN:\"{#IFNAME}\"}/s for 5m)",
+                                        "opdata": "FCS errors/s: {ITEM.LASTVALUE1}",
+                                        "priority": "HIGH",
+                                        "description": "FCS errors on {#IFNAME} exceed {$IF.ERRORS.WARN} per second for 5 minutes.\nCheck: cable quality, SFP module, duplex/speed mismatch.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
+                                                "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                                                "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "4384cdeeffa94931afa0effab3f7f14a",
+                                "name": "Interface {#IFNAME}({#IFALIAS}): Rx code errors",
+                                "type": "DEPENDENT",
+                                "key": "net.if.in.rxcode_errors[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "description": "MIB: MIKROTIK-MIB (mtxrInterfaceStatsRxCodeErrors)\nOID: 1.3.6.1.4.1.14988.1.1.14.1.1.52\nReceive code errors per second. Typically caused by fiber signal issues or SFP problems.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.14988.1.1.14.1.1.52.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "CHANGE_PER_SECOND"
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "net.if.mtx.errors.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "description",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "interface",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "57e35de98f2a4100903c85d561b2fdfb",
+                                        "expression": "min(/.MikroTik Network Interfaces by SNMP/net.if.in.rxcode_errors[{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:\"{#IFNAME}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.MikroTik Network Interfaces by SNMP/net.if.in.rxcode_errors[{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:\"{#IFNAME}\"}*0.8",
+                                        "name": "Interface {#IFNAME}({#IFALIAS}): High Rx code error rate",
+                                        "event_name": "Interface {#IFNAME}({#IFALIAS}): High Rx code error rate (>{$IF.ERRORS.WARN:\"{#IFNAME}\"}/s for 5m)",
+                                        "opdata": "RxCode errors/s: {ITEM.LASTVALUE1}",
+                                        "priority": "AVERAGE",
+                                        "description": "Rx code errors on {#IFNAME} exceed {$IF.ERRORS.WARN} per second for 5 minutes.\nCheck: fiber cable, SFP module, or optical signal level.",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
+                                                "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                                                "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "net.if.mtx.errors.walk"
+                        },
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#IFNAME}",
+                                    "1.3.6.1.2.1.31.1.1.1.1",
+                                    "0",
+                                    "{#IFALIAS}",
+                                    "1.3.6.1.2.1.31.1.1.1.18",
+                                    "2",
+                                    "{#FCSERR}",
+                                    "1.3.6.1.4.1.14988.1.1.14.1.1.45",
+                                    "2",
+                                    "{#RXCODERR}",
+                                    "1.3.6.1.4.1.14988.1.1.14.1.1.52",
+                                    "2"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "mikrotik"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$IF.ERRORS.WARN}",
+                        "value": "2",
+                        "description": "FCS/RxCode error rate threshold (errors/s). Can be overridden per interface using context: {$IF.ERRORS.WARN:\"ether1\"}"
+                    },
+                    {
+                        "macro": "{$NETWORK_POLL_INT}",
+                        "value": "5m",
+                        "description": "Poll interval for interface error counters walk."
+                    }
+                ]
+            }
+        ]
+    }
+}

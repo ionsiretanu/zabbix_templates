@@ -1,180 +1,182 @@
-# CLAUDE.md
+# Zabbix Templates — Directory Index
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **Always read `/etc/ansible/CLAUDE.md` at the start of any session in this directory or any vendor subdirectory** — it contains required project-wide context (migration script logic, `syn_vars.yml` keys, import `RULES` pattern) and does NOT auto-load here due to the symlink at `vars/templates` (`templates` → `/home/ion_siretanu/zabbix_templates`).
 
-## Repository purpose
+Zabbix 7.4 monitoring templates (JSON export format). All template files must be 7.4 format — 7.0 templates cannot be imported into Zabbix 7.4.
 
-Zabbix 7.4 monitoring templates (JSON export format) for MikroTik network devices, maintained by ITcare. Each template is a standalone JSON file that can be imported independently into Zabbix.
+## Validate any template before importing
+
+```bash
+python3 -m json.tool "path/to/template.json" > /dev/null && echo "valid"
+```
 
 ## Directory layout
 
 ```
-zbx_export_templates/
-├── MikroTik/       ← active work area (all templates here)
-├── Juniper/        ← ignore
-└── andrena/        ← ignore
+vars/templates/zabbix_templates/
+├── MikroTik/       ← active — see MikroTik/CLAUDE.md (import order, OIDs, design rules)
+├── Aviat/          ← active — see Aviat/CLAUDE.md (WTM4880 OID map, item prototypes)
+├── Cisco/          ← active — see Cisco/CLAUDE.md (import order, ENTITY-SENSOR-MIB OIDs)
+├── HPE/            ← active — see HPE/CLAUDE.md (H3C MIB OIDs, templateLinkage fix)
+├── Siklu/          ← DONE ✅ (5 templates: Generic, EH Radio, MH Radio, B100 Radio, System Alarm) — see Siklu/CLAUDE.md
+├── Juniper/        ← NOT STARTED ❌ CRITICAL (3166 hosts) — see Juniper/CLAUDE.md
+├── Ubiquiti/       ← NOT STARTED ❌ HIGH (~2199 hosts) — see Ubiquiti/CLAUDE.md
+├── SIAE/           ← NOT STARTED ❌ HIGH (~1020 hosts) — see SIAE/CLAUDE.md
+├── CyberPower/     ← NOT STARTED ❌ HIGH (450 hosts) — see CyberPower/CLAUDE.md
+├── APC/            ← NOT STARTED ❌ HIGH (445 hosts) — see APC/CLAUDE.md
+├── Aruba/          ← NOT STARTED ❌ (119 hosts) — see Aruba/CLAUDE.md
+├── Positron/       ← NOT STARTED ❌ (93 hosts) — see Positron/CLAUDE.md
+├── TripLite/       ← NOT STARTED ❌ (25 hosts) — see TripLite/CLAUDE.md
+├── Ceragon/        ← NOT STARTED ❌ (32 hosts) — see Ceragon/CLAUDE.md
+├── Raisecom/       ← NOT STARTED ❌ (14 hosts) — see Raisecom/CLAUDE.md
+├── Ignite/         ← NOT STARTED ❌ (81 hosts) — see Ignite/CLAUDE.md
+├── Alcoma/         ← NOT STARTED ❌ (16 hosts) — see Alcoma/CLAUDE.md
+├── Ruckus/         ← (not in migration tracking matrix — status unknown)
+├── andrena/        ← ignore
+└── README.md
 ```
+
+For cross-vendor import infrastructure (migration script, RULES dict, Python import snippet, required template groups, new Zabbix credentials), see `/etc/ansible/CLAUDE.md` → "Zabbix migration — old → new".
 
 ---
 
-## Template inventory & linkage
+## Template Design Standard — Naming, Keys, and Master/Dependent Items
 
-Templates are imported as standalone units. After import, link them manually in Zabbix UI:
-**Configuration → Templates → (template name) → Linked templates tab → Add**
+The reference implementation is **`.MikroTik Generic by SNMP`** in `MikroTik/`. When building a new vendor template, read `MikroTik/CLAUDE.md` alongside this section.
 
-```
-.ICMP Ping                          (no parents — base)
-.Generic by SNMP                    → link: .ICMP Ping
-.Network Interfaces by SNMP              (no parents — base)
-.MikroTik Generic by SNMP               (no parents — base)
-.MikroTik - BGP monitoring by SNMP      (no parents — feature)
-.MikroTik - OSPF monitoring by SSH      (no parents — feature)
-.MikroTik - Optical interfaces by SNMP  (no parents — feature)
-.MikroTik - POE monitoring by SNMP      (no parents — feature)
-.MikroTik - Sentinel by SNMP            (no parents — feature, add if Sentinel deployed)
-Mikrotik - LDP by SSH                   (no parents — feature)
-MikroTik - ARP Monitor                  (no parents — standalone)
-MikroTik - MAC Monitor                  (no parents — standalone)
+### 1. Template layering
 
-.MikroTik Router   → link: .Generic by SNMP
-                          .MikroTik Generic by SNMP
-                          .Network Interfaces by SNMP
-                          .MikroTik - BGP monitoring by SNMP
-                          .MikroTik - OSPF monitoring by SSH
-                   +opt:  .MikroTik - Sentinel by SNMP
+Three-layer model for managed network devices (switches, routers):
 
-.MikroTik Switch   → link: .Generic by SNMP
-                          .MikroTik Generic by SNMP
-                          .Network Interfaces by SNMP
-                          .MikroTik - Optical interfaces by SNMP
-                          .MikroTik - POE monitoring by SNMP
-                   +opt:  .MikroTik - Sentinel by SNMP
-```
+| Layer | Naming pattern | Purpose |
+|---|---|---|
+| Base | `.Generic by SNMP` | Vendor-agnostic: sysName, sysDescr, sysContact, SNMP availability, ICMP (via `.ICMP Ping` link) |
+| Vendor Generic | `.<Vendor> Generic by SNMP` | Vendor-specific system metrics: CPU, memory, temperature, hardware model, serial, firmware |
+| Role | `.<Vendor> Switch` / `.<Vendor> Router` | Thin shell — only template links, zero items |
 
-Dot-prefix (`.`) = library template, not assigned directly to hosts.
-No dot = assigned directly to hosts.
+**Role template links (mandatory order):** `.Generic by SNMP` + `.Network Interfaces by SNMP` + `.<Vendor> Generic by SNMP`.
+
+The Vendor Generic does **not** link to `.Generic by SNMP` — the role template handles that link directly. This is the reference pattern from MikroTik.
+
+**Single-purpose devices (radio, UPS):** one combined template linking to `.Generic by SNMP` is acceptable — no need for a separate Vendor Generic. This is the Aviat pattern.
+
+**Add-on templates** (`.Cisco - Optical interfaces by SNMP`, `.HPE - Optical interfaces by SNMP`) are standalone, attached per-host as needed alongside the role template.
+
+### 2. Key naming convention
+
+Use the MikroTik Generic keys as the canonical set. No vendor prefix on cross-comparable metrics.
+
+| Metric | Key pattern | Inventory link |
+|---|---|---|
+| Hardware model | `system.hw.model` | `MODEL` |
+| Serial number | `system.hw.serialnumber` | `SERIALNO_A` |
+| Firmware/OS version | `system.hw.firmware` or `system.sw.os[<mibLeaf>.0]` | `OS` |
+| Per-CPU utilization | `system.cpu.util[<mibLeaf>.{#SNMPINDEX}]` | — |
+| Temperature sensor | `sensor.temp.value[<mibLeaf>.{#SNMPINDEX}]` | — |
+| Memory total / used | `vm.memory.total[<mibLeaf>]` / `vm.memory.used[<mibLeaf>]` | — |
+| Memory utilization | `vm.memory.util[<mibLeaf>]` (CALCULATED) | — |
+| Storage | `vfs.fs.total[...]` / `vfs.fs.used[...]` / `vfs.fs.pused[...]` | — |
+| Radio metrics | `net.wlan.<category>[<name>.{#SNMPINDEX}]` | — |
+| Interface metrics | `net.if.*` (via `.Network Interfaces by SNMP`) | — |
+| Walk master items | `<domain>.<scope>.walk` (e.g. `system.cpu.walk`, `sensor.temp.walk`) | — |
+
+**Vendor prefix is allowed only for vendor-specific OID namespaces with no standard equivalent** — walk master keys for truly proprietary MIBs (`cisco.entity.sensor.walk`, `hpe.sfp.walk`) are acceptable exceptions. Threshold-bearing items (CPU, memory, temp) must never carry a vendor prefix.
+
+### 3. Master/dependent walk pattern — mandatory for all discoverable metrics
+
+Every set of metrics that requires SNMP discovery (table walk, indexed values) must use this three-piece structure:
+
+**Master item** (one per MIB subtree):
+- Type: `SNMP_AGENT`
+- OID: `walk[<oid1>,<oid2>,...]`
+- Key: ends in `.walk` (e.g. `system.cpu.walk`)
+- `value_type: TEXT`, `history: 0` (raw JSON, never store it)
+
+**Discovery rule** (DEPENDENT on the master):
+- Type: `DEPENDENT`
+- `master_item.key`: the walk item key
+- Preprocessing: `SNMP_WALK_TO_JSON`
+
+**Item prototypes** (DEPENDENT on the master, not on the DR):
+- Type: `DEPENDENT`
+- `master_item.key`: same walk item key
+- Preprocessing: `SNMP_WALK_VALUE` to extract the indexed column
+
+**Allowed exception:** single-instance metrics (one fixed value per device, no index) may use a standalone `SNMP_AGENT get[<oid>]` without a walk master. Example: `vm.memory.total`, `system.hw.model`, `system.hw.firmware`.
+
+**Non-compliant pattern — do not use:** `SNMP_AGENT` discovery rule (polls the device independently for every discovered instance). Replaced by the walk+dependent pattern above.
+
+### 4. Preprocessing engine choice
+
+1. Try native Zabbix steps first: `SNMP_WALK_VALUE`, `MULTIPLIER`, `DISCARD_UNCHANGED_HEARTBEAT`, `JSONPATH`, `REGEX`, `CHANGE_PER_SECOND`
+2. Use JavaScript only when native cannot do it — log10 conversion for dBm from mW is a valid case
+3. If JavaScript is used, put the reason in the preprocessing step name (e.g. `"JS: native cannot do log10"`)
+
+### 5. Trigger pattern
+
+- Triggers on discovered items go in `trigger_prototypes` under the item prototype, never as standalone triggers referencing `{#SNMPINDEX}` from outside
+- Include `{#SNMPINDEX}` or `{#NAME}` in the trigger name so each instance is uniquely named
+- Define `dependencies` to suppress cascade alerts (e.g. "interface down" depends on "device unreachable"; warn threshold depends on critical threshold)
+- Severity guide: `DISASTER` = device offline, `HIGH` = critical operational failure (radio link down, UPS on battery), `AVERAGE` = degraded/threshold breach, `WARNING` = warn threshold
+
+### 6. Macro naming
+
+Threshold macros — use **these exact names across all vendors** so host-level overrides work uniformly:
+
+| Macro | Purpose | Default |
+|---|---|---|
+| `{$TEMP_CRIT}` | Temperature critical threshold (°C) | 60 |
+| `{$TEMP_WARN}` | Temperature warning threshold (°C) | 50 |
+| `{$CPU.UTIL.CRIT}` | CPU utilization critical (%) | 90 |
+| `{$MEMORY.UTIL.MAX}` | Memory utilization max (%) | 90 |
+| `{$HEALTH_POLL_INT}` | Poll interval for health/sensor items | 1m |
+| `{$INVENTORY_INT}` | Poll interval for slow-changing inventory items | 1h |
+
+Vendor-specific context macros (`{$HPE.ENTITY.MODULE.INDEX}`, `{$CISCO.SFP.PHYSNAME_FILTER}`) are allowed for per-host override of device-specific parameters. Vendor prefix is required there to avoid collision.
+
+**Wrong:** `{$HPE.CPU.WARN}`, `{$HPE.MEM.WARN}`, `{$HPE.TEMP.HIGH}` — these cannot be overridden at host level cross-vendor and break the standard macro contract.
 
 ---
 
-## Template groups & tags (all templates)
+### Live Zabbix as source of truth — sync-back rule
 
-Every template in `MikroTik/` must have:
+When working on a template that is **already imported into new Zabbix**, the live template state is authoritative — the local JSON file may lag behind UI-applied fixes.
 
-| Field | Value |
-|---|---|
-| Template groups | `ITcare`, `MikroTik`, `Templates/Network devices` |
-| Tag | `target: mikrotik` |
-
----
-
-## Netbox auto-assignment
-
-Role templates (`.MikroTik Router`, `.MikroTik Switch`) carry a `description` block used by automation to assign templates based on Netbox device attributes. Preserve it exactly:
-
-```
-[netbox]
-manufacturer = [ "MikroTik" ]
-device_type  = [ "CCR2004-16G-2S+", "CHR" ]
-device_role  = [ "Core Router", "Edge Router", ... ]
-```
-
----
-
-## Importing templates into Zabbix
-
-### Simple import (recommended — link manually after)
-
+**Step 1 — Fetch live template:**
 ```python
-import json, subprocess
-
-API   = "https://<zabbix>/api_jsonrpc.php"
-TOKEN = "<api-token>"          # User → API tokens in Zabbix UI
-BASE  = "MikroTik"
-
-RULES = {
-    "templates":          {"createMissing": True, "updateExisting": True},
-    "items":              {"createMissing": True, "updateExisting": True, "deleteMissing": False},
-    "discoveryRules":     {"createMissing": True, "updateExisting": True, "deleteMissing": False},
-    "triggers":           {"createMissing": True, "updateExisting": True, "deleteMissing": False},
-    "graphs":             {"createMissing": True, "updateExisting": True, "deleteMissing": False},
-    "valueMaps":          {"createMissing": True, "updateExisting": False},
-    "templateDashboards": {"createMissing": True, "updateExisting": True, "deleteMissing": False},
-}
-
-# Import in this order (base templates before composites)
-FILES = [
-    "zbx_export_templates (ICMP Ping).json",
-    "zbx_export_templates (Generic by SNMP).json",
-    "zbx_export_templates (Network Interfaces by SNMP).json",
-    "zbx_export_templates (MikroTik - Generic by SNMP).json",
-    "zbx_export_templates (MikroTik - BGP monitoring by SNMP).json",
-    "zbx_export_templates (MikroTik - OSPF monitoring by SSH).json",
-    "zbx_export_templates (MikroTik - Optical interfaces by SNMP).json",
-    "zbx_export_templates (MikroTik - POE monitoring by SNMP).json",
-    "zbx_export_templates (MikroTik - LDP by SSH).json",
-    "zbx_export_templates (MikroTik - Sentinel by SNMP).json",
-    "zbx_export_templates (MikroTik - ARP Monitor).json",
-    "zbx_export_templates (MikroTik - MAC Monitor).json",
-    "zbx_export_templates (MikroTik - Router).json",
-    "zbx_export_templates (MikroTik - Switch).json",
-]
-
-for fname in FILES:
-    source = open(f"{BASE}/{fname}").read()
-    payload = json.dumps({
-        "jsonrpc": "2.0", "method": "configuration.import", "id": 1,
-        "params": {"format": "json", "rules": RULES, "source": source}
-    }).encode()
-    proc = subprocess.run(
-        ["curl", "-s", "-X", "POST", API,
-         "-H", "Content-Type: application/json",
-         "-H", f"Authorization: Bearer {TOKEN}",
-         "-d", "@-"],
-        input=payload, capture_output=True
-    )
-    resp = json.loads(proc.stdout)
-    status = "OK" if resp.get("result") == True else resp.get("error", {}).get("data")
-    print(f"  {status:4}  {fname}")
+result = call("template.get", {
+    "filter": {"name": ".Vendor Template Name"},
+    "selectItems": "extend",
+    "selectDiscoveryRules": {
+        "selectItemPrototypes": "extend",
+        "selectTriggerPrototypes": "extend",
+        "selectLLDMacroPaths": "extend",
+        "selectFilter": "extend"
+    },
+    "selectTriggers": "extend",
+    "selectMacros": "extend",
+    "selectParentTemplates": "extend",
+    "selectTags": "extend",
+    "selectValueMaps": "extend",
+    "selectGroups": "extend"
+})
 ```
 
-### Prerequisites on a fresh Zabbix instance
+**Step 2 — Compare live vs local JSON** for:
+- Template name, parent template links, template groups, tags
+- Item keys, OIDs, preprocessing steps and parameters, update intervals, value types
+- Discovery rules: type (`DEPENDENT` vs `SNMP_AGENT`), master_item, LLD filter, macro paths
+- Item prototype keys, types, master_item references, preprocessing
+- Trigger expressions, severity, dependencies
+- Macro names and values, value maps
 
-The following template groups must exist before import (create via
-**Configuration → Template groups → Create**, or via `templategroup.create` API):
+**Step 3 — If they match:** say so explicitly. No edits needed.
 
-- `ITcare`
-- `MikroTik`
-- `Templates/Network devices` ← usually exists by default
+**Step 4 — If they differ:** live Zabbix is the source of truth for intentional changes. Apply live state back to local JSON. Update vendor CLAUDE.md with a dated note (what changed, why). Flag any standard violations found — note them as future fixes, not overrides.
 
-### After import — manual linking order
-
-Link in the UI in this order to avoid dependency errors:
-
-1. `.Generic by SNMP` → add `.ICMP Ping`
-2. `.MikroTik Router` → add the 5 parents listed above
-3. `.MikroTik Switch` → add the 5 parents listed above
-
-> **Note:** When linking `.ICMP Ping` to `.Generic by SNMP` the UI may warn
-> about the trigger dependency ("No SNMP data collection" depends on
-> "Unavailable by ICMP ping"). If it blocks, temporarily remove the dependency
-> on that trigger, complete the link, then re-add it.
-
----
-
-## Validating a template file
-
+**Step 5 — Validate** the updated local JSON:
 ```bash
-python3 -m json.tool "MikroTik/zbx_export_templates (MikroTik - Router).json" > /dev/null \
-  && echo "valid"
+python3 -m json.tool "vars/templates/zabbix_templates/Vendor/zbx_export_templates (.Name).json" > /dev/null && echo valid
 ```
 
-## Checking SNMP OIDs on a device
-
-```bash
-# Standard IF-MIB
-snmpwalk -v2c -c <community> <ip> 1.3.6.1.2.1.2.2.1.9     # ifLastChange
-
-# MikroTik proprietary interface error counters
-snmpwalk -v2c -c <community> <ip> 1.3.6.1.4.1.14988.1.1.14.1.1.45  # FCS errors
-snmpwalk -v2c -c <community> <ip> 1.3.6.1.4.1.14988.1.1.14.1.1.52  # Rx code errors
-```
+This rule applies retroactively to all active templates (MikroTik, Cisco, HPE, Aviat, Siklu) unless the user says "just check local file".

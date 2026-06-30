@@ -3,13 +3,16 @@
         "version": "7.4",
         "template_groups": [
             {
-                "name": "ITcare"
+                "name": "ITcare",
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a"
             },
             {
-                "name": "MikroTik"
+                "name": "MikroTik",
+                "uuid": "fb49cc980e6a4d06956c8bdab91afcc4"
             },
             {
-                "name": "Templates/Network devices"
+                "name": "Templates/Network devices",
+                "uuid": "36bff6c29af641f6a474e5e61de68816"
             }
         ],
         "templates": [
@@ -50,6 +53,14 @@
                                 "tag": "componet",
                                 "value": "raw"
                             }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var obj;\ntry { obj = JSON.parse(value); } catch(e) { throw 'OSPF script returned invalid JSON: ' + e; }\nif (obj.error !== undefined) { throw obj.error; }\nreturn value;"
+                                ]
+                            }
                         ]
                     }
                 ],
@@ -57,9 +68,8 @@
                     {
                         "uuid": "3026ee0dadc14d979a19c06a89fd2398",
                         "name": "OSPF - Neighbor Discovery",
-                        "type": "EXTERNAL",
-                        "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]",
-                        "delay": "1h",
+                        "type": "DEPENDENT",
+                        "key": "ospf.neighbor.discovery",
                         "filter": {
                             "conditions": [
                                 {
@@ -69,12 +79,11 @@
                                 }
                             ]
                         },
-                        "lifetime_type": "DELETE_IMMEDIATELY",
                         "preprocessing": [
                             {
                                 "type": "JAVASCRIPT",
                                 "parameters": [
-                                    "var obj = JSON.parse(value);\nvar out = [];\nfor (var k in obj) {\n    var e = obj[k];\n    out.push({\n        \"{#NUMBER}\":       k,\n        \"{#INTERFACE}\":    e.INTERFACE    || \"\",\n        \"{#NETWORKS}\":     e.NETWORKS     || \"\",\n        \"{#COST}\":         e.COST         || \"\",\n        \"{#AREA}\":         e.AREA         || \"\",\n        \"{#FLAGS}\":        e.FLAGS        || \"0\",\n        \"{#HASNEIGHBOR}\":  e.HASNEIGHBOR  || \"0\",\n        \"{#ADDRESS}\":      e.ADDRESS      || \"\",\n        \"{#ROUTERID}\":     e.ROUTERID     || \"\",\n        \"{#STATEOSPF}\":    e.STATEOSPF    || \"\",\n        \"{#ADJACENCY}\":    e.ADJACENCY    || \"\",\n        \"{#STATECHANGES}\": e.STATECHANGES || \"0\"\n    });\n}\nreturn JSON.stringify({\"data\": out});"
+                                    "var obj;\ntry { obj = JSON.parse(value); } catch(e) { return JSON.stringify({\"data\": []}); }\nif (obj.error !== undefined) { return JSON.stringify({\"data\": []}); }\nvar out = [];\nfor (var k in obj) {\n    var e = obj[k];\n    out.push({\n        \"{#NUMBER}\":       k,\n        \"{#INTERFACE}\":    e.INTERFACE    || \"\",\n        \"{#NETWORKS}\":     e.NETWORKS     || \"\",\n        \"{#COST}\":         e.COST         || \"\",\n        \"{#AREA}\":         e.AREA         || \"\",\n        \"{#FLAGS}\":        e.FLAGS        || \"0\",\n        \"{#HASNEIGHBOR}\":  e.HASNEIGHBOR  || \"0\",\n        \"{#ADDRESS}\":      e.ADDRESS      || \"\",\n        \"{#ROUTERID}\":     e.ROUTERID     || \"\",\n        \"{#STATEOSPF}\":    e.STATEOSPF    || \"\",\n        \"{#ADJACENCY}\":    e.ADJACENCY    || \"\",\n        \"{#STATECHANGES}\": e.STATECHANGES || \"0\"\n    });\n}\nreturn JSON.stringify({\"data\": out});"
                                 ]
                             }
                         ],
@@ -92,7 +101,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.COST"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -137,7 +147,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.FLAGS"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -170,7 +181,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.ADJACENCY"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "JAVASCRIPT",
@@ -212,7 +224,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.STATECHANGES"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -257,7 +270,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.ROUTERID"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -289,7 +303,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.STATEOSPF"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -332,7 +347,8 @@
                                         "type": "JSONPATH",
                                         "parameters": [
                                             "$.{#NUMBER}.HASNEIGHBOR"
-                                        ]
+                                        ],
+                                        "error_handler": "DISCARD_VALUE"
                                     },
                                     {
                                         "type": "DISCARD_UNCHANGED_HEARTBEAT",
@@ -412,7 +428,10 @@
                                     }
                                 ]
                             }
-                        ]
+                        ],
+                        "master_item": {
+                            "key": "mikrotik_ospf_api.py[{HOST.IP},{$MIKROTIK_API_USER},{$MIKROTIK_API_PASS},{$MIKROTIK_API_PORT}]"
+                        }
                     }
                 ],
                 "tags": [

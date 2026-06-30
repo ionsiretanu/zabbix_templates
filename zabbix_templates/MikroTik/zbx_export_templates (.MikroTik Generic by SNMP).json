@@ -468,7 +468,7 @@
                                 "history": "{$HISTORY}",
                                 "value_type": "FLOAT",
                                 "trends": "{$TRENDS}",
-                                "units": "\u00b0C",
+                                "units": "°C",
                                 "description": "MIB: MIKROTIK-MIB\nmtxrHlProcessorTemperature Processor temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).",
                                 "preprocessing": [
                                     {
@@ -612,7 +612,7 @@
                                 "history": "{$HISTORY}",
                                 "value_type": "FLOAT",
                                 "trends": "{$TRENDS}",
-                                "units": "\u00b0C",
+                                "units": "°C",
                                 "description": "MIB: MIKROTIK-MIB\nmtxrHlTemperature Device temperature in Celsius (degrees C).\nMight be missing in entry models (RB750, RB450G..).\n\nReference: http://wiki.mikrotik.com/wiki/Manual:SNMP",
                                 "preprocessing": [
                                     {

@@ -47,7 +47,7 @@
                         "uuid": "24b5c854d25a468bba7a3cc232b11b00",
                         "name": "SNMP walk network interfaces",
                         "type": "SNMP_AGENT",
-                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.3,1.3.6.1.2.1.31.1.1.1.6,1.3.6.1.2.1.31.1.1.1.10,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20,1.3.6.1.2.1.2.2.1.19,1.3.6.1.2.1.2.2.1.13,1.3.6.1.2.1.31.1.1.1.15,1.3.6.1.2.1.31.1.1.1.7,1.3.6.1.2.1.31.1.1.1.9,1.3.6.1.2.1.31.1.1.1.8,1.3.6.1.2.1.31.1.1.1.13,1.3.6.1.2.1.31.1.1.1.12,1.3.6.1.2.1.31.1.1.1.11]",
+                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.31.1.1.1.18,1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.3,1.3.6.1.2.1.31.1.1.1.6,1.3.6.1.2.1.31.1.1.1.10,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20,1.3.6.1.2.1.2.2.1.19,1.3.6.1.2.1.2.2.1.13,1.3.6.1.2.1.31.1.1.1.15,1.3.6.1.2.1.31.1.1.1.7,1.3.6.1.2.1.31.1.1.1.9,1.3.6.1.2.1.31.1.1.1.8,1.3.6.1.2.1.31.1.1.1.13,1.3.6.1.2.1.31.1.1.1.12,1.3.6.1.2.1.31.1.1.1.11,1.3.6.1.2.1.2.2.1.9]",
                         "key": "net.if.walk",
                         "delay": "{$NETWORK_POLL_INT}",
                         "history": "0",
@@ -740,6 +740,91 @@
                                         "value": "{#IFNAME}"
                                     }
                                 ]
+                            },
+                            {
+                                "uuid": "3818673838134a058b2605cb7a805ce0",
+                                "name": "Interface {#IFNAME}({#IFALIAS}): Admin status",
+                                "type": "DEPENDENT",
+                                "key": "net.if.adminstatus[ifAdminStatus.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: IF-MIB\nThe desired state of the interface. The testing(3) state indicates that no operational packets can be passed.",
+                                "valuemap": {
+                                    "name": "IF-MIB::ifAdminStatus"
+                                },
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1h"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "net.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "description",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "interface",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e9e872e6b83e4c02a5c669b0d5c67f91",
+                                "name": "Interface {#IFNAME}({#IFALIAS}): Last state change",
+                                "type": "DEPENDENT",
+                                "key": "net.if.lastchange[ifLastChange.{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "0",
+                                "description": "MIB: IF-MIB\nThe value of sysUpTime at the time the interface entered its current operational state. Used to detect interface flaps.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.2.1.2.2.1.9.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "{$NETWORK_POLL_INT}"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "net.if.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "description",
+                                        "value": "{#IFALIAS}"
+                                    },
+                                    {
+                                        "tag": "interface",
+                                        "value": "{#IFNAME}"
+                                    }
+                                ]
                             }
                         ],
                         "trigger_prototypes": [
@@ -818,6 +903,28 @@
                                     {
                                         "tag": "scope",
                                         "value": "performance"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "97c6422aaa1b40b4b6069b9220e6e62d",
+                                "expression": "last(/.Network Interfaces by SNMP/net.if.lastchange[ifLastChange.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.lastchange[ifLastChange.{#SNMPINDEX}],#2) and last(/.Network Interfaces by SNMP/net.if.lastchange[ifLastChange.{#SNMPINDEX}])>0",
+                                "name": "Interface {#IFNAME}({#IFALIAS}): Link changed state",
+                                "opdata": "Last change time: {ITEM.LASTVALUE1}",
+                                "priority": "INFO",
+                                "description": "Interface has changed its operational state. Acknowledge to close.",
+                                "manual_close": "YES",
+                                "dependencies": [
+                                    {
+                                        "name": "Interface {#IFNAME}({#IFALIAS}): Link down",
+                                        "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                                        "recovery_expression": "last(/.Network Interfaces by SNMP/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "availability"
                                     }
                                 ]
                             }
@@ -2466,6 +2573,24 @@
                             {
                                 "value": "290",
                                 "newvalue": "ghn"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "88c8adf76060457b84aafabbf0cfd9d0",
+                        "name": "IF-MIB::ifAdminStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "up"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "down"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "testing"
                             }
                         ]
                     }
