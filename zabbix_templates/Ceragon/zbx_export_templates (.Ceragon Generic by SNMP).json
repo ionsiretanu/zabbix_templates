@@ -1,0 +1,264 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c8d9860f969e4466b73b24f247d22090",
+        "name": "Ceragon"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "e648e89cb1074ef79b38b1f18ca944d0",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "30dc19f8ffc74726b3607dfde4fb27ca",
+        "template": ".Ceragon Generic by SNMP",
+        "name": ".Ceragon Generic by SNMP",
+        "description": "Ceragon IP50 E-band system inventory template.\nCovers hardware model, serial number, firmware version, and board temperature via Ceragon proprietary MIB (enterprise OID 1.3.6.1.4.1.2281.10).\nCompatible with IP50EX, IP50EX-P, IP50CX models.\n\nOID map (confirmed on IP50EX-P, FW 13.1.0):\n  system.hw.model:         1.3.6.1.4.1.2281.10.1.2.3.0\n  system.hw.serialnumber:  1.3.6.1.4.1.2281.10.1.2.10.1.1.6.127 (main board, index 127)\n  system.hw.firmware:      1.3.6.1.4.1.2281.10.4.1.13.1.1.4.1 (strm component, index 1)\n  sensor.temp.value:       1.3.6.1.4.1.2281.10.1.1.9.0 (board temperature, °C)",
+        "templates": [
+          {
+            "name": ".Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "Ceragon"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "e4a7651c198743f1a54c33c7e51b7b6f",
+            "name": "Hardware model name",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.2281.10.1.2.3.0]",
+            "key": "system.hw.model",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "trends": "0",
+            "value_type": "CHAR",
+            "description": "MIB: CERAGON-IP50-MIB\ncerProductType.0 — product type string (e.g. IP-50EX-P).",
+            "inventory_link": "MODEL",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "ebc94b393c234781ac35c1af4139a731",
+            "name": "Hardware serial number",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.2281.10.1.2.10.1.1.6.127]",
+            "key": "system.hw.serialnumber",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "trends": "0",
+            "value_type": "CHAR",
+            "description": "MIB: CERAGON-IP50-MIB\ncerModuleSerialNum.127 — main board serial number (board table index 127 is constant for the main chassis on IP50).",
+            "inventory_link": "SERIALNO_A",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "357770e9400c4b8280c8ea36ff903192",
+                "expression": "last(/.Ceragon Generic by SNMP/system.hw.serialnumber,#1)<>last(/.Ceragon Generic by SNMP/system.hw.serialnumber,#2) and length(last(/.Ceragon Generic by SNMP/system.hw.serialnumber))>0",
+                "name": "Ceragon: Device has been replaced",
+                "event_name": "Ceragon: Device has been replaced (new serial number received)",
+                "priority": "INFO",
+                "description": "Device serial number has changed. Acknowledge to close manually.",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "notice"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "cca01a541be34c85ae5b84a6473871df",
+            "name": "Firmware version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.2281.10.4.1.13.1.1.4.1]",
+            "key": "system.hw.firmware",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "trends": "0",
+            "value_type": "CHAR",
+            "description": "MIB: CERAGON-IP50-MIB\ncerSwComponentCurrentVersion.1 — current software version of the strm (main) component.",
+            "inventory_link": "OS",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "31d16eb3f1de4c5b854c07d91d4c5f98",
+                "expression": "last(/.Ceragon Generic by SNMP/system.hw.firmware,#1)<>last(/.Ceragon Generic by SNMP/system.hw.firmware,#2) and length(last(/.Ceragon Generic by SNMP/system.hw.firmware))>0",
+                "name": "Ceragon: Firmware has changed",
+                "event_name": "Ceragon: Firmware has changed (new version received)",
+                "priority": "INFO",
+                "description": "Firmware version has changed. Acknowledge to close manually.",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "notice"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "7fc8ac76335641c5a9ee26d0fe41f91f",
+            "name": "Temperature: Board",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.2281.10.1.1.9.0]",
+            "key": "sensor.temp.value[ceragonSysTempBoard.0]",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "value_type": "FLOAT",
+            "units": "°C",
+            "description": "MIB: CERAGON-IP50-MIB\ncerSysBoardTemp.0 — board temperature in degrees Celsius.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "temperature"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "aa2e5df369f0404686aff992e378ca0e",
+                "expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})>{$TEMP_WARN}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})<{$TEMP_WARN}-3",
+                "name": "Ceragon: Board temperature is above warning threshold",
+                "event_name": "Ceragon: Board temperature is above warning threshold (>{$TEMP_WARN}°C)",
+                "opdata": "Current temperature: {ITEM.LASTVALUE1}",
+                "priority": "WARNING",
+                "description": "Board temperature has exceeded {$TEMP_WARN}°C. Check ventilation and environment.",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  },
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              },
+              {
+                "uuid": "9a4c7fd4004345d08d9c1c430989ff3b",
+                "expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})>{$TEMP_CRIT}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})<{$TEMP_CRIT}-3",
+                "name": "Ceragon: Board temperature is critically high",
+                "event_name": "Ceragon: Board temperature is critically high (>{$TEMP_CRIT}°C)",
+                "opdata": "Current temperature: {ITEM.LASTVALUE1}",
+                "priority": "HIGH",
+                "description": "Board temperature has exceeded {$TEMP_CRIT}°C. Immediate action required to prevent equipment damage.",
+                "manual_close": "YES",
+                "dependencies": [
+                  {
+                    "name": "Ceragon: Board temperature is above warning threshold",
+                    "expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})>{$TEMP_WARN}",
+                    "recovery_expression": "avg(/.Ceragon Generic by SNMP/sensor.temp.value[ceragonSysTempBoard.0],{$HEALTH_TRIGGER_INT})<{$TEMP_WARN}-3"
+                  }
+                ],
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "ceragon"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HEALTH_TRIGGER_INT}",
+            "value": "15m"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h"
+          },
+          {
+            "macro": "{$TEMP_CRIT}",
+            "value": "60"
+          },
+          {
+            "macro": "{$TEMP_WARN}",
+            "value": "50"
+          }
+        ]
+      }
+    ]
+  }
+}

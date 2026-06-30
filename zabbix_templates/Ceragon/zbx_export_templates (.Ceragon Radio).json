@@ -1,0 +1,1251 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c8d9860f969e4466b73b24f247d22090",
+        "name": "Ceragon"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "e648e89cb1074ef79b38b1f18ca944d0",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "d6413ebd8a3b4e13913a00c6558c768b",
+        "template": ".Ceragon Radio",
+        "name": ".Ceragon Radio",
+        "description": "Ceragon IP50 E-band radio link monitoring template.\nCovers IF-MIB interface statistics and Ceragon proprietary radio performance metrics.\nCompatible with IP50EX, IP50EX-P, IP50CX models sharing enterprise OID 1.3.6.1.4.1.2281.\n\nRadio OID map (confirmed on IP50EX-P FW 13.1.0, ifIndex 268451905):\n  RSL (dBm, integer):         1.3.6.1.4.1.2281.10.5.1.1.2.{ifIndex}\n  TX Power (dBm, integer):    1.3.6.1.4.1.2281.10.5.1.1.3.{ifIndex}\n  TX Frequency (kHz):         1.3.6.1.4.1.2281.10.5.2.1.3.{ifIndex}\n  RX Frequency (kHz):         1.3.6.1.4.1.2281.10.5.2.1.4.{ifIndex}\n  Capacity (Mbps, Gauge32):   1.3.6.1.4.1.2281.10.5.2.1.16.{ifIndex}\n  TX Modulation (integer):    1.3.6.1.4.1.2281.10.5.2.1.19.{ifIndex}\n  RX Modulation (integer):    1.3.6.1.4.1.2281.10.5.2.1.21.{ifIndex}\n  RSL MIMO/diversity (dBm):   1.3.6.1.4.1.2281.10.5.2.1.22.{ifIndex}\n\nNote: Modulation valuemap codes (unverified — need confirmation from Ceragon MIB or device output at known modulation).\nNote: Capacity at .10.5.2.1.16 reported as 600 on test device — assumed Mbps but needs MIB confirmation.\nNote: RSL MIMO at .10.5.2.1.22 = -68 dBm on test device while main RSL = -35 dBm — likely XPIC/diversity channel.\n\n[network-tool]\nmanufacturer = [ \"Ceragon\" ]\ndevice_role = [ \"Radio Link\" ]\ndevice_types = [ ]",
+        "templates": [
+          {
+            "name": ".Ceragon Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "Ceragon"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "718bd61f96114e43b96c4053f93e0f68",
+            "name": "Interface Info Walk",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.3,1.3.6.1.2.1.2.2.1.5,1.3.6.1.2.1.31.1.1.1.15,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.31.1.1.1.6,1.3.6.1.2.1.31.1.1.1.10,1.3.6.1.2.1.2.2.1.13,1.3.6.1.2.1.2.2.1.19,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20,1.3.6.1.2.1.2.2.1.15]",
+            "key": "net.if.walk",
+            "delay": "{$NETWORK_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "trends": "0",
+            "description": "IF-MIB bulk walk master item.\n  ifName:             1.3.6.1.2.1.31.1.1.1.1\n  ifDescr:            1.3.6.1.2.1.2.2.1.2\n  ifType:             1.3.6.1.2.1.2.2.1.3\n  ifSpeed:            1.3.6.1.2.1.2.2.1.5\n  ifHighSpeed:        1.3.6.1.2.1.31.1.1.1.15\n  ifAdminStatus:      1.3.6.1.2.1.2.2.1.7\n  ifOperStatus:       1.3.6.1.2.1.2.2.1.8\n  ifHCInOctets:       1.3.6.1.2.1.31.1.1.1.6\n  ifHCOutOctets:      1.3.6.1.2.1.31.1.1.1.10\n  ifInDiscards:       1.3.6.1.2.1.2.2.1.13\n  ifOutDiscards:      1.3.6.1.2.1.2.2.1.19\n  ifInErrors:         1.3.6.1.2.1.2.2.1.14\n  ifOutErrors:        1.3.6.1.2.1.2.2.1.20\n  ifInUnknownProtos:  1.3.6.1.2.1.2.2.1.15",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          },
+          {
+            "uuid": "4df1c7d525284d238ead791d37bf03ca",
+            "name": "Wireless Radio Walk",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.4.1.2281.10.5.1.1.2,1.3.6.1.4.1.2281.10.5.1.1.3,1.3.6.1.4.1.2281.10.5.2.1.3,1.3.6.1.4.1.2281.10.5.2.1.4,1.3.6.1.4.1.2281.10.5.2.1.16,1.3.6.1.4.1.2281.10.5.2.1.19,1.3.6.1.4.1.2281.10.5.2.1.21,1.3.6.1.4.1.2281.10.5.2.1.22]",
+            "key": "net.wlan.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "trends": "0",
+            "description": "Ceragon proprietary radio performance bulk walk master item.\n  ifName:             1.3.6.1.2.1.31.1.1.1.1 (for {#IFNAME} LLD macro)\n  RSL (dBm):          1.3.6.1.4.1.2281.10.5.1.1.2\n  TX Power (dBm):     1.3.6.1.4.1.2281.10.5.1.1.3\n  TX Freq (kHz):      1.3.6.1.4.1.2281.10.5.2.1.3\n  RX Freq (kHz):      1.3.6.1.4.1.2281.10.5.2.1.4\n  Capacity (Mbps?):   1.3.6.1.4.1.2281.10.5.2.1.16\n  TX Modulation:      1.3.6.1.4.1.2281.10.5.2.1.19\n  RX Modulation:      1.3.6.1.4.1.2281.10.5.2.1.21\n  RSL MIMO/div (dBm): 1.3.6.1.4.1.2281.10.5.2.1.22\nAll entries indexed by ifIndex (268451905 on test IP50EX-P).",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "ea68d816297c4c379a902946e0ab55f6",
+            "name": "General Interface Discovery",
+            "type": "DEPENDENT",
+            "key": "net.if.discovery",
+            "delay": "0",
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+                  "formulaid": "A",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+                  "operator": "NOT_MATCHES_REGEX",
+                  "formulaid": "B"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.MATCHES}",
+                  "formulaid": "C",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.NOT_MATCHES}",
+                  "operator": "NOT_MATCHES_REGEX",
+                  "formulaid": "D"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+                  "formulaid": "E",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                  "operator": "NOT_MATCHES_REGEX",
+                  "formulaid": "F"
+                }
+              ]
+            },
+            "lifetime": "0s",
+            "description": "Discover IF-MIB interfaces. Radio interface excluded from Ethernet-style triggers via {$IFCONTROL} override.",
+            "item_prototypes": [
+              {
+                "uuid": "0cd712efd4a14887aacb4f05428e7e27",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Inbound packets discarded",
+                "type": "DEPENDENT",
+                "key": "net.if.in.discards[ifInDiscards.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "description": "MIB: IF-MIB\nThe number of inbound packets chosen to be discarded even though no errors had been detected.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.13.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "93bbbcecb0d34e26899ea39c64a594ba",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Inbound packets with errors",
+                "type": "DEPENDENT",
+                "key": "net.if.in.errors[ifInErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "description": "MIB: IF-MIB\nThe number of inbound packets that contained errors preventing them from being delivered to a higher-layer protocol.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "e56a6dc6cd714d4f9fcea3fe2b28d4eb",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Outbound packets discarded",
+                "type": "DEPENDENT",
+                "key": "net.if.out.discards[ifOutDiscards.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "description": "MIB: IF-MIB\nThe number of outbound packets chosen to be discarded even though no errors had been detected.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.19.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "787691f19abc44ce99e05df335270433",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Outbound packets with errors",
+                "type": "DEPENDENT",
+                "key": "net.if.out.errors[ifOutErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "description": "MIB: IF-MIB\nThe number of outbound packets that could not be transmitted because of errors.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "997458b40ca44e9c9b8ae24d4c5ce520",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Bits received",
+                "type": "DEPENDENT",
+                "key": "net.if.in[ifHCInOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\nifHCInOctets — the total number of octets received on the interface. Calculated as bits/s via CHANGE_PER_SECOND.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "89deaedc7f5b48a7a8db0f7330cef43f",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Bits sent",
+                "type": "DEPENDENT",
+                "key": "net.if.out[ifHCOutOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\nifHCOutOctets — the total number of octets transmitted out of the interface. Calculated as bits/s via CHANGE_PER_SECOND.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "735af67d72dd42bf9ce50ea0d0767f3b",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Speed",
+                "type": "DEPENDENT",
+                "key": "net.if.speed[ifHighSpeed.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\nifHighSpeed — an estimate of the interface's current bandwidth in Mb/s (megabits per second). Multiplied by 1,000,000 to give bps.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "1000000"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "2e37cf3895f840278b3f9b520005b0c1",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Operational status",
+                "type": "DEPENDENT",
+                "key": "net.if.status[ifOperStatus.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "description": "MIB: IF-MIB\nifOperStatus — the current operational state of the interface.",
+                "valuemap": {
+                  "name": "IF-MIB::ifOperStatus"
+                },
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "343d5b50e7484eae8b34ac9fb93cbd12",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0",
+                    "name": "Interface {#IFNAME}({#IFDESCR}): Link down",
+                    "opdata": "Current state: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "description": "Triggers when the operational status is down and the interface was previously up.\nSet {$IFCONTROL:\"{#IFNAME}\"}=0 to suppress for a specific interface.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "189edb3289674363896ddd63e153e5fc",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Interface type",
+                "type": "DEPENDENT",
+                "key": "net.if.type[ifType.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "description": "MIB: IF-MIB\nifType — the type of interface.",
+                "valuemap": {
+                  "name": "IF-MIB::ifType"
+                },
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              }
+            ],
+            "trigger_prototypes": [
+              {
+                "uuid": "886ac1476dc44a0288641e5c33427c9c",
+                "expression": "(avg(/.Ceragon Radio/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:\"{#IFNAME}\"}/100)*last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) or\navg(/.Ceragon Radio/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)>({$IF.UTIL.MAX:\"{#IFNAME}\"}/100)*last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])) and\nlast(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "avg(/.Ceragon Radio/net.if.in[ifHCInOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:\"{#IFNAME}\"}-3)/100)*last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}]) and\navg(/.Ceragon Radio/net.if.out[ifHCOutOctets.{#SNMPINDEX}],15m)<(({$IF.UTIL.MAX:\"{#IFNAME}\"}-3)/100)*last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])",
+                "name": "Interface {#IFNAME}({#IFDESCR}): High bandwidth usage",
+                "event_name": "Interface {#IFNAME}({#IFDESCR}): High bandwidth usage (>{$IF.UTIL.MAX:\"{#IFNAME}\"}%)",
+                "opdata": "In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}",
+                "priority": "WARNING",
+                "description": "The utilization of the network interface is close to its estimated maximum bandwidth.",
+                "manual_close": "YES",
+                "dependencies": [
+                  {
+                    "name": "Interface {#IFNAME}({#IFDESCR}): Link down",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_expression": "last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                  }
+                ],
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              },
+              {
+                "uuid": "353e17cf0656402583a551f049e53f0e",
+                "expression": "min(/.Ceragon Radio/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:\"{#IFNAME}\"}\nor min(/.Ceragon Radio/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)>{$IF.ERRORS.WARN:\"{#IFNAME}\"}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "max(/.Ceragon Radio/net.if.in.errors[ifInErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:\"{#IFNAME}\"}*0.8\nand max(/.Ceragon Radio/net.if.out.errors[ifOutErrors.{#SNMPINDEX}],5m)<{$IF.ERRORS.WARN:\"{#IFNAME}\"}*0.8",
+                "name": "Interface {#IFNAME}({#IFDESCR}): High error rate",
+                "event_name": "Interface {#IFNAME}({#IFDESCR}): High error rate (>{$IF.ERRORS.WARN:\"{#IFNAME}\"} for 5m)",
+                "opdata": "errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}",
+                "priority": "WARNING",
+                "description": "Recovers when below 80% of {$IF.ERRORS.WARN:\"{#IFNAME}\"} threshold.",
+                "manual_close": "YES",
+                "dependencies": [
+                  {
+                    "name": "Interface {#IFNAME}({#IFDESCR}): Link down",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_expression": "last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                  }
+                ],
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  },
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              },
+              {
+                "uuid": "7a2522748f7c488a8c17d69e4d896177",
+                "expression": "change(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])<0 and last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0\nand (\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=6 or\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=7 or\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=11 or\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=62 or\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=69 or\nlast(/.Ceragon Radio/net.if.type[ifType.{#SNMPINDEX}])=117\n)\nand\n(last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2)",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "(change(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}])>0 and last(/.Ceragon Radio/net.if.speed[ifHighSpeed.{#SNMPINDEX}],#2)>0) or\n(last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2)",
+                "name": "Interface {#IFNAME}({#IFDESCR}): Ethernet has changed to lower speed than it was before",
+                "opdata": "Current reported speed: {ITEM.LASTVALUE1}",
+                "priority": "INFO",
+                "description": "This Ethernet connection has transitioned down from its known maximum speed. Acknowledge to close manually.",
+                "manual_close": "YES",
+                "dependencies": [
+                  {
+                    "name": "Interface {#IFNAME}({#IFDESCR}): Link down",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_expression": "last(/.Ceragon Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0"
+                  }
+                ],
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.if.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#IFNAME}",
+                  "1.3.6.1.2.1.31.1.1.1.1",
+                  "0",
+                  "{#IFDESCR}",
+                  "1.3.6.1.2.1.2.2.1.2",
+                  "0",
+                  "{#IFTYPE}",
+                  "1.3.6.1.2.1.2.2.1.3",
+                  "0",
+                  "{#IFSPEED}",
+                  "1.3.6.1.2.1.2.2.1.5",
+                  "0",
+                  "{#IFHISPEED}",
+                  "1.3.6.1.2.1.31.1.1.1.15",
+                  "0",
+                  "{#IFADMINSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.7",
+                  "0",
+                  "{#IFOPERSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.8",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "ebca2d59515841668a965b200ca7109d",
+            "name": "Wireless Interface Discovery",
+            "type": "DEPENDENT",
+            "key": "net.wlan.discovery",
+            "delay": "0",
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.CARRIERNAME.MATCHES}",
+                  "formulaid": "A",
+                  "operator": "MATCHES_REGEX"
+                }
+              ]
+            },
+            "lifetime": "30d",
+            "description": "Discover Ceragon radio interfaces from the proprietary radio performance walk.\nOnly interfaces in the .10.5 subtree appear — typically one radio interface per device.\nFilter uses {$NET.IF.CARRIERNAME.MATCHES} (default: .*[Rr]adio.*).",
+            "item_prototypes": [
+              {
+                "uuid": "72d954bcf9e34f019a4e315f6199d6d6",
+                "name": "Interface {#IFNAME}: RSL",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.[rsl.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "FLOAT",
+                "units": "dBm",
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelCurrentRxSignalLevel (1.3.6.1.4.1.2281.10.5.1.1.2.{ifIndex})\nReceive signal level in dBm. Integer value, no multiplier required.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.1.1.2.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "4657e2c65d734a049652dd678ceb6b5a",
+                    "expression": "avg(/.Ceragon Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.HIGH}",
+                    "name": "Interface {#IFNAME}: RSL High",
+                    "opdata": "Current RSL: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSL is abnormally high (>{$RSL.HIGH} dBm). May indicate near-end reflections, interference, or misconfiguration. Verify against link budget.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  },
+                  {
+                    "uuid": "2a0eff29456347058ed51a6af9fd4ed5",
+                    "expression": "avg(/.Ceragon Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.LOW}",
+                    "name": "Interface {#IFNAME}: RSL Low",
+                    "opdata": "Current RSL: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSL is below acceptable threshold (<{$RSL.LOW} dBm). Link may be affected by rain fade, obstruction, or equipment issues.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "e41e27c5b0504b5688a7647f7ae9aa05",
+                "name": "Interface {#IFNAME}: TX Power",
+                "type": "DEPENDENT",
+                "key": "net.wlan.pow.[txpow.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "FLOAT",
+                "units": "dBm",
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelCurrentTxPower (1.3.6.1.4.1.2281.10.5.1.1.3.{ifIndex})\nCurrent transmit power in dBm. Integer value, no multiplier required.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.1.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "ecbe6079ab794b70bc90a2225c80f342",
+                "name": "Interface {#IFNAME}: TX Frequency",
+                "type": "DEPENDENT",
+                "key": "net.wlan.rf.[txfreq.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "FLOAT",
+                "units": "hz",
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelStatusTxFrequency (1.3.6.1.4.1.2281.10.5.2.1.3.{ifIndex})\nActual TX frequency in Hz. OID reports kHz — multiplied by 1000.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "1000"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "9edf73206f24431ab25c31b6a282cf01",
+                "name": "Interface {#IFNAME}: RX Frequency",
+                "type": "DEPENDENT",
+                "key": "net.wlan.rf.[rxfreq.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "FLOAT",
+                "units": "hz",
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelStatusRxFrequency (1.3.6.1.4.1.2281.10.5.2.1.4.{ifIndex})\nActual RX frequency in Hz. OID reports kHz — multiplied by 1000.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.4.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "1000"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "6d8fd1326d6b4349a8fd2808fd548d34",
+                "name": "Interface {#IFNAME}: TX Modulation",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.[txmod.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "valuemap": {
+                  "name": "Ceragon Modulation"
+                },
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelStatusTxModulation (1.3.6.1.4.1.2281.10.5.2.1.19.{ifIndex})\nCurrent TX adaptive modulation state. See Ceragon Modulation valuemap.\nNote: valuemap codes unverified — confirm against Ceragon IP50 MIB documentation.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.19.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "9143a0de84db4ac68d1a3956fb4aa382",
+                "name": "Interface {#IFNAME}: RX Modulation",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.[rxmod.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "valuemap": {
+                  "name": "Ceragon Modulation"
+                },
+                "description": "MIB: CERAGON-IP50-MIB\ncerRfHalfChannelStatusRxModulation (1.3.6.1.4.1.2281.10.5.2.1.21.{ifIndex})\nCurrent RX adaptive modulation state. See Ceragon Modulation valuemap.\nNote: valuemap codes unverified — confirm against Ceragon IP50 MIB documentation.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.21.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "59909c9dfd044d919a8a83e6741f6a3c",
+                "name": "Interface {#IFNAME}: RSL MIMO/Diversity",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.[rsl.mimo.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "FLOAT",
+                "units": "dBm",
+                "description": "MIB: CERAGON-IP50-MIB\n(1.3.6.1.4.1.2281.10.5.2.1.22.{ifIndex})\nSecond channel RSL — likely XPIC/MIMO or diversity channel receive level.\nOn test IP50EX-P: main RSL = -35 dBm, this = -68 dBm (33 dB below main, suggesting inactive XPIC port or severe cross-pol attenuation).\nNeeds verification against Ceragon MIB documentation.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.22.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "73715f4a8f4a40519ea72ff2b58d2306",
+                "name": "Interface {#IFNAME}: Capacity",
+                "type": "DEPENDENT",
+                "key": "net.wlan.cap.[cap.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: CERAGON-IP50-MIB\n(1.3.6.1.4.1.2281.10.5.2.1.16.{ifIndex})\nEstimated link capacity. OID reported 600 on test IP50EX-P — assumed Mbps, multiplied by 1,000,000 for bps.\nNeeds confirmation against Ceragon MIB documentation.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2281.10.5.2.1.16.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "1000000"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.wlan.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#IFNAME}",
+                  "1.3.6.1.2.1.31.1.1.1.1",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "ceragon"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$IF.ERRORS.WARN}",
+            "value": "2"
+          },
+          {
+            "macro": "{$IF.UTIL.MAX}",
+            "value": "90"
+          },
+          {
+            "macro": "{$IFCONTROL}",
+            "value": "1"
+          },
+          {
+            "macro": "{$NET.IF.CARRIERNAME.MATCHES}",
+            "value": ".*[Rr]adio.*",
+            "description": "Filter for wireless/radio interface discovery. Matches 'Radio: Slot 1, Port 1' on Ceragon IP50."
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+            "value": "^.*",
+            "description": "Ignore notPresent(6)"
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+            "value": "^2$",
+            "description": "Ignore down(2) administrative status"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.NOT_MATCHES}",
+            "value": "(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$)",
+            "description": "Filter out loopback and null interfaces"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+            "value": "^6$",
+            "description": "Ignore notPresent(6)"
+          },
+          {
+            "macro": "{$NETWORK_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$RADIO_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$RSL.HIGH}",
+            "value": "-24",
+            "description": "RSL high alert threshold (dBm) — abnormally strong signal, may indicate near-end reflections or interference"
+          },
+          {
+            "macro": "{$RSL.LOW}",
+            "value": "-42",
+            "description": "RSL low alert threshold (dBm) — signal degradation warning, link at risk. Adjust per link budget."
+          }
+        ],
+        "valuemaps": [
+          {
+            "uuid": "d40a549bb9024671b1f0873b0549d6c1",
+            "name": "IF-MIB::ifOperStatus",
+            "mappings": [
+              {
+                "value": "1",
+                "newvalue": "up"
+              },
+              {
+                "value": "2",
+                "newvalue": "down"
+              },
+              {
+                "value": "3",
+                "newvalue": "testing"
+              },
+              {
+                "value": "4",
+                "newvalue": "unknown"
+              },
+              {
+                "value": "5",
+                "newvalue": "dormant"
+              },
+              {
+                "value": "6",
+                "newvalue": "notPresent"
+              },
+              {
+                "value": "7",
+                "newvalue": "lowerLayerDown"
+              }
+            ]
+          },
+          {
+            "uuid": "4756ac40a8c04bd691851ad30b9cd394",
+            "name": "IF-MIB::ifType",
+            "mappings": [
+              {
+                "value": "6",
+                "newvalue": "ethernetCsmacd"
+              },
+              {
+                "value": "24",
+                "newvalue": "softwareLoopback"
+              },
+              {
+                "value": "53",
+                "newvalue": "propVirtual"
+              },
+              {
+                "value": "161",
+                "newvalue": "ieee8023adLag"
+              },
+              {
+                "value": "166",
+                "newvalue": "mpls"
+              }
+            ]
+          },
+          {
+            "uuid": "abcdb340364a4e12a572afa2d149ec23",
+            "name": "Ceragon Modulation",
+            "mappings": [
+              {
+                "value": "1",
+                "newvalue": "BPSK"
+              },
+              {
+                "value": "2",
+                "newvalue": "QPSK"
+              },
+              {
+                "value": "3",
+                "newvalue": "16QAM"
+              },
+              {
+                "value": "4",
+                "newvalue": "32QAM"
+              },
+              {
+                "value": "5",
+                "newvalue": "64QAM"
+              },
+              {
+                "value": "6",
+                "newvalue": "128QAM"
+              },
+              {
+                "value": "7",
+                "newvalue": "256QAM"
+              },
+              {
+                "value": "8",
+                "newvalue": "512QAM"
+              },
+              {
+                "value": "9",
+                "newvalue": "1024QAM"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

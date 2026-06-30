@@ -18,16 +18,16 @@ vars/templates/zabbix_templates/
 ├── Aviat/          ← active — see Aviat/CLAUDE.md (WTM4880 OID map, item prototypes)
 ├── Cisco/          ← active — see Cisco/CLAUDE.md (import order, ENTITY-SENSOR-MIB OIDs)
 ├── HPE/            ← active — see HPE/CLAUDE.md (H3C MIB OIDs, templateLinkage fix)
-├── Siklu/          ← DONE ✅ (5 templates: Generic, EH Radio, MH Radio, B100 Radio, System Alarm) — see Siklu/CLAUDE.md
+├── Siklu/          ← DONE ✅ (6 templates: Generic, EH Radio, MH Radio, B100 Radio, T200 Radio, System Alarm) — see Siklu/CLAUDE.md
 ├── Juniper/        ← NOT STARTED ❌ CRITICAL (3166 hosts) — see Juniper/CLAUDE.md
 ├── Ubiquiti/       ← NOT STARTED ❌ HIGH (~2199 hosts) — see Ubiquiti/CLAUDE.md
-├── SIAE/           ← NOT STARTED ❌ HIGH (~1020 hosts) — see SIAE/CLAUDE.md
+├── SIAE/           ← DONE ✅ (3 templates: Generic, AlfoPlus80 Radio, AlfoPlus80HD Radio) — see SIAE/CLAUDE.md
 ├── CyberPower/     ← NOT STARTED ❌ HIGH (450 hosts) — see CyberPower/CLAUDE.md
 ├── APC/            ← NOT STARTED ❌ HIGH (445 hosts) — see APC/CLAUDE.md
 ├── Aruba/          ← NOT STARTED ❌ (119 hosts) — see Aruba/CLAUDE.md
 ├── Positron/       ← NOT STARTED ❌ (93 hosts) — see Positron/CLAUDE.md
 ├── TripLite/       ← NOT STARTED ❌ (25 hosts) — see TripLite/CLAUDE.md
-├── Ceragon/        ← NOT STARTED ❌ (32 hosts) — see Ceragon/CLAUDE.md
+├── Ceragon/        ← DONE ✅ (2 templates: Generic, Radio; IDs 11110, 11111) — see Ceragon/CLAUDE.md
 ├── Raisecom/       ← NOT STARTED ❌ (14 hosts) — see Raisecom/CLAUDE.md
 ├── Ignite/         ← NOT STARTED ❌ (81 hosts) — see Ignite/CLAUDE.md
 ├── Alcoma/         ← NOT STARTED ❌ (16 hosts) — see Alcoma/CLAUDE.md
