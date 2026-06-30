@@ -11,10 +11,7 @@ Zabbix 7.4 monitoring templates (JSON export format) for MikroTik network device
 ## Directory layout
 
 ```
-zbx_export_templates/
-├── MikroTik/       ← active work area (all templates here)
-├── Juniper/        ← ignore
-└── andrena/        ← ignore
+zabbix_templates/MikroTik/   ← active work area (all templates here)
 ```
 
 ---
@@ -49,11 +46,12 @@ Templates are imported as standalone units. After import, link them manually in 
 
 ```
 .MikroTik Router   → link: .Generic by SNMP
-                          .MikroTik Generic by SNMP
                           .Network Interfaces by SNMP
+                          .MikroTik Generic by SNMP
                           .MikroTik Network Interfaces by SNMP
                           .MikroTik BGP monitoring by SNMP
                           .MikroTik OSPF monitoring by API   (or SSH variant)
+                          .MikroTik Optical interfaces by SNMP
                    +opt:  .MikroTik Sentinel by SNMP        (only if Sentinel deployed)
 
 .MikroTik Switch   → link: .Generic by SNMP
@@ -158,6 +156,7 @@ BASE  = "/etc/ansible/vars/templates/zabbix_templates/MikroTik"
 
 RULES = {
     "templates":          {"createMissing": True, "updateExisting": True},
+    "templateLinkage":    {"createMissing": True},
     "items":              {"createMissing": True, "updateExisting": True, "deleteMissing": True},
     "discoveryRules":     {"createMissing": True, "updateExisting": True, "deleteMissing": True},
     "triggers":           {"createMissing": True, "updateExisting": True, "deleteMissing": True},
