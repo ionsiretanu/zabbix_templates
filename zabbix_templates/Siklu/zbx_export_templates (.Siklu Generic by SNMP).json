@@ -1,0 +1,189 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c561ba84a97b499494c1ff18569e1673",
+        "name": "Siklu"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "d47cc969f3744323ace5bfb2105d7862",
+        "template": ".Siklu Generic by SNMP",
+        "name": ".Siklu Generic by SNMP",
+        "templates": [
+          {
+            "name": ".Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "Siklu"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "7cd34db472134d86a0b74b8e70afdcdc",
+            "name": "Hardware model name",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.2.1.1.1.0]",
+            "key": "system.hw.model",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SNMPv2-MIB\nsysDescr returns the Siklu model string (e.g. EH-2500FX, MH-T280).",
+            "inventory_link": "MODEL",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "6afce467439c4cbb9699519c68f59215",
+            "name": "Hardware serial number",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.2.1.47.1.1.1.1.11.1]",
+            "key": "system.hw.serialnumber",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: ENTITY-MIB\nentPhysicalSerialNum.1",
+            "inventory_link": "SERIALNO_A",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "81912526955a41d6b627fae945248638",
+                "expression": "last(/.Siklu Generic by SNMP/system.hw.serialnumber,#1)<>last(/.Siklu Generic by SNMP/system.hw.serialnumber,#2) and length(last(/.Siklu Generic by SNMP/system.hw.serialnumber))>0",
+                "name": "Siklu: Device has been replaced",
+                "event_name": "Siklu: Device has been replaced (new serial number received)",
+                "priority": "INFO",
+                "description": "Device serial number has changed. Acknowledge to close manually.",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "notice"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "94cbc8e72aad41d49095fac3563b3b82",
+            "name": "Hardware revision",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.2.1.47.1.1.1.1.8.1]",
+            "key": "siklu.hw.rev",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: ENTITY-MIB\nentPhysicalHardwareRev.1 — PCB revision.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "7d6ea91edea2493aa7b96a7e768624a4",
+            "name": "MAC address",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.2.1.2.2.1.6.1]",
+            "key": "siklu.mac",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: IF-MIB\nifPhysAddress.1 — primary interface MAC address.",
+            "inventory_link": "MACADDRESS_A",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siklu"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h",
+            "description": "Firmware, model, serial"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          }
+        ]
+      }
+    ]
+  }
+}

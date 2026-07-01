@@ -1,0 +1,41 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "a5cb81878d394b8d98e6b9853b03d98b",
+                "name": "HPE"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "3ed6e8ee861243e39e81dfb575f93d66",
+                "template": ".HPE Switch",
+                "name": ".HPE Switch",
+                "description": "Role template for HPE Comware 7 switches (1910, 1920, 1950 series).\nAssigned directly to hosts. Inherits metrics from linked base templates.\n\n[network-tool]\nmanufacturer = [ \"HPE\", \"H3C\", \"HP\" ]\ndevice_role = [ \"Access Switch\", \"Aggregation Switch\", \"Distribution Switch\" ]\ndevice_types = [ \"HPE 1950 24G 2SFP+ 2XGT JG960A\", \"HPE 1950 48G 2SFP+ 2XGT JG961A\", \"HPE 1950 12XGT 4SFP+ JG962A\", \"HPE 1920S 8G JL380A\", \"HPE 1920S 16G JL381A\", \"HPE 1920S 24G JL382A\", \"HPE 1920S 48G JL383A\", \"HPE 1920S 8G PoE+ JL384A\", \"HPE 1920S 24G PoE+ JL385A\", \"HPE 1920S 48G PoE+ JL386A\", \"HPE 1920 8G JG920A\", \"HPE 1920 16G JG923A\", \"HPE 1920 24G JG924A\", \"HPE 1920 48G JG927A\", \"HPE 1910 8G JE174A\", \"HPE 1910 16G JE175A\", \"HPE 1910 24G JE176A\", \"HPE 1910 48G JE177A\", \"HPE 1910-24 JG536A\", \"HPE 1910-48 JG540A\", \"JG960A\", \"JG961A\", \"JG962A\", \"JL380A\", \"JL381A\", \"JL382A\", \"JL383A\", \"JG920A\", \"JG923A\", \"JG924A\", \"JG927A\" ]",
+                "groups": [
+                    {"name": "HPE"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "templates": [
+                    {"name": ".Generic by SNMP"},
+                    {"name": ".Network Interfaces by SNMP"},
+                    {"name": ".HPE Generic by SNMP"}
+                ],
+                "tags": [
+                    {"tag": "target", "value": "hpe"},
+                    {"tag": "role",   "value": "switch"}
+                ]
+            }
+        ]
+    }
+}

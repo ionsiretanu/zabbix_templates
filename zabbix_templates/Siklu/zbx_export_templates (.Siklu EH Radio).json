@@ -1,0 +1,1186 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c561ba84a97b499494c1ff18569e1673",
+        "name": "Siklu"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "ec905f08ac3347babe4ee0d45d75a496",
+        "template": ".Siklu EH Radio",
+        "name": ".Siklu EH Radio",
+        "description": "[network-tool]\nmanufacturer = [ \"Siklu\" ]\ndevice_role = [ \"Radio Link\" ]\ndevice_types = [ \"EH-600T\", \"EH-600TX\", \"EH-614TX\", \"EH-1200\", \"EH-1200F\", \"EH-1200FX\", \"EH-1200L\", \"EH-1200TL\", \"EH-1200TX\", \"EH-2200F\", \"EH-2200FX\", \"EH-2500F\", \"EH-2500FX\", \"EH-5500FD\", \"EH-8010FX\", \"EH-8010FX-L\", \"EH-8010FX-H\" ]\n\n# Siklu template → model mapping (verified by live SNMP walk):\n# .Siklu EH Radio:   EH-600T/TX, EH-614TX, EH-1200/F/FX/L/TL/TX, EH-2200F/FX, EH-2500F/FX, EH-5500FD, EH-8010FX/L/H → .31926.2.*\n# .Siklu MH Radio:   MH-T280, MH-N366(?), ML2.5-60-35(?) → .31926.35.* HC-64bit\n# .Siklu B100 Radio: MH-B100-CCS-PoE-MWB → .31926.27.1.*/27.4.* 32-bit\n# .Siklu T200 Radio: MH-T200-CNN/CCC-PoE-MWB → .31926.27.2.* 32-bit\n# MH-N366/ML2.5-60-35: unverified — check live walk before migration",
+        "templates": [
+          {
+            "name": ".Siklu Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "Siklu"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "cc7585376c784e90a951ed86518ac286",
+            "name": "Firmware version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.7.0]",
+            "key": "system.hw.firmware",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIKLU-MIB\nsikluSwVersion.0 — active firmware version. Returns integer on some EH2500 units (bank index).",
+            "inventory_link": "OS",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "658e8a525c7d4a6dbe32c69fb0e38c83",
+            "name": "Software Bank 1 version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.5.0]",
+            "key": "siklu.sw.bank1",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIKLU-MIB\nsikluSwBank1Version.0",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "3e59ce4f7203455ba869a726fa746422",
+            "name": "Software Bank 2 version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.6.0]",
+            "key": "siklu.sw.bank2",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIKLU-MIB\nsikluSwBank2Version.0",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "ab4805414d0d49fba5f36a8beed999b4",
+            "name": "Software Bank 2 running",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.8.0]",
+            "key": "siklu.sw.bank2.running",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIKLU-MIB\nsikluSwBank2Running.0 — returns 2 on EH2500 when bank 2 is active.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "1dd53033c0d54a7d912bc48731bc3c7d",
+            "name": "System temperature",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.2.0]",
+            "key": "sensor.temp.value[rbSysTemperature.0]",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "units": "°C",
+            "value_type": "FLOAT",
+            "description": "MIB: SIKLU-MIB\nsikluSysTemperature.0 — board temperature in °C.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "3m"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "temperature"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "78ebac75cbee4c2390d32ef24471857c",
+                "expression": "avg(/.Siklu EH Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})>{$TEMP_WARN}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "max(/.Siklu EH Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})<{$TEMP_WARN}-3",
+                "name": "Siklu EH: Temperature is above warning threshold",
+                "event_name": "Siklu EH: Temperature {ITEM.LASTVALUE1} is above warning threshold: >{$TEMP_WARN}°C",
+                "opdata": "Current: {ITEM.LASTVALUE1}",
+                "priority": "WARNING",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              },
+              {
+                "uuid": "ef0eb493e2bb4322a9dd8c26062f0b78",
+                "expression": "avg(/.Siklu EH Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})>{$TEMP_CRIT}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "max(/.Siklu EH Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})<{$TEMP_CRIT}-3",
+                "name": "Siklu EH: Temperature is above critical threshold",
+                "event_name": "Siklu EH: Temperature {ITEM.LASTVALUE1} is above critical threshold: >{$TEMP_CRIT}°C",
+                "opdata": "Current: {ITEM.LASTVALUE1}",
+                "priority": "HIGH",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "84ab334d653b455f8a495641740d0d97",
+            "name": "System voltage",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.1.0]",
+            "key": "siklu.system.voltage",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "units": "mV",
+            "value_type": "FLOAT",
+            "description": "MIB: SIKLU-MIB\nsikluSysVoltage.0 — input supply voltage in millivolts.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "power"
+              }
+            ]
+          },
+          {
+            "uuid": "fc2aeb418aae48f9b00c125b74f34231",
+            "name": "System alarms active count",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.11.1.2.0]",
+            "key": "siklu.alarms.count",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "value_type": "UNSIGNED",
+            "description": "MIB: SIKLU-MIB\nNumber of active system alarms. Use .Siklu System Alarm template for per-alarm LLD detail.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "health"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "4b7bf5dca2b24bebb3d31180065d3f85",
+                "expression": "last(/.Siklu EH Radio/siklu.alarms.count)>0",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "last(/.Siklu EH Radio/siklu.alarms.count)=0",
+                "name": "Siklu EH: System alarms active",
+                "event_name": "Siklu EH: {ITEM.LASTVALUE1} system alarm(s) active",
+                "opdata": "Active alarms: {ITEM.LASTVALUE1}",
+                "priority": "AVERAGE",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "15ecec9c535a42a8ba2407bb13c1c32a",
+            "name": "SNMP walk radio metrics",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.4.1.31926.2.1.1.3,1.3.6.1.4.1.31926.2.1.1.4,1.3.6.1.4.1.31926.2.1.1.17,1.3.6.1.4.1.31926.2.1.1.18,1.3.6.1.4.1.31926.2.1.1.19,1.3.6.1.4.1.31926.2.1.1.42,1.3.6.1.4.1.31926.2.1.1.46,1.3.6.1.4.1.31926.2.2.1.9]",
+            "key": "net.wlan.radio.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for EH radio table.\nColumns: chanWidth(.2.1.1.3), freq(.2.1.1.4), state(.2.1.1.17), CINR(.2.1.1.18), RSSI(.2.1.1.19), TXpow(.2.1.1.42), modulation(.2.1.1.46), rxErrors(.2.2.1.9).\nIndex .1 = primary radio; EH-8010FX variants may have two radios.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          },
+          {
+            "uuid": "b17965d90b8f4e24b52b369998f86ab7",
+            "name": "SNMP walk network interfaces",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.10,1.3.6.1.2.1.2.2.1.16,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20]",
+            "key": "net.if.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for interface LLD. Uses 32-bit counters — HC not supported on EH series.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "319852aa4fbf400d9291316b0cc81937",
+            "name": "Radio interface discovery",
+            "type": "DEPENDENT",
+            "key": "net.wlan.radio.discovery",
+            "delay": "0",
+            "lifetime": "0s",
+            "description": "Discovers EH radio interfaces from .31926.2.1.1.17 (operating state). Normally index .1 only; EH-8010FX may have two.",
+            "item_prototypes": [
+              {
+                "uuid": "9435e35d43d44fe0a78263d84470e348",
+                "name": "Radio #{#SNMPINDEX}: Operating state",
+                "type": "DEPENDENT",
+                "key": "net.wlan.state[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\nradioOperationalState. 1=active.",
+                "valuemap": {
+                  "name": "Siklu EH Operating State"
+                },
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.17.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "fcf3d98c88d741ce91477017ff3f9413",
+                    "expression": "last(/.Siklu EH Radio/net.wlan.state[{#SNMPINDEX}])<>1",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Siklu EH Radio/net.wlan.state[{#SNMPINDEX}])=1",
+                    "name": "Siklu EH: Radio #{#SNMPINDEX}: Link not active",
+                    "opdata": "State: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "0874c4204d164d80afab4b33190eaeb0",
+                "name": "Radio #{#SNMPINDEX}: RSSI",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.rssi[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\nradioAverageRssi — Received Signal Strength in dBm.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.19.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "f4e2f6c9bf34443ab0bbb386f08073cb",
+                    "expression": "avg(/.Siklu EH Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.Siklu EH Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.LOW}+3",
+                    "name": "Siklu EH: Radio #{#SNMPINDEX}: RSSI below threshold",
+                    "event_name": "Siklu EH: Radio #{#SNMPINDEX}: RSSI {ITEM.LASTVALUE1} below {$RSL.LOW} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSSI below acceptable threshold. Check for rain fade, antenna misalignment, or link budget issue.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  },
+                  {
+                    "uuid": "7c82ddc516e843cf8d722e813e2c29bd",
+                    "expression": "avg(/.Siklu EH Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.HIGH}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "max(/.Siklu EH Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.HIGH}-3",
+                    "name": "Siklu EH: Radio #{#SNMPINDEX}: RSSI abnormally high",
+                    "event_name": "Siklu EH: Radio #{#SNMPINDEX}: RSSI {ITEM.LASTVALUE1} above {$RSL.HIGH} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSSI abnormally high — possible near-end reflections or interference.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "1bc9ce034f5349cdb2d222c0c1ff9cb6",
+                "name": "Radio #{#SNMPINDEX}: CINR",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.cinr[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dB",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\nradioAverageCINR — Carrier-to-Interference-plus-Noise Ratio in dB.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.18.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "43bd1c76a1a84e498823f0fc8c7eee94",
+                    "expression": "avg(/.Siklu EH Radio/net.wlan.health.cinr[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$CINR.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.Siklu EH Radio/net.wlan.health.cinr[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$CINR.LOW}+2",
+                    "name": "Siklu EH: Radio #{#SNMPINDEX}: CINR below threshold",
+                    "event_name": "Siklu EH: Radio #{#SNMPINDEX}: CINR {ITEM.LASTVALUE1} below {$CINR.LOW} dB",
+                    "opdata": "Current CINR: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "cc52b96af27541df8d1b0dd1fe43dd0a",
+                "name": "Radio #{#SNMPINDEX}: TX power",
+                "type": "DEPENDENT",
+                "key": "net.wlan.pow.txpow[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\nradioTxPower in dBm.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.42.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "c564cb07fa574051b0a3fdb2e8924849",
+                "name": "Radio #{#SNMPINDEX}: Modulation",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.modulation[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "qam",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\nCurrent modulation as integer code.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.46.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "d91172b6f5904275a2f6affe0659d4a4",
+                "name": "Radio #{#SNMPINDEX}: RF frequency",
+                "type": "DEPENDENT",
+                "key": "net.wlan.rf.freq[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "Hz",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\nOperating frequency in Hz.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.4.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "c8caae554ae34c16aeefa5aae54ff333",
+                "name": "Radio #{#SNMPINDEX}: RF channel width",
+                "type": "DEPENDENT",
+                "key": "net.wlan.rf.chanwidth[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\nRF channel width (integer code). Not supported on EH-1200FX.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.1.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "b7ba9421ea014c21aecdd1ecb45e2555",
+                "name": "Radio #{#SNMPINDEX}: RF RX error packets",
+                "type": "DEPENDENT",
+                "key": "net.wlan.rf.rxerrors[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "pps",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\nRF receive error packets per second. Not supported on EH-1200FX or EH-2200FX.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.2.2.1.9.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.wlan.radio.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#SNMPVALUE}",
+                  "1.3.6.1.4.1.31926.2.1.1.17",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "8c33cbff50034b1d8068973bbc3179f7",
+            "name": "Network interface discovery",
+            "type": "DEPENDENT",
+            "key": "net.if.discovery",
+            "delay": "0",
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+                  "formulaid": "A",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+                  "formulaid": "B",
+                  "operator": "NOT_MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.MATCHES}",
+                  "formulaid": "C",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.NOT_MATCHES}",
+                  "formulaid": "D",
+                  "operator": "NOT_MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+                  "formulaid": "E",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                  "formulaid": "F",
+                  "operator": "NOT_MATCHES_REGEX"
+                }
+              ]
+            },
+            "lifetime": "0s",
+            "description": "Discovers EH interfaces. Uses 32-bit counters — HC not supported on EH series.",
+            "item_prototypes": [
+              {
+                "uuid": "cb5b6b3ec9a544e092b7250655a3d36a",
+                "name": "Interface {#IFNAME}: Bits received",
+                "type": "DEPENDENT",
+                "key": "net.if.in[ifInOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\n32-bit ifInOctets. HC counters not supported on EH series.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "a34c625979114837af609e01956d6f23",
+                "name": "Interface {#IFNAME}: Bits sent",
+                "type": "DEPENDENT",
+                "key": "net.if.out[ifOutOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\n32-bit ifOutOctets. HC counters not supported on EH series.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "b8ee6bc9c5364ffdac11bb65992aee92",
+                "name": "Interface {#IFNAME}: Operational status",
+                "type": "DEPENDENT",
+                "key": "net.if.status[ifOperStatus.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "valuemap": {
+                  "name": "IF-MIB::ifOperStatus"
+                },
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "fedf93ef1d5645d8911851ccbbdd9dae",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Siklu EH Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Siklu EH Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Siklu EH Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Siklu EH Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0",
+                    "name": "Interface {#IFNAME}: Link down",
+                    "opdata": "Current state: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "ebf025d6245b4c0e97a1c66286ec4485",
+                "name": "Interface {#IFNAME}: Inbound errors",
+                "type": "DEPENDENT",
+                "key": "net.if.in.errors[ifInErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "0bcd9863499a4897a5388476f1f3633a",
+                "name": "Interface {#IFNAME}: Outbound errors",
+                "type": "DEPENDENT",
+                "key": "net.if.out.errors[ifOutErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.if.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#IFNAME}",
+                  "1.3.6.1.2.1.31.1.1.1.1",
+                  "0",
+                  "{#IFDESCR}",
+                  "1.3.6.1.2.1.2.2.1.2",
+                  "0",
+                  "{#IFADMINSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.7",
+                  "0",
+                  "{#IFOPERSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.8",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siklu"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$CINR.LOW}",
+            "value": "22",
+            "description": "CINR low threshold (dB). Default covers EH-2200FX/2500FX/5500FD/8010FX. See EH-1200FX override below."
+          },
+          {
+            "macro": "{$CINR.LOW:\"EH-1200FX\"}",
+            "value": "20",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH1200_RADIO used 20 dB vs 22 dB on all other EH models."
+          },
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HEALTH_TRIGGER_INT}",
+            "value": "15m"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h"
+          },
+          {
+            "macro": "{$RADIO_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$RSL.HIGH}",
+            "value": "-33",
+            "description": "RSSI abnormally high (dBm). Default covers EH-2200FX, EH-2500FX, EH-5500FD. See model overrides."
+          },
+          {
+            "macro": "{$RSL.HIGH:\"EH-1200FX\"}",
+            "value": "-31",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH1200_RADIO threshold."
+          },
+          {
+            "macro": "{$RSL.HIGH:\"EH-5500FD\"}",
+            "value": "-35",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH5500_RADIO used -35 vs -33 default."
+          },
+          {
+            "macro": "{$RSL.HIGH:\"EH-8010FX\"}",
+            "value": "-24",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH8010_RADIO threshold (bare model without -L/-H suffix)."
+          },
+          {
+            "macro": "{$RSL.HIGH:\"EH-8010FX-L\"}",
+            "value": "-24",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH8010_RADIO threshold."
+          },
+          {
+            "macro": "{$RSL.HIGH:\"EH-8010FX-H\"}",
+            "value": "-24",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH8010_RADIO threshold."
+          },
+          {
+            "macro": "{$RSL.LOW}",
+            "value": "-42",
+            "description": "RSSI low threshold (dBm). Default covers EH-2200FX/2500FX/5500FD/8010FX. See EH-1200FX override."
+          },
+          {
+            "macro": "{$RSL.LOW:\"EH-1200FX\"}",
+            "value": "-43",
+            "description": "Old ZENTRO_ZBX_TEMPLATE_SIKLU_EH1200_RADIO threshold was -43 vs -42 on all other EH models."
+          },
+          {
+            "macro": "{$TEMP_CRIT}",
+            "value": "60"
+          },
+          {
+            "macro": "{$TEMP_WARN}",
+            "value": "50"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          },
+          {
+            "macro": "{$IFCONTROL}",
+            "value": "1",
+            "description": "Link status trigger fires only when context macro = 1."
+          },
+          {
+            "macro": "{$IF.ERRORS.WARN}",
+            "value": "2"
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+            "value": "^2$",
+            "description": "Ignore down(2) administrative status"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.NOT_MATCHES}",
+            "value": "CHANGE_IF_NEEDED"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+            "value": "^6$",
+            "description": "Ignore notPresent(6)"
+          }
+        ],
+        "valuemaps": [
+          {
+            "uuid": "f9971f63632c4934b8fefcac3a15263b",
+            "name": "Siklu EH Operating State",
+            "mappings": [
+              {
+                "value": "0",
+                "newvalue": "inactive"
+              },
+              {
+                "value": "1",
+                "newvalue": "active"
+              }
+            ]
+          },
+          {
+            "uuid": "cfe35de841c14e458c1eaa76c7ea7f81",
+            "name": "IF-MIB::ifOperStatus",
+            "mappings": [
+              {
+                "value": "1",
+                "newvalue": "up"
+              },
+              {
+                "value": "2",
+                "newvalue": "down"
+              },
+              {
+                "value": "4",
+                "newvalue": "unknown"
+              },
+              {
+                "value": "5",
+                "newvalue": "dormant"
+              },
+              {
+                "value": "6",
+                "newvalue": "notPresent"
+              },
+              {
+                "value": "7",
+                "newvalue": "lowerLayerDown"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

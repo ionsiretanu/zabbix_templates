@@ -1,0 +1,47 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "91d964de963440aebdae3ec9e1e960ed",
+                "name": "Cisco"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "110123d006154fbe96f73992bf9f93f9",
+                "template": ".Cisco Switch",
+                "name": ".Cisco Switch",
+                "description": "Role template for Cisco switches (Catalyst WS-C, Nexus in switching role).\nAssigned directly to hosts. Inherits metrics from linked base templates.\n\n[network-tool]\nmanufacturer = [ \"Cisco\" ]\ndevice_role = [ \"Access Switch\", \"Aggregation Switch\", \"Distribution Switch\", \"Core Switch\", \"TOR Switch\" ]\ndevice_types = [ \"WS-C4948\", \"WS-C4948-10GE\", \"WS-C3850-48U-S\", \"WS-C3850-24T-S\", \"WS-C3850-48P-S\", \"WS-C3750E-24TD-S\", \"WS-C3750E-48TD-S\", \"WS-C3750X-24\", \"WS-C3750X-48\", \"WS-C3750-48TS\", \"WS-C3560E-48TD-S\", \"WS-C3560E-24TD-S\", \"WS-C3560X-24\", \"WS-C3560X-48\", \"WS-C3550-48-SMI\", \"WS-C3550-24-SMI\", \"WS-C2960G-24TC-L\", \"WS-C2960G-48TC-L\", \"WS-C2960S-48TS-L\", \"WS-C2960S-24TS-L\", \"WS-C2960-24TC-L\", \"WS-C2960-48TC-L\", \"WS-C2950T-48-SI\", \"WS-C2950-24\", \"WS-C2950-48\", \"C9200L-24T-4G\", \"C9200L-48T-4G\", \"C9300-24T\", \"C9300-48T\", \"C9500-24Q\", \"N5K-C5548UP\", \"N5K-C5596UP\", \"N7K-C7010\", \"N7K-C7018\", \"N3K-C3064PQ-10GE\", \"N3K-C3048TP-1GE\", \"N9K-C9372PX\", \"N9K-C9396PX\", \"N9K-C93180YC-FX\", \"N9K-C93240YC-FX2\" ]",
+                "groups": [
+                    {"name": "Cisco"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "templates": [
+                    {"name": ".Generic by SNMP"},
+                    {"name": ".Network Interfaces by SNMP"},
+                    {"name": ".Cisco Generic by SNMP"}
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "cisco"
+                    },
+                    {
+                        "tag": "role",
+                        "value": "switch"
+                    }
+                ]
+            }
+        ]
+    }
+}

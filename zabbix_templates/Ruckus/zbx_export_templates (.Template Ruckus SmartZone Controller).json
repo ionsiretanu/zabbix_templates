@@ -1,0 +1,183 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "550e8400e29b41d4a716446655440000",
+                "name": "Ruckus"
+            },
+            {
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "host_groups": [
+            {
+                "uuid": "5b780dca330e473b9fca4d99a69bee3d",
+                "name": "Ruckus APs"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "6f1d2c3a4b5e4f90a1b2c3d4e5f60718",
+                "template": ".Template Ruckus SmartZone Controller",
+                "name": ".Template Ruckus SmartZone Controller",
+                "groups": [
+                    {"name": "ITcare"},
+                    {"name": "Ruckus"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "items": [
+                    {
+                        "uuid": "a6cabfc5556d4173b48cf796e2b127ea",
+                        "name": "Ruckus Zone List",
+                        "type": "SCRIPT",
+                        "key": "ruckus.zone.list",
+                        "delay": "1h",
+                        "history": "12h",
+                        "value_type": "TEXT",
+                        "params": "var baseUrl = 'https://{$SMARTZONE_URL}/wsg/api/public/v11_1';\nvar token   = '{$SMARTZONE_TOKEN}';\n\nfunction getJson(url) {\n    var req = new HttpRequest();\n    req.addHeader('Content-Type: application/json;charset=UTF-8');\n    var body = req.get(url);\n    return {status: req.getStatus(), data: JSON.parse(body)};\n}\n\n// Fetch all domains recursively (one call)\nvar dr = getJson(baseUrl + '/domains?serviceTicket=' + token + '&recursively=true&listSize=1000');\nif (dr.status !== 200) throw new Error('Domains failed: ' + dr.status);\n\n// Build domain map {id: {name, parent, zoneCount}}\nvar domMap = {};\nvar domList = dr.data.list || [];\nfor (var i = 0; i < domList.length; i++) {\n    var d = domList[i];\n    domMap[d.id] = {name: d.name, parent: d.parentDomainId || null, zoneCount: d.zoneCount || 0};\n}\n\n// Build hierarchy path: 'Domain :: Sub :: ...' (stops at root = no parent)\nfunction domainPath(id) {\n    var parts = [], cur = id, seen = {};\n    while (cur && domMap[cur] && domMap[cur].parent && !seen[cur]) {\n        seen[cur] = 1;\n        parts.unshift(domMap[cur].name);\n        cur = domMap[cur].parent;\n    }\n    return parts.join(' :: ');\n}\n\n// Fetch zones for each domain that has zones\nvar zones = [];\nfor (var domId in domMap) {\n    if (!domMap[domId].zoneCount) continue;\n    var zr = getJson(baseUrl + '/rkszones?serviceTicket=' + token + '&domainId=' + domId + '&listSize=1000');\n    if (zr.status !== 200) {\n        Zabbix.log(4, 'SmartZone: zones for domain ' + domId + ' failed: ' + zr.status);\n        continue;\n    }\n    var dPath = domainPath(domId);\n    var zList = zr.data.list || [];\n    for (var j = 0; j < zList.length; j++) {\n        var z = zList[j];\n        zones.push({\n            zoneId: z.id,\n            zoneName: z.name,\n            domainId: domId,\n            zonePath: dPath ? dPath + ' :: ' + z.name : z.name\n        });\n    }\n}\n\nreturn JSON.stringify(zones);",
+                        "timeout": "60s",
+                        "description": "Fetches all zones with full domain hierarchy paths. Used by Zone Discovery to create per-zone AP list items.",
+                        "tags": [
+                            {"tag": "component", "value": "ruckus"}
+                        ]
+                    },
+                    {
+                        "uuid": "f0d272026594491eb9cb44f45d2acd20",
+                        "name": "Ruckus AP List (Zone {$SMARTZONE_ZONE_ID})",
+                        "type": "SCRIPT",
+                        "key": "ruckus.ap.list",
+                        "delay": "1h",
+                        "history": "12h",
+                        "value_type": "TEXT",
+                        "params": "var baseUrl  = 'https://{$SMARTZONE_URL}/wsg/api/public/v11_1';\nvar token    = '{$SMARTZONE_TOKEN}';\nvar zoneId   = '{$SMARTZONE_ZONE_ID}';\nvar listSize = 5;\n\n// Fetch AP list for the configured zone\nvar listReq = new HttpRequest();\nlistReq.addHeader('Content-Type: application/json;charset=UTF-8');\nvar listResp = listReq.get(baseUrl + '/aps?serviceTicket=' + token + '&zoneId=' + zoneId + '&listSize=' + listSize);\nif (listReq.getStatus() !== 200) throw new Error('AP list failed: ' + listReq.getStatus());\nvar aps = JSON.parse(listResp).list || [];\n\n// Enrich each AP with IP from operational summary\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    if (!ap.mac) { ap.ip = null; continue; }\n    try {\n        var sumReq = new HttpRequest();\n        sumReq.addHeader('Content-Type: application/json;charset=UTF-8');\n        var sumResp = sumReq.get(baseUrl + '/aps/' + ap.mac + '/operational/summary?serviceTicket=' + token);\n        if (sumReq.getStatus() === 200) {\n            ap.ip = JSON.parse(sumResp).ip || null;\n        } else {\n            Zabbix.log(4, 'SmartZone: summary mac=' + ap.mac + ' status=' + sumReq.getStatus());\n            ap.ip = null;\n        }\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone: summary error mac=' + ap.mac + ': ' + e.message);\n        ap.ip = null;\n    }\n}\n\nreturn JSON.stringify(aps);",
+                        "timeout": "60s",
+                        "description": "AP list for the zone set in {$SMARTZONE_ZONE_ID}. Master item for AP host discovery. IP is fetched per-AP via operational summary.",
+                        "tags": [
+                            {"tag": "component", "value": "ruckus"}
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "ff138b813a4f473d81823c07f15e8d40",
+                        "name": "Zone Discovery",
+                        "type": "DEPENDENT",
+                        "key": "ruckus.zone.discovery",
+                        "master_item": {"key": "ruckus.zone.list"},
+                        "lld_macro_paths": [
+                            {"lld_macro": "{#ZONE_ID}",   "path": "$.zoneId"},
+                            {"lld_macro": "{#ZONE_NAME}", "path": "$.zoneName"},
+                            {"lld_macro": "{#ZONE_PATH}", "path": "$.zonePath"}
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "95c3bd8909274abfbbd0c0b1c484666d",
+                                "name": "{#ZONE_PATH}",
+                                "type": "SCRIPT",
+                                "key": "ruckus.zone.ap.list[{#ZONE_ID}]",
+                                "delay": "1h",
+                                "history": "12h",
+                                "value_type": "TEXT",
+                                "params": "var baseUrl  = 'https://{$SMARTZONE_URL}/wsg/api/public/v11_1';\nvar token    = '{$SMARTZONE_TOKEN}';\nvar zoneId   = '{#ZONE_ID}';\nvar listSize = parseInt('{$SMARTZONE_LIST_SIZE}') || 50;\n\n// Fetch AP list for this zone\nvar listReq = new HttpRequest();\nlistReq.addHeader('Content-Type: application/json;charset=UTF-8');\nvar listResp = listReq.get(baseUrl + '/aps?serviceTicket=' + token + '&zoneId=' + zoneId + '&listSize=' + listSize);\nif (listReq.getStatus() !== 200) throw new Error('AP list failed: ' + listReq.getStatus());\nvar aps = JSON.parse(listResp).list || [];\n\n// Enrich each AP with IP from operational summary\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    if (!ap.mac) { ap.ip = null; continue; }\n    try {\n        var sumReq = new HttpRequest();\n        sumReq.addHeader('Content-Type: application/json;charset=UTF-8');\n        var sumResp = sumReq.get(baseUrl + '/aps/' + ap.mac + '/operational/summary?serviceTicket=' + token);\n        if (sumReq.getStatus() === 200) {\n            ap.ip = JSON.parse(sumResp).ip || null;\n        } else {\n            Zabbix.log(4, 'SmartZone: summary mac=' + ap.mac + ' status=' + sumReq.getStatus());\n            ap.ip = null;\n        }\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone: summary error mac=' + ap.mac + ': ' + e.message);\n        ap.ip = null;\n    }\n}\n\nreturn JSON.stringify(aps);",
+                                "timeout": "60s",
+                                "tags": [
+                                    {"tag": "component", "value": "ruckus"}
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [],
+                        "graph_prototypes": [],
+                        "host_prototypes": [],
+                        "preprocessing": []
+                    },
+                    {
+                        "uuid": "8b2c3d4e5f604a91b2c3d4e5f6071829",
+                        "name": "Discover Ruckus APs",
+                        "type": "DEPENDENT",
+                        "key": "ruckus.ap.discovery",
+                        "master_item": {"key": "ruckus.ap.list"},
+                        "lld_macro_paths": [
+                            {"lld_macro": "{#AP_GROUP_ID}", "path": "$.apGroupId"},
+                            {"lld_macro": "{#AP_IP}",       "path": "$.ip"},
+                            {"lld_macro": "{#AP_MAC}",      "path": "$.mac"},
+                            {"lld_macro": "{#AP_NAME}",     "path": "$.name"},
+                            {"lld_macro": "{#AP_SERIAL}",   "path": "$.serial"},
+                            {"lld_macro": "{#AP_ZONE_ID}",  "path": "$.zoneId"}
+                        ],
+                        "host_prototypes": [
+                            {
+                                "uuid": "9c3d4e5f60714a92b3c4d5e6f708192a",
+                                "host": "Ruckus AP {#AP_NAME}",
+                                "name": "{#AP_NAME} ({#AP_MAC})",
+                                "group_links": [
+                                    {"group": {"name": "Ruckus APs"}}
+                                ],
+                                "templates": [
+                                    {"name": "ICMP Ping"}
+                                ],
+                                "macros": [
+                                    {"macro": "{$AP_IP}",     "value": "{#AP_IP}"},
+                                    {"macro": "{$AP_MAC}",    "value": "{#AP_MAC}"},
+                                    {"macro": "{$AP_NAME}",   "value": "{#AP_NAME}"},
+                                    {"macro": "{$AP_SERIAL}", "value": "{#AP_SERIAL}"}
+                                ],
+                                "tags": [
+                                    {"tag": "AP_MAC",  "value": "{#AP_MAC}"},
+                                    {"tag": "AP_NAME", "value": "{#AP_NAME}"}
+                                ],
+                                "custom_interfaces": "YES",
+                                "interfaces": [
+                                    {
+                                        "type": "SNMP",
+                                        "ip": "{#AP_IP}",
+                                        "port": "161",
+                                        "details": {
+                                            "community": "{$SNMP_COMMUNITY}"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [],
+                        "graph_prototypes": [],
+                        "item_prototypes": [],
+                        "preprocessing": []
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SMARTZONE_LIST_SIZE}",
+                        "value": "50",
+                        "description": "Max APs fetched per zone. Each AP needs 1 extra HTTP call for IP — raise only if proxy Timeout allows."
+                    },
+                    {
+                        "macro": "{$SMARTZONE_TOKEN}",
+                        "value": "ST-543-S2LvCn1IcHoGgC4BwtTI-LADC-vSZ-2-C",
+                        "description": "SmartZone service ticket from POST /wsg/api/public/v11_1/serviceTicket"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_URL}",
+                        "value": "172.30.14.14:8443",
+                        "description": "SmartZone management IP:port"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_ZONE_ID}",
+                        "value": "186f8759-0927-4bc2-aba8-75eee58fb26c",
+                        "description": "Zone ID for AP host discovery. Set to the zone whose APs you want as Zabbix hosts."
+                    },
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "oomoomee",
+                        "description": "SNMP community string for discovered AP hosts"
+                    }
+                ]
+            }
+        ]
+    }
+}

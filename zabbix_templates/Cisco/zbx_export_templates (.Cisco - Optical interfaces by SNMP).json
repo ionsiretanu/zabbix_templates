@@ -1,0 +1,290 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "91d964de963440aebdae3ec9e1e960ed",
+                "name": "Cisco"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "2459f63885654cc98d3a5ff0a0baaf14",
+                "template": ".Cisco - Optical interfaces by SNMP",
+                "name": ".Cisco - Optical interfaces by SNMP",
+                "description": "SFP/SFP+ optical monitoring via CISCO-ENTITY-SENSOR-MIB (1.3.6.1.4.1.9.9.91).\nTested on: NX-OS 5.x / Nexus 5548.\n\nDesign notes:\n  NX-OS reports sensor values with scale=milli (10^-3). All values multiplied by {$CISCO_DOM_DBM_SCALAR} = 0.001.\n  Physical entity names are self-describing: \"Ethernet1/26(Rx-dBm)\", \"Ethernet1/26(Tx-dBm)\", \"Ethernet1/26(celsius)\".\n  Filter macro {$CISCO.SFP.PHYSNAME_FILTER} = \\([RT]x-dBm\\) covers both Rx and Tx optical power sensors.\n  For IOS/IOS-XE platforms, override this macro to match their entPhysicalName format.\n\n  Cisco Generic by SNMP template has a separate Light sensor discovery using mW→dBm log conversion\n  which targets IOS platforms. This template uses the simpler milli-scale approach for NX-OS.\n\nOIDs used (all indexed by entPhysicalIndex):\n  1.3.6.1.2.1.47.1.1.1.1.7  entPhysicalName (ENTITY-MIB)\n  1.3.6.1.4.1.9.9.91.1.1.1.1.1  entPhySensorType  (14=dBm, 8=celsius, 3=volts DC, 5=amperes)\n  1.3.6.1.4.1.9.9.91.1.1.1.1.4  entPhySensorValue (raw integer, scale=milli)\n  1.3.6.1.4.1.9.9.91.1.1.1.1.5  entPhySensorOperStatus (1=ok, 2=unavailable, 3=nonoperational)",
+                "groups": [
+                    {"name": "Cisco"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "items": [
+                    {
+                        "uuid": "54d0868b2bdb4c2c914e61cebba42113",
+                        "name": "SNMP walk: ENTITY-SENSOR-MIB",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.47.1.1.1.1.7,1.3.6.1.4.1.9.9.91.1.1.1.1.1,1.3.6.1.4.1.9.9.91.1.1.1.1.4,1.3.6.1.4.1.9.9.91.1.1.1.1.5]",
+                        "key": "cisco.entity.sensor.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Bulk walk of ENTITY-MIB (entPhysicalName) and CISCO-ENTITY-SENSOR-MIB (type/value/operStatus).\nAll dependent items and discovery rules use this as the master item.",
+                        "tags": [
+                            {"tag": "component", "value": "optics"},
+                            {"tag": "component", "value": "raw"}
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "ef0629dfbe7d4f66ab0a21dffc37fe7d",
+                        "name": "Optical power (Rx/Tx) discovery",
+                        "type": "DEPENDENT",
+                        "key": "cisco.entity.sfp.power.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#PHYSNAME}",
+                                    "value": "{$CISCO.SFP.PHYSNAME_FILTER}"
+                                },
+                                {
+                                    "macro": "{#OPERSTATUS}",
+                                    "value": "^1$"
+                                }
+                            ]
+                        },
+                        "description": "Discovers SFP optical power sensors (Rx and Tx dBm) from CISCO-ENTITY-SENSOR-MIB.\nFilter: entPhysicalName matches {$CISCO.SFP.PHYSNAME_FILTER} AND operStatus=1 (ok).\nOn NX-OS: filter matches \"Ethernet1/N(Rx-dBm)\" and \"Ethernet1/N(Tx-dBm)\".",
+                        "item_prototypes": [
+                            {
+                                "uuid": "9a0cbb3e1e034f31a84b559c9b6e6b4b",
+                                "name": "SFP {#PHYSNAME}: Optical Power",
+                                "type": "DEPENDENT",
+                                "key": "cisco.entity.sfp.power[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "dbm",
+                                "description": "SFP optical power (Rx or Tx) as indicated by {#PHYSNAME}.\nentPhySensorValue.{#SNMPINDEX} × {$CISCO_DOM_DBM_SCALAR}.\nNX-OS: scale=milli (10^-3), so default scalar=0.001 gives the correct dBm value.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": ["{$CISCO_DOM_DBM_SCALAR}"]
+                                    }
+                                ],
+                                "master_item": {"key": "cisco.entity.sensor.walk"},
+                                "tags": [
+                                    {"tag": "component", "value": "network"},
+                                    {"tag": "component", "value": "optics"},
+                                    {"tag": "sfp",       "value": "{#PHYSNAME}"}
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "0d24d280561245d59dd7f0e079b5266f",
+                                        "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.power[{#SNMPINDEX}]) < {$SFP.POWER.LOW.ALARM}",
+                                        "name": "Cisco: SFP {#PHYSNAME}: Optical Power Low Alarm ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "f02417d4dee94b9dbc3726411f7b2fec",
+                                        "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.power[{#SNMPINDEX}]) < {$SFP.POWER.LOW.WARN}",
+                                        "name": "Cisco: SFP {#PHYSNAME}: Optical Power Low Warning ({ITEM.LASTVALUE})",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Cisco: SFP {#PHYSNAME}: Optical Power Low Alarm ({ITEM.LASTVALUE})",
+                                                "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.power[{#SNMPINDEX}]) < {$SFP.POWER.LOW.ALARM}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "5a33e100b7414bdcbb1a5bb05a6e9ad6",
+                                        "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.power[{#SNMPINDEX}]) > {$SFP.POWER.HIGH.ALARM}",
+                                        "name": "Cisco: SFP {#PHYSNAME}: Optical Power High Alarm ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {"key": "cisco.entity.sensor.walk"},
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#PHYSNAME}",    "1.3.6.1.2.1.47.1.1.1.1.7",            "0",
+                                    "{#SENSORTYPE}",  "1.3.6.1.4.1.9.9.91.1.1.1.1.1",        "0",
+                                    "{#OPERSTATUS}",  "1.3.6.1.4.1.9.9.91.1.1.1.1.5",        "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": ["1h"]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "3ec12b3b72a149758f99606c19748757",
+                        "name": "Optical transceiver temperature discovery",
+                        "type": "DEPENDENT",
+                        "key": "cisco.entity.sfp.temp.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#PHYSNAME}",
+                                    "value": "\\(celsius\\)"
+                                },
+                                {
+                                    "macro": "{#PHYSNAME}",
+                                    "value": "^Ethernet"
+                                },
+                                {
+                                    "macro": "{#OPERSTATUS}",
+                                    "value": "^1$"
+                                }
+                            ]
+                        },
+                        "description": "Discovers SFP temperature sensors.\nFiltered to Ethernet* interfaces only (excludes chassis/module temperature sensors).\nNX-OS names example: \"Ethernet1/26(celsius)\".",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4dc27cbef7bc4439886d47d55efd7111",
+                                "name": "SFP {#PHYSNAME}: Temperature",
+                                "type": "DEPENDENT",
+                                "key": "cisco.entity.sfp.temp[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "value_type": "FLOAT",
+                                "trends": "{$TRENDS}",
+                                "units": "°C",
+                                "description": "SFP transceiver module temperature.\nentPhySensorValue.{#SNMPINDEX} × {$CISCO_DOM_TEMP_SCALAR}.\nNX-OS: scale=milli, so 39082 × 0.001 = 39.082°C.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": [
+                                            "1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}",
+                                            "0"
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": ["{$CISCO_DOM_TEMP_SCALAR}"]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": ["1h"]
+                                    }
+                                ],
+                                "master_item": {"key": "cisco.entity.sensor.walk"},
+                                "tags": [
+                                    {"tag": "component", "value": "network"},
+                                    {"tag": "component", "value": "optics"},
+                                    {"tag": "component", "value": "temperature"},
+                                    {"tag": "sfp",       "value": "{#PHYSNAME}"}
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "86e83805ac23418da9bb78eeed538362",
+                                        "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.temp[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
+                                        "name": "Cisco: SFP {#PHYSNAME}: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "b5f45b4c1e9042a29d0fcddd605096f4",
+                                        "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.temp[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.WARN}",
+                                        "name": "Cisco: SFP {#PHYSNAME}: Temperature High Warning ({ITEM.LASTVALUE})",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "Cisco: SFP {#PHYSNAME}: Temperature High Alarm ({ITEM.LASTVALUE})",
+                                                "expression": "last(/.Cisco - Optical interfaces by SNMP/cisco.entity.sfp.temp[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {"key": "cisco.entity.sensor.walk"},
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#PHYSNAME}",    "1.3.6.1.2.1.47.1.1.1.1.7",            "0",
+                                    "{#SENSORTYPE}",  "1.3.6.1.4.1.9.9.91.1.1.1.1.1",        "0",
+                                    "{#OPERSTATUS}",  "1.3.6.1.4.1.9.9.91.1.1.1.1.5",        "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": ["1h"]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {"tag": "target", "value": "cisco"}
+                ],
+                "macros": [
+                    {
+                        "macro": "{$CISCO.SFP.PHYSNAME_FILTER}",
+                        "value": "\\([RT]x-dBm\\)",
+                        "description": "Regex filter for entPhysicalName to discover optical power sensors.\nNX-OS: \\([RT]x-dBm\\) matches \"Ethernet1/26(Rx-dBm)\" and \"Ethernet1/26(Tx-dBm)\".\nIOS/IOS-XE: Override to match \"Light level Rx\" / \"Light level Tx\" naming."
+                    },
+                    {
+                        "macro": "{$CISCO_DOM_DBM_SCALAR}",
+                        "value": "0.001",
+                        "description": "Multiplier for optical power values. NX-OS uses scale=milli (10^-3) so 0.001 gives correct dBm. Override if your platform reports in different units."
+                    },
+                    {
+                        "macro": "{$CISCO_DOM_TEMP_SCALAR}",
+                        "value": "0.001",
+                        "description": "Multiplier for SFP temperature values. NX-OS uses scale=milli (10^-3) so 0.001 gives degrees Celsius."
+                    },
+                    {
+                        "macro": "{$SFP.POWER.HIGH.ALARM}",
+                        "value": "2",
+                        "description": "Optical power high alarm threshold (dBm). Applies to both Rx and Tx. Overload protection."
+                    },
+                    {
+                        "macro": "{$SFP.POWER.LOW.ALARM}",
+                        "value": "-26",
+                        "description": "Optical power low alarm threshold (dBm). Applies to both Rx and Tx. Link loss / dirty connector."
+                    },
+                    {
+                        "macro": "{$SFP.POWER.LOW.WARN}",
+                        "value": "-24",
+                        "description": "Optical power low warning threshold (dBm)."
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.ALARM}",
+                        "value": "95",
+                        "description": "SFP temperature high alarm threshold (Celsius)."
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.WARN}",
+                        "value": "85",
+                        "description": "SFP temperature high warning threshold (Celsius)."
+                    }
+                ]
+            }
+        ]
+    }
+}

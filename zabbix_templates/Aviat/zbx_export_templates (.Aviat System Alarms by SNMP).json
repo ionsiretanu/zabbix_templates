@@ -1,0 +1,173 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "6227fc62af324775ac35d18f666160ab",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "128d309ace1942e2bba4f0182caa12f5",
+        "name": "Templates"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "773b1c327f0d4d08b0a58f8cf7b970c2",
+        "template": ".Aviat System Alarms by SNMP",
+        "name": ".Aviat System Alarms by SNMP",
+        "groups": [
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "aa1506dde68846f09e00679deecb380a",
+            "name": "Aviat: Alarm table walk",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.4.1.2509.9.47.2.5]",
+            "key": "aviat.alarm.walk",
+            "value_type": "TEXT",
+            "trends": "0"
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "a0a8d78cf72846588480e3324dbe652b",
+            "name": "Aviat: Alarm discovery",
+            "type": "DEPENDENT",
+            "key": "aviat.alarm.discovery",
+            "delay": "0",
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#ALARM_DESC}",
+                  "value": "^(?!Summary alarm$).*",
+                  "formulaid": "A",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#ALARM_OPER_STATUS}",
+                  "value": "^2$",
+                  "formulaid": "B",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#ALARM_STATUS}",
+                  "value": "^2$",
+                  "formulaid": "C",
+                  "operator": "MATCHES_REGEX"
+                }
+              ]
+            },
+            "item_prototypes": [
+              {
+                "uuid": "f36f61eb70fd43c3a094e103e31722ef",
+                "name": "Aviat [{#ALARM_COMPONENT}]: {#ALARM_DESC} description",
+                "type": "DEPENDENT",
+                "key": "aviat.alarm.desc[{#SNMPINDEX}]",
+                "delay": "0",
+                "value_type": "TEXT",
+                "trends": "0",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2509.9.47.2.5.1.2.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "aviat.alarm.walk"
+                }
+              },
+              {
+                "uuid": "5ad307f00591494299702f6b0df97f9c",
+                "name": "Aviat [{#ALARM_COMPONENT}]: {#ALARM_DESC} severity",
+                "type": "DEPENDENT",
+                "key": "aviat.alarm.sev[{#SNMPINDEX}]",
+                "delay": "0",
+                "trends": "0",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.2509.9.47.2.5.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "aviat.alarm.walk"
+                },
+                "trigger_prototypes": [
+                  {
+                    "uuid": "3385f259270f4160b2874de87f316d2e",
+                    "expression": "last(/.Aviat System Alarms by SNMP/aviat.alarm.sev[{#SNMPINDEX}],#1)<>1",
+                    "name": "Aviat alarm ACTIVE: {#ALARM_COMPONENT} - {#ALARM_DESC}",
+                    "opdata": "Severity code: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "component",
+                        "value": "system"
+                      },
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "aviat.alarm.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#ALARM_STATUS}",
+                  "1.3.6.1.4.1.2509.9.47.2.5.1.1",
+                  "0",
+                  "{#ALARM_DESC}",
+                  "1.3.6.1.4.1.2509.9.47.2.5.1.2",
+                  "0",
+                  "{#ALARM_SEVERITY}",
+                  "1.3.6.1.4.1.2509.9.47.2.5.1.3",
+                  "0",
+                  "{#ALARM_TIMESTAMP}",
+                  "1.3.6.1.4.1.2509.9.47.2.5.1.5",
+                  "0",
+                  "{#ALARM_OPER_STATUS}",
+                  "1.3.6.1.4.1.2509.9.47.2.5.1.6",
+                  "0"
+                ]
+              },
+              {
+                "type": "JAVASCRIPT",
+                "parameters": [
+                  "var rows = JSON.parse(value);\nvar out = [];\nrows.forEach(function(row) {\n    var idx = row['{#SNMPINDEX}'];\n    var parts = idx.split('.').map(Number);\n    var compLen = parts[0];\n    var comp = '';\n    for (var i = 1; i <= compLen; i++) {\n        comp += String.fromCharCode(parts[i]);\n    }\n    row['{#ALARM_COMPONENT}'] = comp;\n    out.push(row);\n});\nreturn JSON.stringify(out);"
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "aviat"
+          }
+        ]
+      }
+    ]
+  }
+}

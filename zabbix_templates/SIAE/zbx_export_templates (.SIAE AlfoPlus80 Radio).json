@@ -1,0 +1,441 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "f893eac82dd346a08522a1796a82cbba",
+        "name": "SIAE"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "ba994769481642c59ea60161ba73a148",
+        "template": ".SIAE AlfoPlus80 Radio",
+        "name": ".SIAE AlfoPlus80 Radio",
+        "description": "SIAE AlfoPlus80HDX and AlfoPlus2 radio monitoring. Uses SIAE MIB .1103.80.* (shared by both models).\nAlfoPlus80HDX is a single-TRX 80 GHz link; AlfoPlus2 is dual-TRX 11 GHz (XPIC-capable).\nLLD discovers TRX instances from .80.12 table — finds 1 TRX for HDX, 2 TRX for AlfoPlus2.\n\nOID base: 1.3.6.1.4.1.3373.1103.80\n  .12.1.3.{trx} = RSSI dBm (direct)\n  .12.1.4.{trx} = Tx Power dBm (direct)\n  .12.1.5.{trx} = CINR x0.1 dBm\n  .17.1.10.1.{trx} = Capacity kbps\n  .17.1.7.1.{trx} = Modulation profile ID\n  .9.1.4.1 = Operating frequency kHz\n\n[network-tool]\nmanufacturer = [ \"SIAE\" ]\ndevice_role = [ \"Radio Link\" ]\ndevice_types = [ \"ALFOplus80HDX - SIAE Microelettronica\", \"ALFOplus2 - SIAE Microelettronica\" ]",
+        "templates": [
+          {
+            "name": ".SIAE Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "SIAE"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "87566e8125d441a58b6ed7870d1c59b3",
+            "name": "SNMP walk radio metrics",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.4.1.3373.1103.80.2.1.2,1.3.6.1.4.1.3373.1103.80.12.1.3,1.3.6.1.4.1.3373.1103.80.12.1.4,1.3.6.1.4.1.3373.1103.80.12.1.5,1.3.6.1.4.1.3373.1103.80.17.1.10.1,1.3.6.1.4.1.3373.1103.80.17.1.7.1]",
+            "key": "siae.radio.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for SIAE .80.* radio table. Columns per TRX index:\n  .80.2.1.2.{trx} = TRX name (TRX / TRX A / TRX B)\n  .80.12.1.3.{trx} = RSSI dBm\n  .80.12.1.4.{trx} = Tx Power dBm\n  .80.12.1.5.{trx} = CINR x0.1 dBm\n  .80.17.1.10.1.{trx} = Capacity kbps (radio=1)\n  .80.17.1.7.1.{trx} = Modulation profile ID",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          },
+          {
+            "uuid": "689665a1fd7843f997da17aa49025712",
+            "name": "Operating frequency",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.3373.1103.80.9.1.4.1]",
+            "key": "net.wlan.rf.freq",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "units": "Hz",
+            "value_type": "FLOAT",
+            "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfFrequency.1 — operating frequency in kHz. Multiplied by 1000 to store as Hz.",
+            "preprocessing": [
+              {
+                "type": "MULTIPLIER",
+                "parameters": [
+                  "1000"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "radio"
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "9e835bc3d81042ddafb14473c296f2a0",
+            "name": "TRX discovery",
+            "type": "DEPENDENT",
+            "key": "siae.radio.trx.discovery",
+            "delay": "0",
+            "lifetime": "7d",
+            "description": "Discovers TRX instances from .80.2.1.2 (TRX name column). HDX has 1 TRX; AlfoPlus2 has 2 TRX. XPIC entries (name contains XPIC) are excluded.",
+            "item_prototypes": [
+              {
+                "uuid": "901a98ace88a452da8f9554a8dbee2f0",
+                "name": "TRX {#TRXNAME}: RSSI",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.[rsl.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfAverageRssi — received signal level in dBm (direct, no scaling).",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.3373.1103.80.12.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siae.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "23d53df990054e05bc702ce44eacb426",
+                    "expression": "avg(/.SIAE AlfoPlus80 Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.SIAE AlfoPlus80 Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.LOW}+3",
+                    "name": "SIAE: TRX {#TRXNAME}: RSSI below threshold",
+                    "event_name": "SIAE: TRX {#TRXNAME}: RSSI {ITEM.LASTVALUE1} below {$RSL.LOW} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSSI below acceptable threshold. Check for rain fade, antenna misalignment, or link budget issue.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  },
+                  {
+                    "uuid": "ecdc471de2ef4bfe9960ff6dd3803e19",
+                    "expression": "avg(/.SIAE AlfoPlus80 Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.HIGH}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "max(/.SIAE AlfoPlus80 Radio/net.wlan.health.[rsl.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.HIGH}-3",
+                    "name": "SIAE: TRX {#TRXNAME}: RSSI abnormally high",
+                    "event_name": "SIAE: TRX {#TRXNAME}: RSSI {ITEM.LASTVALUE1} above {$RSL.HIGH} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "description": "RSSI abnormally high — possible near-end reflections or interference.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "f8c3b2e193564324a94c58e1d0f7d4d1",
+                "name": "TRX {#TRXNAME}: Tx Power",
+                "type": "DEPENDENT",
+                "key": "net.wlan.pow.[txpow.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfTxPower — transmit power in dBm (direct, no scaling).",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.3373.1103.80.12.1.4.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siae.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "b2d1f9a62f584c44a3a35ba7b42fe09a",
+                "name": "TRX {#TRXNAME}: CINR",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.[cinr.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfAverageCINR — Carrier-to-Interference-plus-Noise Ratio. Raw value x0.1 dBm.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.3373.1103.80.12.1.5.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "0.1"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siae.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "63ffe1b35c6545fc91db572d6df7dccf",
+                    "expression": "avg(/.SIAE AlfoPlus80 Radio/net.wlan.health.[cinr.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$CINR.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.SIAE AlfoPlus80 Radio/net.wlan.health.[cinr.{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$CINR.LOW}+2",
+                    "name": "SIAE: TRX {#TRXNAME}: CINR below threshold",
+                    "event_name": "SIAE: TRX {#TRXNAME}: CINR {ITEM.LASTVALUE1} below {$CINR.LOW} dBm",
+                    "opdata": "Current CINR: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "description": "CINR below acceptable threshold. Link quality is degraded.",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "21c50b1a91034b6ca733f87d3026b8a9",
+                "name": "TRX {#TRXNAME}: Capacity",
+                "type": "DEPENDENT",
+                "key": "net.wlan.cap.[cap.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "value_type": "FLOAT",
+                "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfCapacity — aggregate radio link throughput. Raw value in kbps, multiplied by 1000 to store as bps.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.3373.1103.80.17.1.10.1.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "1000"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siae.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "b981428dc79b44058e17b27cb92496dc",
+                "name": "TRX {#TRXNAME}: Modulation profile",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.[profile.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIAE-ALFOPLUS-MIB\nrbRfModulationProfile — current active modulation profile ID (integer). Higher values indicate higher-order modulation.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.3373.1103.80.17.1.7.1.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siae.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "siae.radio.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "NAME",
+                  "1.3.6.1.4.1.3373.1103.80.2.1.2",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ],
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#TRXNAME}",
+                  "value": "XPIC",
+                  "operator": "NOT_MATCHES_REGEX",
+                  "formulaid": "A"
+                }
+              ]
+            },
+            "lld_macro_paths": [
+              {
+                "lld_macro": "{#TRXNAME}",
+                "path": "$.NAME"
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siae"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$CINR.LOW}",
+            "value": "22",
+            "description": "CINR low alarm threshold (dBm)"
+          },
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HEALTH_TRIGGER_INT}",
+            "value": "15m",
+            "description": "Averaging window for RSL/CINR trigger evaluation"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h"
+          },
+          {
+            "macro": "{$RADIO_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$RSL.HIGH}",
+            "value": "-24",
+            "description": "RSL high alarm threshold (dBm) — abnormally high signal"
+          },
+          {
+            "macro": "{$RSL.LOW}",
+            "value": "-42",
+            "description": "RSL low alarm threshold (dBm)"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          }
+        ]
+      }
+    ]
+  }
+}

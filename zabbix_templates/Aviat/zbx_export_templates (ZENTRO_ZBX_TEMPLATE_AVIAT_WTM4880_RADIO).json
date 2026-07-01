@@ -1,0 +1,734 @@
+{
+    "zabbix_export": {
+        "version": "7.0",
+        "template_groups": [
+            {
+                "uuid": "8cee5050eeb74783a8bfaa73003ced3a",
+                "name": "RS"
+            },
+            {
+                "uuid": "128d309ace1942e2bba4f0182caa12f5",
+                "name": "Templates"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "5b87b3da0d33402e8d489facc966e3d0",
+                "template": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                "name": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                "templates": [
+                    {
+                        "name": "ZENTRO_SNMP_CHECK"
+                    },
+                    {
+                        "name": "ZENTRO_ZBX_TEMPLATE_ICMP_GLOBAL"
+                    }
+                ],
+                "groups": [
+                    {
+                        "name": "RS"
+                    },
+                    {
+                        "name": "Templates"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "5d73b4c10a8c45abaaa9fe013f77ff00",
+                        "name": "INV_HARDWARE_REV",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.47.1.1.1.1.8.1",
+                        "key": "INV_HARDWARE_REV",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "TYPE",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "dd25c4b0a1714c13be7ec90b841a1c9b",
+                        "name": "INV_HARD_VER",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.1.0",
+                        "key": "INV_HARD_VER",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "HARDWARE",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "c2aae9ef99b8411aad944bb0b748603c",
+                        "name": "INV_HOSTNAME",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.5.0",
+                        "key": "INV_HOSTNAME",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "NAME",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "db471756c62c489f9f09058ba7999ce8",
+                        "name": "INV_MAC",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.2.2.1.6.1",
+                        "key": "INV_MAC",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "MACADDRESS_A",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "46114fe653154ebe88482126dffbb7bd",
+                        "name": "INV_SERIAL",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.47.1.1.1.1.11.1",
+                        "key": "INV_SERIAL",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "SERIALNO_A",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d8e2b0ed5caf4028b4c9d61c8fbae742",
+                        "name": "INV_SOFT_VER",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.11.2.3.1.0",
+                        "key": "INV_SOFT_VER",
+                        "history": "7d",
+                        "value_type": "CHAR",
+                        "trends": "0",
+                        "inventory_link": "SOFTWARE",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "de74963fc24140359c613c182b1629db",
+                        "name": "IP Address",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.31926.9.1.1.2.2",
+                        "key": "ipaddr",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "OS",
+                        "preprocessing": [
+                            {
+                                "type": "CHECK_NOT_SUPPORTED",
+                                "parameters": [
+                                    "-1"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "xxx"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "90393c161f7043e4adab9084bc72a59c",
+                        "name": "Software Active",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.11.2.3.1.0",
+                        "key": "rbSwBank1Version",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0"
+                    },
+                    {
+                        "uuid": "2a87a889cd204e96acc3adbde6b8b7e9",
+                        "name": "Software Inactive",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.11.2.3.2.0",
+                        "key": "rbSwBank2Version",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "7d",
+                        "value_type": "TEXT",
+                        "trends": "0",
+                        "inventory_link": "SOFTWARE_APP_A"
+                    },
+                    {
+                        "uuid": "56457ddcfc9a475b855b1b0b75f41369",
+                        "name": "Radio (RSSI) RSL",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.15.2.2.1.3.63",
+                        "key": "rfAverageRSL",
+                        "delay": "{$POLL_RADIO_RELATED}",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "90d",
+                        "units": "dBm",
+                        "triggers": [
+                            {
+                                "uuid": "d8be0ee869114eb58890334564040cc2",
+                                "expression": "(avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s)-avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,86400s) <= -6) or (avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s) < -46)",
+                                "name": "{HOSTNAME} RSSI has dropped below average",
+                                "status": "DISABLED",
+                                "priority": "WARNING"
+                            },
+                            {
+                                "uuid": "b833b4f1c7b44e76b98e620c322a100f",
+                                "expression": "(avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s)-avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,86400s) <= -10) or (avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s) < -48)",
+                                "name": "{HOSTNAME} RSSI has dropped below normal",
+                                "status": "DISABLED",
+                                "priority": "AVERAGE"
+                            },
+                            {
+                                "uuid": "ff9357261d194ef5911d769126dfbcc4",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s)>-24",
+                                "name": "{HOSTNAME} RSSI high",
+                                "priority": "HIGH",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} wireless link down",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfOperationalState)<>1"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1a65699a107b4469a3db7094c7db894e",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfAverageRSL,300s) < -42",
+                                "name": "{HOSTNAME} RSSI low",
+                                "priority": "HIGH",
+                                "dependencies": [
+                                    {
+                                        "name": "{HOSTNAME} wireless link down",
+                                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfOperationalState)<>1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "66e1f6c13d29422799fbbed28a7b077f",
+                        "name": "RF Channel Width",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.3.2.1.1.1.63",
+                        "key": "rfChannelWidth",
+                        "delay": "{$POLL_MISC}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "valuemap": {
+                            "name": "Siklu-Channel-Widths"
+                        }
+                    },
+                    {
+                        "uuid": "d371a4e839874b29adc17a21cf1a3e80",
+                        "name": "Radio Download",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.6.1537",
+                        "key": "rfDownload",
+                        "delay": "{$POLL_RADIO_RELATED}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "units": "bps",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "8"
+                                ]
+                            },
+                            {
+                                "type": "CHANGE_PER_SECOND",
+                                "parameters": [
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "f8dff6ea58f14501b240598792d78eb5",
+                        "name": "Radio Rx Frequency",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.5.2.1.1.2.63",
+                        "key": "rfFreqRx",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "units": "Hz",
+                        "inventory_link": "NOTES"
+                    },
+                    {
+                        "uuid": "8261dc89be1347af9e01dd33ee9ed8ef",
+                        "name": "Radio Tx Frequency",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.5.2.1.1.1.63",
+                        "key": "rfFreqTx",
+                        "delay": "{$POLL_INVENTORY}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "units": "Hz"
+                    },
+                    {
+                        "uuid": "25e31bf4ad2b4ef7b7fb0fc2f5cc5856",
+                        "name": "Operating State",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.3.2.4.1.2.63",
+                        "key": "rfOperationalState",
+                        "delay": "{$POLL_BB_INTERFACE}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "triggers": [
+                            {
+                                "uuid": "f49a5d8d78904e3e83171fc6bd85d27c",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfOperationalState)<>1",
+                                "name": "{HOSTNAME} wireless link down",
+                                "priority": "DISASTER"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d11166d20d6c4badba0852fff8d86065",
+                        "name": "Radio Rx capacity",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.3.2.1.1.12.63",
+                        "key": "rfRxCapacity",
+                        "delay": "{$POLL_RADIO_RELATED}",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "90d",
+                        "units": "bps",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1000"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "caee1855269d4e46ab21674ba30fd5d5",
+                        "name": "Radio Tx capacity",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.3.2.1.1.11.63",
+                        "key": "rfTxCapacity",
+                        "delay": "{$POLL_RADIO_RELATED}",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "90d",
+                        "units": "bps",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "1000"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "184bd56ddda940e690f1a49286788f3b",
+                        "name": "Radio TX Power",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.4.1.2509.9.5.2.1.1.3.63",
+                        "key": "rfTxPower",
+                        "delay": "{$POLL_MISC}",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "90d",
+                        "units": "dBm"
+                    },
+                    {
+                        "uuid": "89f804d8e26742e1a327932c19764a2f",
+                        "name": "Radio Upload",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.10.1537",
+                        "key": "rfUpload",
+                        "delay": "{$POLL_RADIO_RELATED}",
+                        "history": "7d",
+                        "trends": "90d",
+                        "units": "bps",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "8"
+                                ]
+                            },
+                            {
+                                "type": "CHANGE_PER_SECOND",
+                                "parameters": [
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "59cece5146ce48649c2536707b045a4d",
+                        "name": "Uptime",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": ".1.3.6.1.2.1.1.3.0",
+                        "key": "upTime.1",
+                        "delay": "{$POLL_UPTIME}",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "trends": "90d",
+                        "units": "s",
+                        "preprocessing": [
+                            {
+                                "type": "MULTIPLIER",
+                                "parameters": [
+                                    "0.01"
+                                ]
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e59d6e27242448c1af182288fee0d293",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/upTime.1,#2)>last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/upTime.1)",
+                                "name": "{HOSTNAME} was restarted",
+                                "priority": "HIGH"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "e72754b165ee4df28c02c776f77acc48",
+                        "name": "Interfaces",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},ifIndex]",
+                        "key": "snmp.discovery",
+                        "delay": "{$DISCOVERY_INTERFACES}",
+                        "status": "DISABLED",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "@ZENTRO_REGEX_BB_SIKLU_INTERFACES_NAME",
+                                    "formulaid": "A"
+                                }
+                            ]
+                        },
+                        "lifetime_type": "DELETE_IMMEDIATELY",
+                        "lifetime": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "dcb87f5a5c264cbf989ef01966808b8f",
+                                "name": "{#SNMPVALUE} Admin Status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}",
+                                "key": "AdminStatus[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_TRAFFIC}",
+                                "history": "30d"
+                            },
+                            {
+                                "uuid": "5896b64bbf744561904837e6591c133c",
+                                "name": "{#SNMPVALUE} Download",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.6.{#SNMPINDEX}",
+                                "key": "ifHCInOctets[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_TRAFFIC}",
+                                "history": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "736b0429025f4cdd92af42bd27f26192",
+                                "name": "{#SNMPVALUE} Upload",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.10.{#SNMPINDEX}",
+                                "key": "ifHCOutOctets[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE_TRAFFIC}",
+                                "history": "30d",
+                                "units": "bps",
+                                "preprocessing": [
+                                    {
+                                        "type": "CHANGE_PER_SECOND",
+                                        "parameters": [
+                                            ""
+                                        ]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "8"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "e17a54b749f149ff9e4dcb7861be5cd4",
+                                "name": "{#SNMPVALUE} Oper Status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}",
+                                "key": "OperStatus[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d"
+                            },
+                            {
+                                "uuid": "bfd2a2df92d04cb8ac9f3950446891ad",
+                                "name": "{#SNMPVALUE} Speed",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": ".1.3.6.1.2.1.31.1.1.1.15.{#SNMPINDEX}",
+                                "key": "Speed[{#SNMPVALUE}]",
+                                "delay": "{$POLL_BB_INTERFACE}",
+                                "history": "90d",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1000000"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "e64d4aa95cc14191b5f7903d0ad0e491",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/AdminStatus[{#SNMPVALUE}])=1 and last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/OperStatus[{#SNMPVALUE}])<>1",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} down",
+                                "priority": "HIGH"
+                            },
+                            {
+                                "uuid": "b30a68166a4d44c2852f767152904931",
+                                "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/OperStatus[{#SNMPVALUE}])=1 and  last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/Speed[{#SNMPVALUE}])<1000000000",
+                                "name": "{HOSTNAME} int {#SNMPVALUE} not gig",
+                                "priority": "HIGH"
+                            },
+                            {
+                                "uuid": "3e872aad3a9b4f7e9c023813b96a419d",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/ifHCInOctets[{#SNMPVALUE}],{$CONGESTION_AVG_TIME})>(\nlast(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/Speed[{#SNMPVALUE}])*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/Speed[{#SNMPVALUE}])>0",
+                                "name": "{HOSTNAME} {#SNMPVALUE} wired download>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                                "priority": "HIGH"
+                            },
+                            {
+                                "uuid": "c2c1593c6cc1422781edd7293477580b",
+                                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/ifHCOutOctets[{#SNMPVALUE}],{$CONGESTION_AVG_TIME})>(\nlast(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/Speed[{#SNMPVALUE}])*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/Speed[{#SNMPVALUE}])>0",
+                                "name": "{HOSTNAME} {#SNMPVALUE} wired upload>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                                "priority": "HIGH"
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "c98e021f838f4a02b0f0d7dea433713e",
+                                "name": "Inttraffic: {#SNMPVALUE}",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "FILLED_REGION",
+                                        "color": "009900",
+                                        "yaxisside": "RIGHT",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                                            "key": "ifHCInOctets[{#SNMPVALUE}]"
+                                        }
+                                    },
+                                    {
+                                        "sortorder": "1",
+                                        "color": "000099",
+                                        "yaxisside": "RIGHT",
+                                        "item": {
+                                            "host": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                                            "key": "ifHCOutOctets[{#SNMPVALUE}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "oomoomee"
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "d00df4526a314ef19af5b54964b75988",
+                        "name": "Siklu-Channel-Widths",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "250"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "500"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "750"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "1250"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "125"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "083fa37cb54349019e7308edb530f2c8",
+                        "name": "Siklu-Modulation-Rate",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "QPSK1"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "QPSK2"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "QPSK3"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "QPSK16"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "QPSK64"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "QPSK32"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "BPSK1"
+                            },
+                            {
+                                "value": "8",
+                                "newvalue": "BPSK2"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "triggers": [
+            {
+                "uuid": "fc2816ffe68f44c8a5ba57699ab55a92",
+                "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfRxCapacity)>7000000000 or last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfTxCapacity)>7000000000",
+                "name": "{HOSTNAME} capacity low",
+                "priority": "HIGH",
+                "dependencies": [
+                    {
+                        "name": "{HOSTNAME} wireless link down",
+                        "expression": "last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfOperationalState)<>1"
+                    }
+                ]
+            },
+            {
+                "uuid": "94c70673358f4f288f04fc338869b452",
+                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfDownload,{$CONGESTION_AVG_TIME})>( last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfRxCapacity)*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfRxCapacity)>0",
+                "name": "{HOSTNAME} wireless download>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                "priority": "HIGH"
+            },
+            {
+                "uuid": "6fe4d89b76e24e0787ebb59f11cad5c0",
+                "expression": "avg(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfUpload,{$CONGESTION_AVG_TIME})>( last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfTxCapacity)*{$GLOBAL_PERCENT_INT_UTILIZATION}/100) and last(/ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO/rfTxCapacity)>0",
+                "name": "{HOSTNAME} wireless upload>{$GLOBAL_PERCENT_INT_UTILIZATION}%",
+                "priority": "HIGH"
+            }
+        ],
+        "graphs": [
+            {
+                "uuid": "edbea8927dac4936b2bfd9cd3e0f8a54",
+                "name": "Capacity",
+                "ymin_type_1": "FIXED",
+                "graph_items": [
+                    {
+                        "drawtype": "FILLED_REGION",
+                        "color": "1A7C11",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                            "key": "rfRxCapacity"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "1a10e06797294062a27cddf7df457bf5",
+                "name": "RSSI (Signal)",
+                "graph_items": [
+                    {
+                        "color": "00C800",
+                        "item": {
+                            "host": "ZENTRO_ZBX_TEMPLATE_AVIAT_WTM4880_RADIO",
+                            "key": "rfAverageRSL"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

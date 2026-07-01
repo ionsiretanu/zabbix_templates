@@ -1,0 +1,230 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "a5cb81878d394b8d98e6b9853b03d98b",
+                "name": "HPE"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "b87dd36d393b4843907a81479aef6aac",
+                "template": ".HPE - Optical interfaces by SNMP",
+                "name": ".HPE - Optical interfaces by SNMP",
+                "description": "SFP/SFP+ optical monitoring for HPE Comware 7 switches via H3C transceiver MIB.\nTested on: HPE 1950 24G 2SFP+ 2XGT (JG960A), Comware 7.1.045.\n\nMIB: HH3C-TRANSEIVER-MIB (1.3.6.1.4.1.25506.2.70.1.1.1)\n  Indexed by ifIndex.\n  .2 = transceiver type string\n  .6 = present (1=installed, 2=not installed)\n  .9 = Rx optical power (units: 0.01 dBm; 2147483647 = DOM not supported)\n  .10 = Tx optical power (units: 0.01 dBm)\n  .13 = temperature (units: 1°C)\n\nCross-referenced with ifDescr (IF-MIB) to get interface names.\n\nIMPORTANT: DOM values of 2147483647 mean the transceiver does not support\ndigital optical monitoring. The LLD filter {#SFP_RXPOWER} NOT_MATCHES ^2147483647$\nexcludes such ports from item creation. Run SNMP walk on\n1.3.6.1.4.1.25506.2.70.1.1.1.9 to verify DOM availability on your platform.",
+                "groups": [
+                    {"name": "HPE"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "items": [
+                    {
+                        "uuid": "7096074863794f9c82237da3b7a3cce4",
+                        "name": "SNMP walk: HPE transceiver info",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.2.2.1.2,1.3.6.1.4.1.25506.2.70.1.1.1.2,1.3.6.1.4.1.25506.2.70.1.1.1.6,1.3.6.1.4.1.25506.2.70.1.1.1.9,1.3.6.1.4.1.25506.2.70.1.1.1.10,1.3.6.1.4.1.25506.2.70.1.1.1.13]",
+                        "key": "hpe.sfp.walk",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "Bulk walk combining IF-MIB ifDescr (for port names) and H3C transceiver table (type, present, Rx/Tx power, temperature). All dependent items use this as master.",
+                        "tags": [
+                            {"tag": "component", "value": "optics"},
+                            {"tag": "component", "value": "raw"}
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "c16aa164dbf6472bba545e9aa50ca14f",
+                        "name": "SFP optical power discovery",
+                        "type": "DEPENDENT",
+                        "key": "hpe.sfp.discovery",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#SFP_STATUS}",
+                                    "value": "^1$"
+                                },
+                                {
+                                    "macro": "{#SFP_RXPOWER}",
+                                    "value": "^2147483647$",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                },
+                                {
+                                    "macro": "{#SFP_TYPE}",
+                                    "value": ".",
+                                    "operator": "MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "description": "Discovers SFP/SFP+ interfaces with DOM optical power monitoring.\nFilters: installed (STATUS=1), DOM available (RXPOWER != 2147483647), type string non-empty.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "e38dbeb3ccd54e38a3d4f3530e021f53",
+                                "name": "SFP {#IFDESCR} ({#SFP_TYPE}): Rx Power",
+                                "type": "DEPENDENT",
+                                "key": "hpe.sfp.rxpower[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "value_type": "FLOAT",
+                                "units": "dbm",
+                                "description": "SFP Rx optical power. Raw value in 0.01 dBm units × 0.01 = dBm.\nhh3cTransInfoOptRxPower (.9) at ifIndex {#SNMPINDEX}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": ["1.3.6.1.4.1.25506.2.70.1.1.1.9.{#SNMPINDEX}", "0"]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": ["{$HPE.SFP.POWER_SCALAR}"]
+                                    }
+                                ],
+                                "master_item": {"key": "hpe.sfp.walk"},
+                                "tags": [
+                                    {"tag": "component", "value": "optics"},
+                                    {"tag": "ifdescr", "value": "{#IFDESCR}"}
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "be19b4361b1f4c0dbccf5c39d168a206",
+                                        "expression": "last(/.HPE - Optical interfaces by SNMP/hpe.sfp.rxpower[{#SNMPINDEX}]) < {$SFP.POWER.LOW.ALARM}",
+                                        "name": "HPE: SFP {#IFDESCR}: Rx Power Low Alarm ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    },
+                                    {
+                                        "uuid": "e717aa9a448846fe89789d99eb19c083",
+                                        "expression": "last(/.HPE - Optical interfaces by SNMP/hpe.sfp.rxpower[{#SNMPINDEX}]) < {$SFP.POWER.LOW.WARN}",
+                                        "name": "HPE: SFP {#IFDESCR}: Rx Power Low Warning ({ITEM.LASTVALUE})",
+                                        "priority": "AVERAGE",
+                                        "manual_close": "YES",
+                                        "dependencies": [
+                                            {
+                                                "name": "HPE: SFP {#IFDESCR}: Rx Power Low Alarm ({ITEM.LASTVALUE})",
+                                                "expression": "last(/.HPE - Optical interfaces by SNMP/hpe.sfp.rxpower[{#SNMPINDEX}]) < {$SFP.POWER.LOW.ALARM}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "72d9ff6ca6554359be92b552202bbfd8",
+                                "name": "SFP {#IFDESCR} ({#SFP_TYPE}): Tx Power",
+                                "type": "DEPENDENT",
+                                "key": "hpe.sfp.txpower[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "value_type": "FLOAT",
+                                "units": "dbm",
+                                "description": "SFP Tx optical power. Raw value in 0.01 dBm × 0.01 = dBm.\nhh3cTransInfoOptTxPower (.10) at ifIndex {#SNMPINDEX}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": ["1.3.6.1.4.1.25506.2.70.1.1.1.10.{#SNMPINDEX}", "0"]
+                                    },
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": ["{$HPE.SFP.POWER_SCALAR}"]
+                                    }
+                                ],
+                                "master_item": {"key": "hpe.sfp.walk"},
+                                "tags": [
+                                    {"tag": "component", "value": "optics"},
+                                    {"tag": "ifdescr", "value": "{#IFDESCR}"}
+                                ]
+                            },
+                            {
+                                "uuid": "58e6e407abcf4f84b8f8b20f83c057e3",
+                                "name": "SFP {#IFDESCR} ({#SFP_TYPE}): Temperature",
+                                "type": "DEPENDENT",
+                                "key": "hpe.sfp.temp[{#SNMPINDEX}]",
+                                "history": "{$HISTORY}",
+                                "trends": "{$TRENDS}",
+                                "value_type": "FLOAT",
+                                "units": "°C",
+                                "description": "SFP transceiver temperature in Celsius.\nhh3cTransInfoTemp (.13) at ifIndex {#SNMPINDEX}.",
+                                "preprocessing": [
+                                    {
+                                        "type": "SNMP_WALK_VALUE",
+                                        "parameters": ["1.3.6.1.4.1.25506.2.70.1.1.1.13.{#SNMPINDEX}", "0"]
+                                    },
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": ["1h"]
+                                    }
+                                ],
+                                "master_item": {"key": "hpe.sfp.walk"},
+                                "tags": [
+                                    {"tag": "component", "value": "temperature"},
+                                    {"tag": "component", "value": "optics"},
+                                    {"tag": "ifdescr", "value": "{#IFDESCR}"}
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "65e5270e759241588f77ea10da2dcb45",
+                                        "expression": "last(/.HPE - Optical interfaces by SNMP/hpe.sfp.temp[{#SNMPINDEX}]) > {$SFP.TEMP.HIGH.ALARM}",
+                                        "name": "HPE: SFP {#IFDESCR}: Temperature High ({ITEM.LASTVALUE})",
+                                        "priority": "HIGH",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {"key": "hpe.sfp.walk"},
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#IFDESCR}",    "1.3.6.1.2.1.2.2.1.2",              "0",
+                                    "{#SFP_TYPE}",   "1.3.6.1.4.1.25506.2.70.1.1.1.2",  "0",
+                                    "{#SFP_STATUS}", "1.3.6.1.4.1.25506.2.70.1.1.1.6",  "0",
+                                    "{#SFP_RXPOWER}","1.3.6.1.4.1.25506.2.70.1.1.1.9",  "0"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": ["1h"]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {"tag": "target", "value": "hpe"}
+                ],
+                "macros": [
+                    {
+                        "macro": "{$HPE.SFP.POWER_SCALAR}",
+                        "value": "0.01",
+                        "description": "Multiplier for H3C optical power values. H3C reports in units of 0.01 dBm, so 0.01 converts to dBm."
+                    },
+                    {
+                        "macro": "{$SFP.POWER.LOW.ALARM}",
+                        "value": "-26",
+                        "description": "Rx optical power low alarm threshold (dBm)"
+                    },
+                    {
+                        "macro": "{$SFP.POWER.LOW.WARN}",
+                        "value": "-24",
+                        "description": "Rx optical power low warning threshold (dBm)"
+                    },
+                    {
+                        "macro": "{$SFP.TEMP.HIGH.ALARM}",
+                        "value": "95",
+                        "description": "SFP temperature high alarm threshold (°C)"
+                    }
+                ]
+            }
+        ]
+    }
+}

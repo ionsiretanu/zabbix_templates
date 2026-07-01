@@ -1,0 +1,1709 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "91d964de963440aebdae3ec9e1e960ed",
+                "name": "Cisco"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "76114e9eceb543fd9467cd38e95ecba0",
+                "template": ".Cisco Generic by SNMP",
+                "name": ".Cisco Generic by SNMP",
+                "description": "Cisco Series",
+                "groups": [
+                    {
+                        "name": "Cisco"
+                    },
+                    {
+                        "name": "ITCare"
+                    },
+                    {
+                        "name": "Templates/Network devices"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "1cc168ea02804a9c8583332df663e094",
+                        "name": "Temperature Sensor Walk",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.99.1.1.1.1,1.3.6.1.2.1.99.1.1.1.2,1.3.6.1.2.1.99.1.1.1.3,1.3.6.1.2.1.99.1.1.1.4,1.3.6.1.2.1.99.1.1.1.5,1.3.6.1.2.1.99.1.1.1.6,1.3.6.1.2.1.47.1.1.1.1.7]",
+                        "key": "sensor.temp.walk",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "0",
+                        "value_type": "TEXT",
+                        "description": "SENSOR TYPE: 1.3.6.1.2.1.99.1.1.1.1\nSENSOR SCALE: 1.3.6.1.2.1.99.1.1.1.2\nSENSOR NAME: 1.3.6.1.2.1.47.1.1.1.1.7\nSENSOR PRECISION: 1.3.6.1.2.1.99.1.1.1.3\nSENSOR VALUE: 1.3.6.1.2.1.99.1.1.1.4\nSENSOR UNITS: 1.3.6.1.2.1.99.1.1.1.6\nSENSOR STATUS: 1.3.6.1.2.1.99.1.1.1.5",
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "raw"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "2c6f2838eff142cb8b1f516144c2e6e4",
+                        "name": "Chassis index",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.47.1.1.1.1.5,1.3.6.1.2.1.47.1.1.1.1.11,1.3.6.1.2.1.47.1.1.1.1.13]",
+                        "key": "system.asr9k.chassis",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "0",
+                        "value_type": "CHAR",
+                        "description": "MIB: ENTITY-MIB.",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar targetIndex = '';\nvar result = [];\n\n// Step 1: Find the SNMPINDEX where we have \"= INTEGER: 3\" in .1.3.6.1.2.1.47.1.1.1.1.5.{SNMPINDEX}\nfor (var i = 0; i < lines.length; i++) {\n    if (lines[i].indexOf('.1.3.6.1.2.1.47.1.1.1.1.5.') !== -1 && lines[i].indexOf('= INTEGER: 3') !== -1) {\n        // Extract the SNMPINDEX from the OID\n        var oidParts = lines[i].split('.1.3.6.1.2.1.47.1.1.1.1.5.');\n        if (oidParts.length > 1) {\n            var indexPart = oidParts[1].split(' =')[0];\n            targetIndex = indexPart.trim();\n            break;\n        }\n    }\n}\n\n// Step 2: If we found a target index, keep all rows containing that index\nif (targetIndex !== '') {\n    for (var j = 0; j < lines.length; j++) {\n        // Check if the line contains the target SNMPINDEX (as a whole number to avoid partial matches)\n        if (lines[j].indexOf('.' + targetIndex + ' =') !== -1) {\n            result.push(lines[j]);\n        }\n    }\n}\n\nreturn result.join('\\n');"
+                                ]
+                            },
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "{#HW_MODEL}",
+                                    "1.3.6.1.2.1.47.1.1.1.1.13",
+                                    "0",
+                                    "{#HW_SERIAL}",
+                                    "1.3.6.1.2.1.47.1.1.1.1.11",
+                                    "0"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "bbcdd093d62644a0bf03d23a4a89967e",
+                        "name": "System description",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.1.1.0",
+                        "key": "system.descr",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: SNMPv2-MIB.\nThe textual description of the entity. This value should include the full name and version identification number of the system's hardware type, software operating-system, and the networking software.",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d138d6c5efdb4e99ad35d11fb0d8e6f5",
+                        "name": "Hardware model name",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.47.1.1.1.1.13.1,1.3.6.1.2.1.47.1.1.1.1.13.149,1.3.6.1.2.1.47.1.1.1.1.13.1000,1.3.6.1.2.1.47.1.1.1.1.13.1001]",
+                        "key": "system.hw.model",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: ENTITY-MIB.",
+                        "inventory_link": "MODEL",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar result = '';\n\n// Iterate from the bottom (last line) to the top\nfor (var i = lines.length - 1; i >= 0; i--) {\n    var match = lines[i].match(/STRING:\\s*\"([^\"]*)\"/);\n    // Check if it matched AND the captured group is not empty\n    if (match && match[1] && match[1].trim().length > 0) {\n        result = match[1].trim();\n        break; // Stop at the first non-empty one we find from the bottom\n    }\n}\n\nreturn result;"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "91574be87a0b489e9687317abb2a0ffa",
+                        "name": "Hardware serial number",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "walk[1.3.6.1.2.1.47.1.1.1.1.11.1,1.3.6.1.2.1.47.1.1.1.1.11.3,1.3.6.1.2.1.47.1.1.1.1.11.10,1.3.6.1.2.1.47.1.1.1.1.11.149,1.3.6.1.2.1.47.1.1.1.1.11.1000,1.3.6.1.2.1.47.1.1.1.1.11.1001]",
+                        "key": "system.hw.serialnumber",
+                        "delay": "{$INVENTORY_INT}",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: ENTITY-MIB.",
+                        "inventory_link": "SERIALNO_A",
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "var lines = value.split('\\n');\nvar result = '';\n\n// Iterate from the bottom (last line) to the top\nfor (var i = lines.length - 1; i >= 0; i--) {\n    var match = lines[i].match(/STRING:\\s*\"([^\"]*)\"/);\n    // Check if it matched AND the captured group is not empty\n    if (match && match[1] && match[1].trim().length > 0) {\n        result = match[1].trim();\n        break; // Stop at the first non-empty one we find from the bottom\n    }\n}\n\nreturn result;"
+                                ]
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "6887985955654b5aa9a09f1793101b02",
+                                "expression": "change(/.Cisco Generic by SNMP/system.hw.serialnumber)=1 and length(last(/.Cisco Generic by SNMP/system.hw.serialnumber))>0",
+                                "name": "Cisco ASR9K: Device has been replaced",
+                                "event_name": "Cisco ASR9K: Device has been replaced (new serial number received)",
+                                "priority": "INFO",
+                                "description": "The serial number of a device has changed. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "abbdee1017ca48d7b9912df5a54e3319",
+                        "name": "Operating system",
+                        "type": "DEPENDENT",
+                        "key": "system.sw.os",
+                        "history": "{$HISTORY}",
+                        "value_type": "CHAR",
+                        "description": "MIB: CISCO-IMAGE-MIB",
+                        "inventory_link": "OS",
+                        "preprocessing": [
+                            {
+                                "type": "REGEX",
+                                "parameters": [
+                                    "Version\\s+([0-9]+\\.[0-9]+\\.[0-9]+)",
+                                    "\\1"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1d"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "system.descr"
+                        },
+                        "tags": [
+                            {
+                                "tag": "component",
+                                "value": "system"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "baab3746aeba4d9c8c6f9c3e8bcde0ef",
+                                "expression": "change(/.Cisco Generic by SNMP/system.sw.os)=1 and length(last(/.Cisco Generic by SNMP/system.sw.os))>0",
+                                "recovery_mode": "NONE",
+                                "name": "Cisco ASR9K: Operating system description has changed",
+                                "priority": "INFO",
+                                "description": "The description of the operating system has changed. Possible reasons that system has been updated or replaced. Acknowledge to close the problem manually.",
+                                "manual_close": "YES",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "14528c65115c42a2b36b5f7a5f43dd6c",
+                        "name": "CPU discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},1.3.6.1.4.1.9.9.109.1.1.1.1.2]",
+                        "key": "cpu.discovery",
+                        "delay": "1h",
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "You must use CISCO-PROCESS-MIB and its object `cpmCPUTotal5minRev` from the table called `cpmCPUTotalTable`, and indexed with `cpmCPUTotalPhysicalIndex`.\nThe table `cpmCPUTotalTable` allows CISCO-PROCESS-MIB to keep the CPU statistics for different physical entities in the router, such as different CPU chips, a group of CPUs, or CPUs in different modules/cards.\nIn the case of a single CPU, the `cpmCPUTotalTable` has only one entry.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "b3485866255045569a873f1e19d23800",
+                                "name": "#{#SNMPINDEX}: CPU utilization",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}",
+                                "key": "system.cpu.util[{#SNMPINDEX}]",
+                                "delay": "5m",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "description": "MIB: CISCO-PROCESS-MIB\nThe object name: `cpmCPUTotal5minRev`\n\nThe MIB object `cpmCPUTotal5minRev` provides a more accurate view of the performance of the router over time than the MIB objects `cpmCPUTotal1minRev` and `cpmCPUTotal5secRev`. These MIB objects are not accurate because they look at the CPU with an interval of one minute and five seconds, respectively. These MIBs enable to monitor the trends and plan the capacity of your network. The recommended baseline rising threshold for the `cpmCPUTotal5minRev` is 90 percent. Depending on the platform, some routers that run at 90 percent, for example, 2500 series can exhibit performance degradation versus a high-end router, for example, the 7500 series, which can operate fine.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "cpu"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "20bf634ee72b46e983ee6170a3cfb86b",
+                                        "expression": "min(/.Cisco Generic by SNMP/system.cpu.util[{#SNMPINDEX}],5m)>{$CPU.UTIL.CRIT}",
+                                        "name": "#{#SNMPINDEX}: High CPU utilization",
+                                        "event_name": "#{#SNMPINDEX}: High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)",
+                                        "opdata": "Current utilization: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "The CPU utilization is too high. The system might be slow to respond.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "capacity"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "f9e2610e7c4c49d68c72d98cf9f86b53",
+                                "name": "#{#SNMPINDEX}: CPU utilization",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "1A7C11",
+                                        "item": {
+                                            "host": ".Cisco Generic by SNMP",
+                                            "key": "system.cpu.util[{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "36400cf5449945b39512900a88f447c2",
+                        "name": "Entity serial numbers discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#ENT_CLASS},1.3.6.1.2.1.47.1.1.1.1.5,{#ENT_NAME},1.3.6.1.2.1.47.1.1.1.1.7,{#ENT_SN},1.3.6.1.2.1.47.1.1.1.1.11]",
+                        "key": "entity_sn.discovery",
+                        "delay": "1h",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#ENT_CLASS}",
+                                    "value": "{$ENT_CLASS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                },
+                                {
+                                    "macro": "{#ENT_SN}",
+                                    "value": "{$ENT_SN.MATCHES}"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "The discovery of serial numbers of the entities from ENTITY-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "084f00531b2043f590f6930c7ebce1c0",
+                                "name": "{#ENT_NAME}: Hardware serial number",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.2.1.47.1.1.1.1.11.{#SNMPINDEX}",
+                                "key": "system.hw.serialnumber[{#SNMPINDEX}]",
+                                "delay": "1h",
+                                "history": "7d",
+                                "value_type": "CHAR",
+                                "description": "MIB: ENTITY-MIB.\nThe object name: `entPhysicalSerialNum`.\nThe vendor-specific serial number string for the physical entity. The preferred value is the serial number string actually printed on the component itself (if present).",
+                                "preprocessing": [
+                                    {
+                                        "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                        "parameters": [
+                                            "1d"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "serial-number"
+                                    },
+                                    {
+                                        "tag": "entity",
+                                        "value": "{#ENT_NAME}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "4cccfec9d7134d3690ee0150cd2f177c",
+                                        "expression": "change(/.Cisco Generic by SNMP/system.hw.serialnumber[{#SNMPINDEX}])=1 and length(last(/.Cisco Generic by SNMP/system.hw.serialnumber[{#SNMPINDEX}]))>0",
+                                        "name": "{#ENT_NAME}: Device has been replaced",
+                                        "event_name": "{#ENT_NAME}: Device has been replaced (new serial number received)",
+                                        "priority": "INFO",
+                                        "description": "The device serial number has changed. Acknowledge to close the problem manually.",
+                                        "manual_close": "YES",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "notice"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "5f0e1b3add0642adb41fa701f1a44e05",
+                        "name": "Fan status discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]",
+                        "key": "fan.status.discovery",
+                        "delay": "1h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "{$CISCO.LLD.FILTER.FAN.NAME.MATCHES}"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "The discovery of metrics for the fan's status from ENTITY-MIB and CISCO-ENTITY-FRU-CONTROL-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "65ab3eb8d8b44e3f93f8f0487e24f4c5",
+                                "name": "{#SNMPVALUE}: Fan operational status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.117.1.4.1.1.1.{#SNMPINDEX}",
+                                "key": "sensor.fan.status[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "description": "MIB: CISCO-ENTITY-FRU-CONTROL-MIB.\nThe object name: `cefcFanTrayOperStatus`.\nThe operational state of the fan or a fan tray.\nPossible values:\n-  unknown (1) - unknown;\n-  up (2) - powered on;\n-  down (3) - powered down;\n-  warning (4) - partial failure; needs replacement as soon as possible.",
+                                "valuemap": {
+                                    "name": "CISCO-ENTITY-FRU-CONTROL-MIB::cefcFanTrayOperStatus"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "fan"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "22bfb49389b84d1ea634b0a4dc9353de",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.fan.status[{#SNMPINDEX}])=3",
+                                        "name": "{#SNMPVALUE}: Fan is down",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "AVERAGE",
+                                        "description": "The fan unit requires immediate attention.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "0c852b6a4d6c40c697b14cc77230ffae",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.fan.status[{#SNMPINDEX}])=1",
+                                        "name": "{#SNMPVALUE}: Fan is in unknown state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "INFO",
+                                        "description": "The fan unit requires attention.",
+                                        "dependencies": [
+                                            {
+                                                "name": "{#SNMPVALUE}: Fan is down",
+                                                "expression": "last(/.Cisco Generic by SNMP/sensor.fan.status[{#SNMPINDEX}])=3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "4e4815ce72dc4a53a70b8fff4b5e3892",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.fan.status[{#SNMPINDEX}])=4",
+                                        "name": "{#SNMPVALUE}: Fan is in warning state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "The fan unit requires attention.",
+                                        "dependencies": [
+                                            {
+                                                "name": "{#SNMPVALUE}: Fan is down",
+                                                "expression": "last(/.Cisco Generic by SNMP/sensor.fan.status[{#SNMPINDEX}])=3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "26031b4919e7461e8caac05d92e9524d",
+                        "name": "Memory discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},1.3.6.1.4.1.9.9.221.1.1.1.1.3]",
+                        "key": "memory.discovery",
+                        "delay": "1h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "^(image|reserved)",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "The discovery of `ciscoMemoryPoolTable` - the table that contains monitoring entries of the memory pool.\nFor more details see \"How to Get Free and Largest Block of Contiguous Memory Using SNMP\":\nhttp://www.cisco.com/c/en/us/support/docs/ip/simple-network-management-protocol-snmp/15216-contiguous-memory.html",
+                        "item_prototypes": [
+                            {
+                                "uuid": "fa2e3ab124694e1385424f420cb0db13",
+                                "name": "{#SNMPVALUE}: Free memory",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.221.1.1.1.1.8.{#SNMPINDEX}",
+                                "key": "vm.memory.free[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "units": "B",
+                                "description": "MIB: CISCO-ENHANCED-MEMPOOL-MIB.\nThe object name: `cempMemPoolFree`.\nIt indicates the number of bytes from the memory pool that are currently unused on the physical entity.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    },
+                                    {
+                                        "tag": "memory",
+                                        "value": "{#SNMPVALUE}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "b19ab26bbde649aaabedea3c3b1a6126",
+                                "name": "{#SNMPVALUE}: Used memory",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.221.1.1.1.1.7.{#SNMPINDEX}",
+                                "key": "vm.memory.used[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "units": "B",
+                                "description": "MIB: CISCO-ENHANCED-MEMPOOL-MIB.\nThe object name: `cempMemPoolUsed`.\nIt indicates the number of bytes from the memory pool that are currently in use by applications on the physical entity.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    },
+                                    {
+                                        "tag": "memory",
+                                        "value": "{#SNMPVALUE}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0ba6853ff8284d6da120869b2b407cdb",
+                                "name": "{#SNMPVALUE}: Memory utilization",
+                                "type": "CALCULATED",
+                                "key": "vm.memory.util[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "units": "%",
+                                "params": "last(//vm.memory.used[{#SNMPINDEX}])/(last(//vm.memory.free[{#SNMPINDEX}])+last(//vm.memory.used[{#SNMPINDEX}]))*100",
+                                "description": "The memory utilization expressed in %.",
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "memory"
+                                    },
+                                    {
+                                        "tag": "memory",
+                                        "value": "{#SNMPVALUE}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "305e75a9c518406db210e543ae8b9688",
+                                        "expression": "min(/.Cisco Generic by SNMP/vm.memory.util[{#SNMPINDEX}],5m)>{$MEMORY.UTIL.MAX}",
+                                        "name": "{#SNMPVALUE}: High memory utilization",
+                                        "event_name": "{#SNMPVALUE}: High memory utilization ( >{$MEMORY.UTIL.MAX}% for 5m)",
+                                        "priority": "AVERAGE",
+                                        "description": "The system is running out of free memory.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "capacity"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "fcacf1f8337347ecbf76974409b752e0",
+                                "name": "{#SNMPVALUE}: Memory utilization",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "1A7C11",
+                                        "item": {
+                                            "host": ".Cisco Generic by SNMP",
+                                            "key": "vm.memory.util[{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "6ad02dcaa05a4c30937d06a73c7f6ce7",
+                        "name": "PSU discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]",
+                        "key": "psu.discovery",
+                        "delay": "1h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SNMPVALUE}",
+                                    "value": "{$CISCO.LLD.FILTER.PSU.NAME.MATCHES}"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "The discovery of power supplies from ENTITY-MIB and CISCO-ENTITY-FRU-CONTROL-MIB.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "66ec3032165a437e9dc059ecfb017478",
+                                "name": "{#SNMPVALUE}: Power supply status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.117.1.1.2.1.2.{#SNMPINDEX}",
+                                "key": "sensor.psu.status[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "description": "MIB: CISCO-ENTITY-FRU-CONTROL-MIB.\nThe object name: cefcFRUPowerOperStatus.\nThe Operational field-replaceable unit (FRU) Status types.\nThe valid values are:\n-  offEnvOther (1): FRU is powered off because of a problem not listed below;\n-  on (2): FRU is powered on;\n-  offAdmin (3): administratively off;\n-  offDenied (4): FRU is powered off because available system power is insufficient;\n-  offEnvPower (5): FRU is powered off because of a power problem in the FRU. For example, the FRU's power translation (DC-DC converter) or distribution failed;\n-  offEnvTemp (6): FRU is powered off because of temperature problem;\n-  offEnvFan (7): FRU is powered off because of fan problems;\n-  failed (8): FRU is in failed state;\n-  onButFanFail (9): FRU is on but fan has failed;\n-  offCooling (10): FRU is powered off because of the system's insufficient cooling capacity;\n-  offConnectorRating (11): FRU is powered off because of the system's connector rating exceeded;\n-  onButInlinePowerFail (12): The FRU is on but no inline power is being delivered as the data/inline power component of the FRU has failed.",
+                                "valuemap": {
+                                    "name": "CISCO-ENTITY-FRU-CONTROL-MIB::cefcFRUPowerOperStatus"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "power"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "afb14b70f1bf459296504724bca6950c",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.psu.status[{#SNMPINDEX}])=8",
+                                        "name": "{#SNMPVALUE}: PSU is in failed state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "description": "The FRU is in a failed state.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "0109785179ab4ddd8ff02ed1199cadc6",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.psu.status[{#SNMPINDEX}])=3",
+                                        "name": "{#SNMPVALUE}: PSU is off: Administratively",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "INFO",
+                                        "description": "The FRU is administratively off.",
+                                        "dependencies": [
+                                            {
+                                                "name": "{#SNMPVALUE}: PSU is in failed state",
+                                                "expression": "last(/.Cisco Generic by SNMP/sensor.psu.status[{#SNMPINDEX}])=8"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "6d0a0dbd33454208a9267c23e3c58e90",
+                                        "expression": "find(/.Cisco Generic by SNMP/sensor.psu.status[{#SNMPINDEX}],#1,\"regexp\",{$PSU.PROBLEM.STATES})",
+                                        "name": "{#SNMPVALUE}: PSU is off or out of optimal state",
+                                        "opdata": "Current state: {ITEM.LASTVALUE}",
+                                        "priority": "AVERAGE",
+                                        "description": "The PSU requires attention. Compare the current state from operational data with the table below:\n-  offEnvOther (1): FRU is powered off because of a problem not listed below;\n-  on (2): FRU is powered on;\n-  offAdmin (3): administratively off;\n-  offDenied (4): FRU is powered off because available system power is insufficient;\n-  offEnvPower (5): FRU is powered off because of a power problem in the FRU. For example, the FRU's power translation (DC-DC converter) or distribution failed;\n-  offEnvTemp (6): FRU is powered off because of temperature problem;\n-  offEnvFan (7): FRU is powered off because of fan problems;\n-  failed (8): FRU is in failed state;\n-  onButFanFail (9): FRU is on but fan has failed;\n-  offCooling (10): FRU is powered off because of the system's insufficient cooling capacity;\n-  offConnectorRating (11): FRU is powered off because of the system's connector rating exceeded;\n-  onButInlinePowerFail (12): The FRU is on but no inline power is being delivered as the data/inline power component of the FRU has failed.",
+                                        "dependencies": [
+                                            {
+                                                "name": "{#SNMPVALUE}: PSU is in failed state",
+                                                "expression": "last(/.Cisco Generic by SNMP/sensor.psu.status[{#SNMPINDEX}])=8"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "263f823d6c7942fa817855773d3a441b",
+                        "name": "Temperature Sensor Discovery",
+                        "type": "DEPENDENT",
+                        "key": "sensor.temp.discovery",
+                        "status": "DISABLED",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#SENSOR_STATUS}",
+                                    "value": "{$SENSOR.STATUS.MATCHES}"
+                                },
+                                {
+                                    "macro": "{#SENSOR_STATUS}",
+                                    "value": "{$SENSOR.STATUS.NOT_MATCHES}",
+                                    "operator": "NOT_MATCHES_REGEX"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "Discover temperature sensors.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "4de321d254ec41a19829b57dd738df8e",
+                                "name": "{#SENSOR_NAME}: Temperature Sensor Status",
+                                "type": "DEPENDENT",
+                                "key": "sensor.temp.status.new[{#SNMPINDEX}]",
+                                "history": "14d",
+                                "description": "MIB: CISCO-ENTITY-SENSOR-MIB.\nThe object name: entSensorStatus.\nThis variable indicates the present operational status of the sensor.\nPossible values:\n-  ok (1): means the agent can read the sensor value;\n-  unavailable (2): means that the agent presently can not report the sensor value;\n-  nonoperational (3) means that the agent believes the sensor is broken. The sensor could have a hard failure (e.g., disconnected wire), or a soft failure (e.g., out-of-range, jittery, or wildly fluctuating readings).",
+                                "valuemap": {
+                                    "name": "CISCO-ENTITY-SENSOR-MIB::entSensorStatus"
+                                },
+                                "master_item": {
+                                    "key": "sensor.temp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sensor",
+                                        "value": "{#SENSOR_NAME}"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "8faaea88f76c4b3fb15efe5cf9ba90ae",
+                                "name": "{#SENSOR_NAME}: Temperature",
+                                "type": "DEPENDENT",
+                                "key": "sensor.temp.value.new[{#SNMPINDEX}]",
+                                "history": "14d",
+                                "value_type": "FLOAT",
+                                "units": "!{#UNITS}",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return value*10**-{#MULTI}"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "sensor.temp.walk"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sensor",
+                                        "value": "{#SENSOR_NAME}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "sensor.temp.walk"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#MULTI}",
+                                "path": "$.['{#SENSOR_PRECISION}']"
+                            },
+                            {
+                                "lld_macro": "{#UNITS}",
+                                "path": "$.['{#SENSOR_UNITS}']"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "SNMP_WALK_TO_JSON",
+                                "parameters": [
+                                    "#SENSOR_TYPE",
+                                    "1.3.6.1.2.1.99.1.1.1.1",
+                                    "0",
+                                    "#SENSOR_SCALE",
+                                    "1.3.6.1.2.1.99.1.1.1.2",
+                                    "0",
+                                    "#SENSOR_NAME",
+                                    "1.3.6.1.2.1.47.1.1.1.1.7",
+                                    "0",
+                                    "#SENSOR_PRECISION",
+                                    "1.3.6.1.2.1.99.1.1.1.3",
+                                    "0",
+                                    "#SENSOR_VALUE",
+                                    "1.3.6.1.2.1.99.1.1.1.4",
+                                    "0",
+                                    "#SENSOR_UNITS",
+                                    "1.3.6.1.2.1.99.1.1.1.6",
+                                    "0",
+                                    "#SENSOR_STATUS",
+                                    "1.3.6.1.2.1.99.1.1.1.5",
+                                    "0"
+                                ],
+                                "error_handler": "CUSTOM_VALUE",
+                                "error_handler_params": "2"
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "d3fe5a7253254328bb77fddaa40947c5",
+                        "name": "Light sensor discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SENSOR_IF},1.3.6.1.2.1.47.1.1.1.1.7]",
+                        "key": "sfp.discovery",
+                        "delay": "1h",
+                        "filter": {
+                            "conditions": [
+                                {
+                                    "macro": "{#SENSOR_IF}",
+                                    "value": "{$CISCO.LLD.FILTER.SFP.NAME.MATCHES}"
+                                }
+                            ]
+                        },
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "item_prototypes": [
+                            {
+                                "uuid": "3d126b04fd904cf99a438915ca280240",
+                                "name": "{#SENSOR_IF}: High Warning threshold",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.2",
+                                "key": "entSensorThresholdRxTxValueHighWarn[{#SNMPINDEX}]",
+                                "delay": "{$CISCO.SFP.THRESHOLD_POLL_INT}",
+                                "history": "1d",
+                                "value_type": "FLOAT",
+                                "trends": "0",
+                                "units": "!dbm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return Math.round(10 * Math.log10(value / 1000) * 100) / 100;"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "5960219153e545de9f2d146c70524fcf",
+                                "name": "{#SENSOR_IF}: High Alert threshold",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.4",
+                                "key": "entSensorThresholdRxTxValueHigh[{#SNMPINDEX}]",
+                                "delay": "{$CISCO.SFP.THRESHOLD_POLL_INT}",
+                                "history": "1d",
+                                "value_type": "FLOAT",
+                                "trends": "0",
+                                "units": "!dbm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return Math.round(10 * Math.log10(value / 1000) * 100) / 100;"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "ae10af8990044e0c830f5eb0d898df3a",
+                                "name": "{#SENSOR_IF}: Low Warning threshold",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.1",
+                                "key": "entSensorThresholdRxTxValueLowWarn[{#SNMPINDEX}]",
+                                "delay": "{$CISCO.SFP.THRESHOLD_POLL_INT}",
+                                "history": "1d",
+                                "value_type": "FLOAT",
+                                "trends": "0",
+                                "units": "!dbm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return Math.round(10 * Math.log10(value / 1000) * 100) / 100;"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "f1359c953e374bee845222e36d7bb61e",
+                                "name": "{#SENSOR_IF}: Low Alert threshold",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.3",
+                                "key": "entSensorThresholdRxTxValueLow[{#SNMPINDEX}]",
+                                "delay": "{$CISCO.SFP.THRESHOLD_POLL_INT}",
+                                "history": "1d",
+                                "value_type": "FLOAT",
+                                "trends": "0",
+                                "units": "!dbm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return Math.round(10 * Math.log10(value / 1000) * 100) / 100;"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1187c462bae84c088b553f87725c951b",
+                                "name": "{#SENSOR_IF}:",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}",
+                                "key": "system.sfp.light[{#SNMPINDEX}]",
+                                "delay": "5m",
+                                "history": "14d",
+                                "value_type": "FLOAT",
+                                "units": "!dbm",
+                                "preprocessing": [
+                                    {
+                                        "type": "JAVASCRIPT",
+                                        "parameters": [
+                                            "return Math.round(10 * Math.log10(value / 1000) * 100) / 100;"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "network"
+                                    },
+                                    {
+                                        "tag": "component",
+                                        "value": "optics"
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [
+                            {
+                                "uuid": "acc624ed510b4a7f88190d7a8262f0f4",
+                                "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) > last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueHigh[{#SNMPINDEX}])",
+                                "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is above the critical threshold",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "HIGH",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "72b17cbc69ef46b3aee1525409cb1bd8",
+                                "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) > last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueHighWarn[{#SNMPINDEX}])",
+                                "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is above the warning threshold",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "WARNING",
+                                "dependencies": [
+                                    {
+                                        "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is above the critical threshold",
+                                        "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) > last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueHigh[{#SNMPINDEX}])"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "24f0ac9dfb844062b84677b25e9f4079",
+                                "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) < last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueLow[{#SNMPINDEX}])",
+                                "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is below the critical threshold",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "HIGH",
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "08cacef2b2424805b7addc7dc004d28e",
+                                "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) < last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueLowWarn[{#SNMPINDEX}])",
+                                "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is below the warning threshold",
+                                "opdata": "Current value: {ITEM.LASTVALUE1}",
+                                "priority": "WARNING",
+                                "dependencies": [
+                                    {
+                                        "name": "Cisco ASR9K: {#SENSOR_IF}: Light Level is below the critical threshold",
+                                        "expression": "last(/.Cisco Generic by SNMP/system.sfp.light[{#SNMPINDEX}]) < last(/.Cisco Generic by SNMP/entSensorThresholdRxTxValueLow[{#SNMPINDEX}])"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "scope",
+                                        "value": "notice"
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "STR_REPLACE",
+                                "parameters": [
+                                    "power",
+                                    "Light level"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "49831033a1e4456194a9dafcc76e8177",
+                        "name": "Temperature sensors discovery",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "discovery[{#SENSOR_TYPE},1.3.6.1.4.1.9.9.91.1.1.1.1.1,{#SENSOR_PRECISION},1.3.6.1.2.1.99.1.1.1.3,{#SENSOR_SCALE},1.3.6.1.4.1.9.9.91.1.1.1.1.2,{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]",
+                        "key": "temperature.discovery",
+                        "delay": "1h",
+                        "lifetime": "30d",
+                        "enabled_lifetime_type": "DISABLE_NEVER",
+                        "description": "The discovery of temperature sensors from CISCO-ENTITY-SENSOR-MIB and ENTITY-MIB. The sensors that have celsius (8) `entSensorType` are discovered. The scale of gathered values is taken from the `entSensorScale` and applied in item preprocessing.",
+                        "item_prototypes": [
+                            {
+                                "uuid": "134fa073dc6a40da8f4c33e3b4186f12",
+                                "name": "{#SNMPVALUE}: Temperature sensor status",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.1.1.1.5.{#SNMPINDEX}",
+                                "key": "sensor.temp.status[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "description": "MIB: CISCO-ENTITY-SENSOR-MIB.\nThe object name: entSensorStatus.\nThis variable indicates the present operational status of the sensor.\nPossible values:\n-  ok (1): means the agent can read the sensor value;\n-  unavailable (2): means that the agent presently can not report the sensor value;\n-  nonoperational (3) means that the agent believes the sensor is broken. The sensor could have a hard failure (e.g., disconnected wire), or a soft failure (e.g., out-of-range, jittery, or wildly fluctuating readings).",
+                                "valuemap": {
+                                    "name": "CISCO-ENTITY-SENSOR-MIB::entSensorStatus"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sensor",
+                                        "value": "{#SNMPVALUE}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "397a6f9063a748e1acc7aed6512948f7",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.temp.status[{#SNMPINDEX}])=2",
+                                        "name": "{#SNMPVALUE}: Temperature sensor is not available",
+                                        "opdata": "Current value: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "It means that the agent presently can not report the sensor value.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "b2f267e2f7824c27810a4d3e94b17ff8",
+                                        "expression": "last(/.Cisco Generic by SNMP/sensor.temp.status[{#SNMPINDEX}])=3",
+                                        "name": "{#SNMPVALUE}: Temperature sensor is not operational",
+                                        "opdata": "Current value: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "description": "It means that the agent considers that the sensor is broken. The sensor could have a hard failure (e.g., disconnected wire), or a soft failure (e.g., out-of-range, jittery, or wildly fluctuating readings).",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "a4cf236bbbc74ad1b5eb5780723729f6",
+                                "name": "{#SNMPVALUE}: Temperature",
+                                "type": "SNMP_AGENT",
+                                "snmp_oid": "1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}",
+                                "key": "sensor.temp.value[{#SNMPINDEX}]",
+                                "history": "7d",
+                                "value_type": "FLOAT",
+                                "units": "!\u00b0C",
+                                "description": "MIB: CISCO-ENTITY-SENSOR-MIB.\nThe object name: entSensorValue.\nThis variable reports the most recent measurement seen by the sensor.",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "{#SENSOR_SCALE}"
+                                        ]
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "component",
+                                        "value": "temperature"
+                                    },
+                                    {
+                                        "tag": "sensor",
+                                        "value": "{#SNMPVALUE}"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "ba7d4d3ee589496ea597f94347d178c8",
+                                        "expression": "avg(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"{#SNMPVALUE}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"{#SNMPVALUE}\"}-3",
+                                        "name": "{#SNMPVALUE}: Temperature is above critical threshold",
+                                        "event_name": "{#SNMPVALUE}: Temperature is above critical threshold: >{$TEMP_CRIT:\"{#SNMPVALUE}\"}\u00b0C",
+                                        "opdata": "Current value: {ITEM.LASTVALUE}",
+                                        "priority": "HIGH",
+                                        "description": "This trigger uses the values of the temperature sensor.",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "4687ac0c18a443f0843cbc7779486458",
+                                        "expression": "avg(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_WARN:\"{#SNMPVALUE}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "max(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)<{$TEMP_WARN:\"{#SNMPVALUE}\"}-3",
+                                        "name": "{#SNMPVALUE}: Temperature is above warning threshold",
+                                        "event_name": "{#SNMPVALUE}: Temperature is above warning threshold: >{$TEMP_WARN:\"{#SNMPVALUE}\u00b0C\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE}",
+                                        "priority": "WARNING",
+                                        "description": "This trigger uses the values of the temperature sensor.",
+                                        "dependencies": [
+                                            {
+                                                "name": "{#SNMPVALUE}: Temperature is above critical threshold",
+                                                "expression": "avg(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_CRIT:\"{#SNMPVALUE}\"}",
+                                                "recovery_expression": "max(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)<{$TEMP_CRIT:\"{#SNMPVALUE}\"}-3"
+                                            }
+                                        ],
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "uuid": "0a67857245764b67b767b3d617def1bd",
+                                        "expression": "avg(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)<{$TEMP_CRIT_LOW:\"{#SNMPVALUE}\"}",
+                                        "recovery_mode": "RECOVERY_EXPRESSION",
+                                        "recovery_expression": "min(/.Cisco Generic by SNMP/sensor.temp.value[{#SNMPINDEX}],5m)>{$TEMP_CRIT_LOW:\"{#SNMPVALUE}\"}-3",
+                                        "name": "{#SNMPVALUE}: Temperature is too low",
+                                        "event_name": "{#SNMPVALUE}: Temperature is too low: <{$TEMP_CRIT_LOW:\"{#SNMPVALUE}\u00b0C\"}",
+                                        "opdata": "Current value: {ITEM.LASTVALUE}",
+                                        "priority": "AVERAGE",
+                                        "tags": [
+                                            {
+                                                "tag": "scope",
+                                                "value": "availability"
+                                            },
+                                            {
+                                                "tag": "scope",
+                                                "value": "performance"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "graph_prototypes": [
+                            {
+                                "uuid": "2f5782495b444354bcd71f051e51d8e0",
+                                "name": "{#SNMPVALUE}: Temperature",
+                                "ymin_type_1": "FIXED",
+                                "ymax_type_1": "FIXED",
+                                "graph_items": [
+                                    {
+                                        "drawtype": "GRADIENT_LINE",
+                                        "color": "1A7C11",
+                                        "item": {
+                                            "host": ".Cisco Generic by SNMP",
+                                            "key": "sensor.temp.value[{#SNMPINDEX}]"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "try {\n    var sensors = JSON.parse(value);\n} catch (e) {\n    throw \"Failed to parse JSON of temperature discovery.\";\n}\n\nvar scales = {'9': 1, '8': 0.001, '7': 0.000001};\nvar result = sensors.filter(function (sensor) {      \n    if (sensor['{#SENSOR_TYPE}'] !== '8' || typeof(scales[sensor['{#SENSOR_SCALE}']]) === 'undefined') {\n        return false;\n    }\n    sensor['{#SENSOR_SCALE}'] = scales[sensor['{#SENSOR_SCALE}']] * (10 ** -sensor['{#SENSOR_PRECISION}']);\n    return true;\n});\n\nreturn JSON.stringify(result);"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "4h"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "cisco"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$CISCO.LLD.FILTER.FAN.NAME.MATCHES}",
+                        "value": "^(?:Fan Module-\\d+|PowerSupply-\\d+ Fan-\\d+)$",
+                        "description": "It leaves only the matching fan names as indicated in the filter string."
+                    },
+                    {
+                        "macro": "{$CISCO.LLD.FILTER.PSU.NAME.MATCHES}",
+                        "value": "^(?:PowerSupply-\\d+)$",
+                        "description": "It leaves only the matching power supply names as indicated in the filter string."
+                    },
+                    {
+                        "macro": "{$CISCO.LLD.FILTER.SFP.NAME.MATCHES}",
+                        "value": "^(Light level [RT]x ).*$"
+                    },
+                    {
+                        "macro": "{$CISCO.SFP.THRESHOLD_POLL_INT}",
+                        "value": "24h"
+                    },
+                    {
+                        "macro": "{$CPU.UTIL.CRIT}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$ENT_CLASS.NOT_MATCHES}",
+                        "value": "3",
+                        "description": "The filter excludes chassis (3) class from Serial discovery. The chassis (3) are polled with a regular item."
+                    },
+                    {
+                        "macro": "{$ENT_SN.MATCHES}",
+                        "value": ".+",
+                        "description": "The filter retrieves only existing serial number strings."
+                    },
+                    {
+                        "macro": "{$IF.ERRORS.WARN}",
+                        "value": "2"
+                    },
+                    {
+                        "macro": "{$IF.UTIL.MAX}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$IFCONTROL}",
+                        "value": "1"
+                    },
+                    {
+                        "macro": "{$MEMORY.UTIL.MAX}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$PSU.PROBLEM.STATES}",
+                        "value": "^(1|4|5|6|7|9|10|11|12)$",
+                        "description": "The PSU states list for average trigger priority."
+                    },
+                    {
+                        "macro": "{$SENSOR.STATUS.MATCHES}",
+                        "value": "^.*",
+                        "description": "Verifies Sensor State"
+                    },
+                    {
+                        "macro": "{$SENSOR.STATUS.NOT_MATCHES}",
+                        "value": "^(2|3)$",
+                        "description": "Verifies Sensor State"
+                    },
+                    {
+                        "macro": "{$SENSOR.TEMP.SENSOR_TYPE.MATCHES}",
+                        "value": "^8$"
+                    },
+                    {
+                        "macro": "{$SNMP.TIMEOUT}",
+                        "value": "5m"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT}",
+                        "value": "60"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:regex:\"BACK\"}",
+                        "value": "70"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:regex:\"CPU\"}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:regex:\"FRONT\"}",
+                        "value": "80"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:regex:\"SUN1\"}",
+                        "value": "110"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT:regex:\"Transceiver\"}",
+                        "value": "75"
+                    },
+                    {
+                        "macro": "{$TEMP_CRIT_LOW}",
+                        "value": "5"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN}",
+                        "value": "50"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:regex:\"BACK\"}",
+                        "value": "42"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:regex:\"CPU\"}",
+                        "value": "80"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:regex:\"FRONT\"}",
+                        "value": "70"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:regex:\"SUN1\"}",
+                        "value": "90"
+                    },
+                    {
+                        "macro": "{$TEMP_WARN:regex:\"Transceiver\"}",
+                        "value": "70"
+                    }
+                ],
+                "dashboards": [
+                    {
+                        "uuid": "1b9a928e71d149a9874d939e3563774f",
+                        "name": "Cisco ASR9K: Overview",
+                        "pages": [
+                            {
+                                "name": "Resources",
+                                "widgets": [
+                                    {
+                                        "type": "graphprototype",
+                                        "name": "SFP Light Levels",
+                                        "width": "72",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AABJM"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graphprototype",
+                                        "y": "5",
+                                        "width": "72",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "GRAPH_PROTOTYPE",
+                                                "name": "graphid",
+                                                "value": {
+                                                    "host": ".Cisco Generic by SNMP",
+                                                    "name": "#{#SNMPINDEX}: CPU utilization"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AABJN"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graphprototype",
+                                        "y": "10",
+                                        "width": "72",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "GRAPH_PROTOTYPE",
+                                                "name": "graphid",
+                                                "value": {
+                                                    "host": ".Cisco Generic by SNMP",
+                                                    "name": "{#SNMPVALUE}: Memory utilization"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AABJO"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "graphprototype",
+                                        "y": "15",
+                                        "width": "72",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "GRAPH_PROTOTYPE",
+                                                "name": "graphid",
+                                                "value": {
+                                                    "host": ".Cisco Generic by SNMP",
+                                                    "name": "{#SNMPVALUE}: Temperature"
+                                                }
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AABJP"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Network traffic",
+                                "widgets": [
+                                    {
+                                        "type": "graphprototype",
+                                        "width": "72",
+                                        "height": "5",
+                                        "fields": [
+                                            {
+                                                "type": "INTEGER",
+                                                "name": "columns",
+                                                "value": "1"
+                                            },
+                                            {
+                                                "type": "STRING",
+                                                "name": "reference",
+                                                "value": "AABJQ"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "valuemaps": [
+                    {
+                        "uuid": "a5ff6daafe1143cdbca465054a2b07f5",
+                        "name": "CISCO-ENTITY-FRU-CONTROL-MIB::cefcFanTrayOperStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "unknown"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "up"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "down"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "warning"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "1c2924e8d5034c4dbb1a3bcac26dd7e0",
+                        "name": "CISCO-ENTITY-FRU-CONTROL-MIB::cefcFRUPowerOperStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "offEnvOther"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "on"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "offAdmin"
+                            },
+                            {
+                                "value": "4",
+                                "newvalue": "offDenied"
+                            },
+                            {
+                                "value": "5",
+                                "newvalue": "offEnvPower"
+                            },
+                            {
+                                "value": "6",
+                                "newvalue": "offEnvTemp"
+                            },
+                            {
+                                "value": "7",
+                                "newvalue": "offEnvFan"
+                            },
+                            {
+                                "value": "8",
+                                "newvalue": "failed"
+                            },
+                            {
+                                "value": "9",
+                                "newvalue": "onButFanFail"
+                            },
+                            {
+                                "value": "10",
+                                "newvalue": "offCooling"
+                            },
+                            {
+                                "value": "11",
+                                "newvalue": "offConnectorRating"
+                            },
+                            {
+                                "value": "12",
+                                "newvalue": "onButInlinePowerFail"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "a0dc011fc85947d19051da52a8914d66",
+                        "name": "CISCO-ENTITY-SENSOR-MIB::entSensorStatus",
+                        "mappings": [
+                            {
+                                "value": "1",
+                                "newvalue": "ok"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "unavailable"
+                            },
+                            {
+                                "value": "3",
+                                "newvalue": "nonoperational"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b0dc350b9189411b95e0e6ceaafc3946",
+                        "name": "Service state",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "Down"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "Up"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "1eb984c4f0fd4aec992a32c07d5cd182",
+                        "name": "zabbix.host.available",
+                        "mappings": [
+                            {
+                                "value": "0",
+                                "newvalue": "not available"
+                            },
+                            {
+                                "value": "1",
+                                "newvalue": "available"
+                            },
+                            {
+                                "value": "2",
+                                "newvalue": "unknown"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,192 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "f893eac82dd346a08522a1796a82cbba",
+        "name": "SIAE"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "7ed958273e0a4a25bc818669198ae1b9",
+        "template": ".SIAE Generic by SNMP",
+        "name": ".SIAE Generic by SNMP",
+        "description": "Vendor generic inventory and alarm items shared by all SIAE AlfoPlus models.\nLinks to .Generic by SNMP. Covered by model-specific radio templates.",
+        "templates": [
+          {
+            "name": ".Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "SIAE"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "86bb75b9628a4559887ed2a607e24053",
+            "name": "Hardware model name",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.2.1.1.1.0]",
+            "key": "system.hw.model",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SNMPv2-MIB\nsysDescr — returns hardware model string (e.g. ALFOplus80HDX - SIAE Microelettronica).",
+            "inventory_link": "MODEL",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "2c626dafecae47cdaf07a168e5d6af65",
+            "name": "Hardware serial number",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.3373.1103.6.2.1.13.1]",
+            "key": "system.hw.serialnumber",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIAE-ALFOPLUS-MIB\nrbEqSerialNumber — chassis serial number.",
+            "inventory_link": "SERIALNO_A",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "d1d08cf3c00d4a28a67778835412f875",
+            "name": "Firmware version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.3373.1103.7.2.0]",
+            "key": "system.hw.firmware",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIAE-ALFOPLUS-MIB\nrbSwBench1Version — active software bench version string.",
+            "inventory_link": "OS",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "385068d2ad8e44cbafaa07b49369ca1b",
+            "name": "Board system alarm",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.3373.1103.4.26.0]",
+            "key": "siae.sys.alarm",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "UNSIGNED",
+            "description": "MIB: SIAE-ALFOPLUS-MIB\nrbSysAlarm — system alarm register. 0 = no alarm.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "3m"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "786ff417a8494b6dbf5b3b9c22576d15",
+                "expression": "last(/.SIAE Generic by SNMP/siae.sys.alarm)<>0",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "last(/.SIAE Generic by SNMP/siae.sys.alarm)=0",
+                "name": "SIAE: Board alarms present",
+                "opdata": "Alarm register: {ITEM.LASTVALUE1}",
+                "priority": "HIGH",
+                "description": "System alarm register is non-zero. Check device management interface for active alarms.",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siae"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h",
+            "description": "Poll interval for firmware, model, serial"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          }
+        ]
+      }
+    ]
+  }
+}

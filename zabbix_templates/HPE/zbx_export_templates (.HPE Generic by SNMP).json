@@ -1,0 +1,200 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "a5cb81878d394b8d98e6b9853b03d98b",
+                "name": "HPE"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "c4d8046318c3431eac3db2c0d03bfae1",
+                "template": ".HPE Generic by SNMP",
+                "name": ".HPE Generic by SNMP",
+                "description": "HPE Comware 7 generic monitoring via H3C enterprise MIBs.\nTested on: HPE 1950 24G 2SFP+ 2XGT (JG960A), Comware 7.1.045.\n\nOIDs used:\n  CPU usage (5-sec avg): 1.3.6.1.4.1.25506.2.6.1.1.1.1.6.{$HPE.ENTITY.MODULE.INDEX}\n  Memory usage (%):      1.3.6.1.4.1.25506.2.6.1.1.1.1.8.{$HPE.ENTITY.MODULE.INDEX}\n  Module temperature:    1.3.6.1.4.1.25506.2.6.1.1.1.1.12.{$HPE.ENTITY.MODULE.INDEX}\n  Hardware model:        1.3.6.1.2.1.47.1.1.1.1.2.2  (entPhysicalDescr.2)\n  Serial number:         1.3.6.1.2.1.47.1.1.1.1.11.2 (entPhysicalSerialNum.2)\n\nNote: entity index 192 = MODULE LEVEL1 on HPE 1950. Override {$HPE.ENTITY.MODULE.INDEX}\nif a different HP Comware platform uses a different module entity index.",
+                "groups": [
+                    {"name": "HPE"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "items": [
+                    {
+                        "uuid": "23446e1241554a90b7aa0dc5221ded49",
+                        "name": "System: Hardware model",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.47.1.1.1.1.2.2",
+                        "key": "hpe.hw.model",
+                        "delay": "{$SLOW_POLL_INT:\"1h\"}",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "CHAR",
+                        "description": "entPhysicalDescr.2 — main device description string.",
+                        "inventory_link": "MODEL",
+                        "tags": [{"tag": "component", "value": "system"}]
+                    },
+                    {
+                        "uuid": "baef1d9f445b4e57bbce561671464fa1",
+                        "name": "System: Serial number",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.2.1.47.1.1.1.1.11.2",
+                        "key": "hpe.hw.serial",
+                        "delay": "{$SLOW_POLL_INT:\"1h\"}",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "CHAR",
+                        "inventory_link": "SERIALNO_A",
+                        "tags": [{"tag": "component", "value": "system"}]
+                    },
+                    {
+                        "uuid": "5e3584a128ba4012b645551adefa8c86",
+                        "name": "System: Uptime",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.6.3.10.2.1.3.0",
+                        "key": "hpe.system.uptime",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "0",
+                        "units": "uptime",
+                        "value_type": "FLOAT",
+                        "preprocessing": [
+                            {"type": "MULTIPLIER", "parameters": ["0.01"]}
+                        ],
+                        "tags": [{"tag": "component", "value": "system"}],
+                        "triggers": [
+                            {
+                                "uuid": "631a0f7d21cb43a4a61e7618b12acd8f",
+                                "expression": "last(/.HPE Generic by SNMP/hpe.system.uptime)<600",
+                                "name": "HPE: Device rebooted (uptime < 10m)",
+                                "priority": "WARNING",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "ce0f306da547496baaaf870b44818868",
+                        "name": "CPU: Usage",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.25506.2.6.1.1.1.1.6.{$HPE.ENTITY.MODULE.INDEX}",
+                        "key": "hpe.cpu.usage",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "units": "%",
+                        "value_type": "FLOAT",
+                        "description": "hh3cEntityExtCpuUsage — CPU utilization in the past 5 seconds (%).",
+                        "tags": [
+                            {"tag": "component", "value": "cpu"},
+                            {"tag": "component", "value": "performance"}
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "244e460e1e994bfda6cbd0c3e0fdee10",
+                                "expression": "min(/.HPE Generic by SNMP/hpe.cpu.usage,5m)>{$HPE.CPU.WARN}",
+                                "name": "HPE: High CPU usage > {$HPE.CPU.WARN}% (5m avg)",
+                                "priority": "WARNING",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "fa38d8f4c081448a91a90ea185f24c0a",
+                        "name": "Memory: Usage",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.25506.2.6.1.1.1.1.8.{$HPE.ENTITY.MODULE.INDEX}",
+                        "key": "hpe.mem.usage",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "units": "%",
+                        "value_type": "FLOAT",
+                        "description": "hh3cEntityExtMemUsage — memory utilization (%).",
+                        "tags": [
+                            {"tag": "component", "value": "memory"},
+                            {"tag": "component", "value": "performance"}
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e9e6646e74b946aeb36111daf73e8e47",
+                                "expression": "min(/.HPE Generic by SNMP/hpe.mem.usage,10m)>{$HPE.MEM.WARN}",
+                                "name": "HPE: High memory usage > {$HPE.MEM.WARN}%",
+                                "priority": "AVERAGE",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "81864a2810ba494795ac79923db56024",
+                        "name": "Temperature: Module",
+                        "type": "SNMP_AGENT",
+                        "snmp_oid": "1.3.6.1.4.1.25506.2.6.1.1.1.1.12.{$HPE.ENTITY.MODULE.INDEX}",
+                        "key": "hpe.temp.module",
+                        "delay": "{$NETWORK_POLL_INT}",
+                        "history": "{$HISTORY}",
+                        "trends": "{$TRENDS}",
+                        "units": "°C",
+                        "value_type": "FLOAT",
+                        "description": "hh3cEntityExtTemperature — module temperature in Celsius. Value 65535 means sensor unavailable.",
+                        "preprocessing": [
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": ["1h"]
+                            }
+                        ],
+                        "tags": [
+                            {"tag": "component", "value": "temperature"},
+                            {"tag": "component", "value": "hardware"}
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "59f8cc4c0586433eaab33ba6aafec5b3",
+                                "expression": "last(/.HPE Generic by SNMP/hpe.temp.module)>{$HPE.TEMP.HIGH} and last(/.HPE Generic by SNMP/hpe.temp.module)<65535",
+                                "name": "HPE: Module temperature high > {$HPE.TEMP.HIGH}°C ({ITEM.LASTVALUE})",
+                                "priority": "HIGH",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {"tag": "target", "value": "hpe"}
+                ],
+                "macros": [
+                    {
+                        "macro": "{$HPE.ENTITY.MODULE.INDEX}",
+                        "value": "192",
+                        "description": "Entity index for the main switch module. 192 = MODULE LEVEL1 on HPE 1950 24G/48G. Override if your model uses a different index."
+                    },
+                    {
+                        "macro": "{$HPE.CPU.WARN}",
+                        "value": "80",
+                        "description": "CPU high usage warning threshold (%)"
+                    },
+                    {
+                        "macro": "{$HPE.MEM.WARN}",
+                        "value": "90",
+                        "description": "Memory high usage warning threshold (%)"
+                    },
+                    {
+                        "macro": "{$HPE.TEMP.HIGH}",
+                        "value": "95",
+                        "description": "Module temperature high alarm threshold (°C)"
+                    },
+                    {
+                        "macro": "{$SLOW_POLL_INT:\"1h\"}",
+                        "value": "1h",
+                        "description": "Polling interval for slow-changing inventory items"
+                    }
+                ]
+            }
+        ]
+    }
+}

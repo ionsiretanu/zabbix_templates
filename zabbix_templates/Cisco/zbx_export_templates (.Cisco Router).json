@@ -1,0 +1,47 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "91d964de963440aebdae3ec9e1e960ed",
+                "name": "Cisco"
+            },
+            {
+                "uuid": "d9b59ad3851c49c09b7db58d0454994b",
+                "name": "ITCare"
+            },
+            {
+                "uuid": "36bff6c29af64692839d077febfc7079",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "df631b10ecab43838a0a03444c0c9365",
+                "template": ".Cisco Router",
+                "name": ".Cisco Router",
+                "description": "Role template for Cisco routers (ASR, ISR, CSR).\nAssigned directly to hosts. Inherits metrics from linked base templates.\n\n[network-tool]\nmanufacturer = [ \"Cisco\" ]\ndevice_role = [ \"Core Router\", \"Edge Router\", \"Router\", \"Distribution Router\" ]\ndevice_types = [ \"ASR1001-4XT3\", \"ASR1001X\", \"ASR1002X\", \"ASR1004\", \"ASR1006\", \"ASR9001\", \"ISR4321\", \"ISR4331\", \"ISR4351\", \"ISR4431\", \"ISR4451\", \"CSR1000V\" ]",
+                "groups": [
+                    {"name": "Cisco"},
+                    {"name": "ITCare"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "templates": [
+                    {"name": ".Generic by SNMP"},
+                    {"name": ".Network Interfaces by SNMP"},
+                    {"name": ".Cisco Generic by SNMP"}
+                ],
+                "tags": [
+                    {
+                        "tag": "target",
+                        "value": "cisco"
+                    },
+                    {
+                        "tag": "role",
+                        "value": "router"
+                    }
+                ]
+            }
+        ]
+    }
+}

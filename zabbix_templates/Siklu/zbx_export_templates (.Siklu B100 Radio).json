@@ -1,0 +1,922 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c561ba84a97b499494c1ff18569e1673",
+        "name": "Siklu"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "23e713581b654f69b26da6de5035b781",
+        "template": ".Siklu B100 Radio",
+        "name": ".Siklu B100 Radio",
+        "description": "[network-tool]\nmanufacturer = [ \"Siklu\" ]\ndevice_role = [ \"Radio Link\" ]\ndevice_types = [ \"MH-B100-CCS-PoE-MWB\" ]\n\n# Siklu template → model mapping (verified by live SNMP walk):\n# .Siklu EH Radio:   EH-600T/TX, EH-614TX, EH-1200/F/FX/L/TL/TX, EH-2200F/FX, EH-2500F/FX, EH-5500FD, EH-8010FX/L/H → .31926.2.*\n# .Siklu MH Radio:   MH-T280, MH-N366(?), ML2.5-60-35(?) → .31926.35.* HC-64bit\n# .Siklu B100 Radio: MH-B100-CCS-PoE-MWB → .31926.27.1.*/27.4.* 32-bit\n# .Siklu T200 Radio: MH-T200-CNN/CCC-PoE-MWB → .31926.27.2.* 32-bit\n# MH-N366/ML2.5-60-35: unverified — check live walk before migration",
+        "templates": [
+          {
+            "name": ".Siklu Generic by SNMP"
+          }
+        ],
+        "groups": [
+          {
+            "name": "Siklu"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "2022e038c08443c6a97634b874adcde6",
+            "name": "System temperature",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.2.0]",
+            "key": "sensor.temp.value[rbSysTemperature.0]",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "units": "°C",
+            "value_type": "FLOAT",
+            "description": "MIB: SIKLU-MIB\nsikluSysTemperature.0 — same OID as EH series. Confirmed 32°C on MH-B100.",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "3m"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "temperature"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "b10078ebac754a2390d32ef24471857c",
+                "expression": "avg(/.Siklu B100 Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})>{$TEMP_WARN}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "max(/.Siklu B100 Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})<{$TEMP_WARN}-3",
+                "name": "Siklu B100: Temperature is above warning threshold",
+                "event_name": "Siklu B100: Temperature {ITEM.LASTVALUE1} is above warning threshold: >{$TEMP_WARN}°C",
+                "opdata": "Current: {ITEM.LASTVALUE1}",
+                "priority": "WARNING",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              },
+              {
+                "uuid": "b100ef0eb4934a22a9dd8c26062f0b78",
+                "expression": "avg(/.Siklu B100 Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})>{$TEMP_CRIT}",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "max(/.Siklu B100 Radio/sensor.temp.value[rbSysTemperature.0],{$HEALTH_TRIGGER_INT})<{$TEMP_CRIT}-3",
+                "name": "Siklu B100: Temperature is above critical threshold",
+                "event_name": "Siklu B100: Temperature {ITEM.LASTVALUE1} is above critical threshold: >{$TEMP_CRIT}°C",
+                "opdata": "Current: {ITEM.LASTVALUE1}",
+                "priority": "HIGH",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "performance"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "56e3788d125d4b7499dc4352496cb881",
+            "name": "Firmware version",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.1.5.0]",
+            "key": "system.hw.firmware",
+            "delay": "{$INVENTORY_INT}",
+            "history": "{$HISTORY}",
+            "value_type": "CHAR",
+            "description": "MIB: SIKLU-MIB\nsikluSwBank1Version.0 — returns full version string on B100 (e.g. MH-2.3.0.26881 2020-04-14 08:16).",
+            "inventory_link": "OS",
+            "preprocessing": [
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1d"
+                ]
+              }
+            ],
+            "tags": [
+              {
+                "tag": "component",
+                "value": "system"
+              }
+            ]
+          },
+          {
+            "uuid": "2ab9a947c284491e86b8e6fd2bb00423",
+            "name": "SNMP walk radio metrics",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.4.1.31926.27.1.1.7,1.3.6.1.4.1.31926.27.1.1.8,1.3.6.1.4.1.31926.27.1.1.10,1.3.6.1.4.1.31926.27.4.1.7,1.3.6.1.4.1.31926.27.4.1.10,1.3.6.1.4.1.31926.27.4.1.12,1.3.6.1.4.1.31926.27.4.1.13,1.3.6.1.4.1.31926.27.4.1.14]",
+            "key": "net.wlan.radio.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for B100 radio table (.31926.27.*).\nLocal link (.27.1.*): linkState(.7), txMCS(.8), txPower(.10).\nPeer table (.27.4.*): rxMCS(.7), opState(.10), RSSI(.12), CINR(.13), SNR(.14).\nBoth tables indexed by link/peer index .1 on single-radio B100.\nConfirmed on 2142-2147-SKB100 (10.12.234.235): RSSI=-50, CINR=12, TXpow=18, MCS=8.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          },
+          {
+            "uuid": "c05db65ab3b44548a333c27c4ae22718",
+            "name": "SNMP walk network interfaces",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.2.1.31.1.1.1.1,1.3.6.1.2.1.2.2.1.2,1.3.6.1.2.1.2.2.1.7,1.3.6.1.2.1.2.2.1.8,1.3.6.1.2.1.2.2.1.10,1.3.6.1.2.1.2.2.1.16,1.3.6.1.2.1.2.2.1.14,1.3.6.1.2.1.2.2.1.20]",
+            "key": "net.if.walk",
+            "delay": "{$RADIO_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for interface LLD. Uses 32-bit counters — HC (ifHCInOctets) not supported on MH-B100.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "66eb26ed3d084367bc54f3bd012fa814",
+            "name": "Radio peer discovery",
+            "type": "DEPENDENT",
+            "key": "net.wlan.radio.discovery",
+            "delay": "0",
+            "lifetime": "0s",
+            "description": "Discovers B100 radio peers from .31926.27.4.1.10 (operational state).\nConfirmed on live device: index .1 = peer active (state=1).\nB100 is PtP — normally one peer only.",
+            "item_prototypes": [
+              {
+                "uuid": "3c927418aa97470f83107243409efb63",
+                "name": "Radio peer #{#SNMPINDEX}: Operational state",
+                "type": "DEPENDENT",
+                "key": "net.wlan.state[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\n.27.4.1.10 — peer operational state. 1=up.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.4.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "3982af182ff64e0ca97d5e24365265e3",
+                    "expression": "last(/.Siklu B100 Radio/net.wlan.state[{#SNMPINDEX}])<>1",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Siklu B100 Radio/net.wlan.state[{#SNMPINDEX}])=1",
+                    "name": "Siklu B100: Radio peer #{#SNMPINDEX}: Link not active",
+                    "opdata": "State: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "7f3f86827eaa4eaa90fe57123069bc8a",
+                "name": "Radio peer #{#SNMPINDEX}: RSSI",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.rssi[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\n.27.4.1.12 — received signal strength from peer. Confirmed -50 dBm on 2142-2147-SKB100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.4.1.12.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "a2842679a3a949ba9ef397e8ecafbbf2",
+                    "expression": "avg(/.Siklu B100 Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.Siklu B100 Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.LOW}+3",
+                    "name": "Siklu B100: Radio peer #{#SNMPINDEX}: RSSI below threshold",
+                    "event_name": "Siklu B100: Radio peer #{#SNMPINDEX}: RSSI {ITEM.LASTVALUE1} below {$RSL.LOW} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  },
+                  {
+                    "uuid": "d1e644034ab8406bb1a5469bc2aaa473",
+                    "expression": "avg(/.Siklu B100 Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$RSL.HIGH}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "max(/.Siklu B100 Radio/net.wlan.health.rssi[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$RSL.HIGH}-3",
+                    "name": "Siklu B100: Radio peer #{#SNMPINDEX}: RSSI abnormally high",
+                    "event_name": "Siklu B100: Radio peer #{#SNMPINDEX}: RSSI {ITEM.LASTVALUE1} above {$RSL.HIGH} dBm",
+                    "opdata": "Current RSSI: {ITEM.LASTVALUE1}",
+                    "priority": "HIGH",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "66c1ea3e3099470d9cde0342e4ab7e5d",
+                "name": "Radio peer #{#SNMPINDEX}: CINR",
+                "type": "DEPENDENT",
+                "key": "net.wlan.health.cinr[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dB",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\n.27.4.1.13 — CINR from peer. Confirmed 12 dB on 2142-2147-SKB100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.4.1.13.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "a1be16f9fa9e4fdfa568d1f0dbffec4c",
+                    "expression": "avg(/.Siklu B100 Radio/net.wlan.health.cinr[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})<{$CINR.LOW}",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "min(/.Siklu B100 Radio/net.wlan.health.cinr[{#SNMPINDEX}],{$HEALTH_TRIGGER_INT})>{$CINR.LOW}+2",
+                    "name": "Siklu B100: Radio peer #{#SNMPINDEX}: CINR below threshold",
+                    "event_name": "Siklu B100: Radio peer #{#SNMPINDEX}: CINR {ITEM.LASTVALUE1} below {$CINR.LOW} dB",
+                    "opdata": "Current CINR: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "performance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "2a5dde2e56834a4c93800d0fe86c2b21",
+                "name": "Radio peer #{#SNMPINDEX}: TX power",
+                "type": "DEPENDENT",
+                "key": "net.wlan.pow.txpow[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "dBm",
+                "value_type": "FLOAT",
+                "description": "MIB: SIKLU-MIB\n.27.1.1.10 (local link table) — TX power in dBm. Confirmed 18 dBm on 2142-2147-SKB100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.1.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "7f076353f2c8473781b76ce3e333f13f",
+                "name": "Radio peer #{#SNMPINDEX}: TX MCS",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.txmcs[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\n.27.1.1.8 (local) — TX MCS index. Confirmed 8 on 2142-2147-SKB100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.1.1.8.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              },
+              {
+                "uuid": "218ca52d4c1841078500300e090ba303",
+                "name": "Radio peer #{#SNMPINDEX}: RX MCS",
+                "type": "DEPENDENT",
+                "key": "net.wlan.mod.rxmcs[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "value_type": "UNSIGNED",
+                "description": "MIB: SIKLU-MIB\n.27.4.1.7 (peer table) — RX MCS reported by peer. Confirmed 8 on 2142-2147-SKB100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.27.4.1.7.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.wlan.radio.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "radio"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.wlan.radio.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#SNMPVALUE}",
+                  "1.3.6.1.4.1.31926.27.4.1.10",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          },
+          {
+            "uuid": "f8d3021f7fb0433980f22249f0dc8d10",
+            "name": "Network interface discovery",
+            "type": "DEPENDENT",
+            "key": "net.if.discovery",
+            "delay": "0",
+            "filter": {
+              "evaltype": "AND",
+              "conditions": [
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+                  "formulaid": "A",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFADMINSTATUS}",
+                  "value": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+                  "formulaid": "B",
+                  "operator": "NOT_MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.MATCHES}",
+                  "formulaid": "C",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFNAME}",
+                  "value": "{$NET.IF.IFNAME.NOT_MATCHES}",
+                  "formulaid": "D",
+                  "operator": "NOT_MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+                  "formulaid": "E",
+                  "operator": "MATCHES_REGEX"
+                },
+                {
+                  "macro": "{#IFOPERSTATUS}",
+                  "value": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+                  "formulaid": "F",
+                  "operator": "NOT_MATCHES_REGEX"
+                }
+              ]
+            },
+            "lifetime": "0s",
+            "description": "Discovers B100 Ethernet interfaces. No radio in IF-MIB. Uses 32-bit counters (HC not supported).",
+            "item_prototypes": [
+              {
+                "uuid": "8bc167fb24144e77af9ec1d6c677bc10",
+                "name": "Interface {#IFNAME}: Bits received",
+                "type": "DEPENDENT",
+                "key": "net.if.in[ifInOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\n32-bit ifInOctets. HC not supported on MH-B100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "dfa12ffa0ef34330bbcce0d07cb17fa4",
+                "name": "Interface {#IFNAME}: Bits sent",
+                "type": "DEPENDENT",
+                "key": "net.if.out[ifOutOctets.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "units": "bps",
+                "description": "MIB: IF-MIB\n32-bit ifOutOctets. HC not supported on MH-B100.",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "MULTIPLIER",
+                    "parameters": [
+                      "8"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "69cd28a154f54a3ba3686a12af00095f",
+                "name": "Interface {#IFNAME}: Operational status",
+                "type": "DEPENDENT",
+                "key": "net.if.status[ifOperStatus.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "valuemap": {
+                  "name": "IF-MIB::ifOperStatus"
+                },
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "1h"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "9b4c25e0056a42a789a767e0a4bd559a",
+                    "expression": "{$IFCONTROL:\"{#IFNAME}\"}=1 and last(/.Siklu B100 Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])=2 and (last(/.Siklu B100 Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#1)<>last(/.Siklu B100 Radio/net.if.status[ifOperStatus.{#SNMPINDEX}],#2))",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Siklu B100 Radio/net.if.status[ifOperStatus.{#SNMPINDEX}])<>2 or {$IFCONTROL:\"{#IFNAME}\"}=0",
+                    "name": "Interface {#IFNAME}: Link down",
+                    "opdata": "Current state: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "uuid": "faebc1154286451096314c8b20ac4175",
+                "name": "Interface {#IFNAME}: Inbound errors",
+                "type": "DEPENDENT",
+                "key": "net.if.in.errors[ifInErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.14.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              },
+              {
+                "uuid": "fc1eab1e66e447abbee9e4955ac3003f",
+                "name": "Interface {#IFNAME}: Outbound errors",
+                "type": "DEPENDENT",
+                "key": "net.if.out.errors[ifOutErrors.{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "{$TRENDS}",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.2.1.2.2.1.20.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "CHANGE_PER_SECOND",
+                    "parameters": [
+                      ""
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "3m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "net.if.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "network"
+                  },
+                  {
+                    "tag": "interface",
+                    "value": "{#IFNAME}"
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "net.if.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#IFNAME}",
+                  "1.3.6.1.2.1.31.1.1.1.1",
+                  "0",
+                  "{#IFDESCR}",
+                  "1.3.6.1.2.1.2.2.1.2",
+                  "0",
+                  "{#IFADMINSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.7",
+                  "0",
+                  "{#IFOPERSTATUS}",
+                  "1.3.6.1.2.1.2.2.1.8",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "1h"
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siklu"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$CINR.LOW}",
+            "value": "22",
+            "description": "CINR low threshold (dB). Live B100: CINR=12 on a weak link. Default 22 dB."
+          },
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HEALTH_TRIGGER_INT}",
+            "value": "15m"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$INVENTORY_INT}",
+            "value": "1h"
+          },
+          {
+            "macro": "{$RADIO_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$RSL.HIGH}",
+            "value": "-33",
+            "description": "RSSI abnormally high (dBm). Live B100: -50 at normal link. Adjust per installation."
+          },
+          {
+            "macro": "{$RSL.LOW}",
+            "value": "-42",
+            "description": "RSSI low threshold (dBm). Adjust per link budget."
+          },
+          {
+            "macro": "{$TEMP_CRIT}",
+            "value": "60"
+          },
+          {
+            "macro": "{$TEMP_WARN}",
+            "value": "50"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          },
+          {
+            "macro": "{$IFCONTROL}",
+            "value": "1",
+            "description": "Link status trigger fires only when context macro = 1."
+          },
+          {
+            "macro": "{$IF.ERRORS.WARN}",
+            "value": "2"
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFADMINSTATUS.NOT_MATCHES}",
+            "value": "^2$",
+            "description": "Ignore down(2) administrative status"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFNAME.NOT_MATCHES}",
+            "value": "CHANGE_IF_NEEDED"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.MATCHES}",
+            "value": "^.*$"
+          },
+          {
+            "macro": "{$NET.IF.IFOPERSTATUS.NOT_MATCHES}",
+            "value": "^6$",
+            "description": "Ignore notPresent(6)"
+          }
+        ],
+        "valuemaps": [
+          {
+            "uuid": "b100c3d4e5f64a7b8c9d0e1f2a3b4c5e",
+            "name": "IF-MIB::ifOperStatus",
+            "mappings": [
+              {
+                "value": "1",
+                "newvalue": "up"
+              },
+              {
+                "value": "2",
+                "newvalue": "down"
+              },
+              {
+                "value": "4",
+                "newvalue": "unknown"
+              },
+              {
+                "value": "5",
+                "newvalue": "dormant"
+              },
+              {
+                "value": "6",
+                "newvalue": "notPresent"
+              },
+              {
+                "value": "7",
+                "newvalue": "lowerLayerDown"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

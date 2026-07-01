@@ -1,0 +1,194 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "template_groups": [
+            {
+                "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+                "name": "ITcare"
+            },
+            {
+                "uuid": "550e8400e29b41d4a716446655440000",
+                "name": "Ruckus"
+            },
+            {
+                "uuid": "36bff6c29af641f6a474e5e61de68816",
+                "name": "Templates/Network devices"
+            }
+        ],
+        "host_groups": [
+            {
+                "uuid": "5b780dca330e473b9fca4d99a69bee3d",
+                "name": "Ruckus APs"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "34b16f3e825e486abf211de304c15cc0",
+                "template": ".Template Ruckus SmartZone 100 Controller",
+                "name": ".Template Ruckus SmartZone 100 Controller",
+                "groups": [
+                    {"name": "ITcare"},
+                    {"name": "Ruckus"},
+                    {"name": "Templates/Network devices"}
+                ],
+                "items": [
+                    {
+                        "uuid": "66c24bfe61d541df9469fcf74b48f91f",
+                        "name": "Ruckus Zone List",
+                        "type": "SCRIPT",
+                        "key": "ruckus.zone.list",
+                        "delay": "1h",
+                        "history": "12h",
+                        "value_type": "TEXT",
+                        "params": "var baseUrl = 'https://{$SMARTZONE_URL}/wsg/api/public/v6_1';\nvar cookie  = '{$SMARTZONE_TOKEN}';\n\nfunction makeReq(c) {\n    var req = new HttpRequest();\n    req.addHeader('Content-Type: application/json;charset=UTF-8');\n    if (c) req.addHeader('Cookie: ' + c);\n    return req;\n}\n\nfunction login() {\n    var user = '{$SMARTZONE_USER}';\n    var pass = '{$SMARTZONE_PASS}';\n    if (!user || !pass) return null;\n    var req = makeReq(null);\n    try {\n        var resp = req.post(baseUrl + '/session', JSON.stringify({username: user, password: pass}));\n        if (req.getStatus() === 200) {\n            var body = JSON.parse(resp);\n            if (body.sessionId) return 'JSESSIONID=' + body.sessionId;\n        }\n        Zabbix.log(3, 'SmartZone100: login failed: ' + req.getStatus());\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone100: login error: ' + e.message);\n    }\n    return null;\n}\n\n// Fetch all domains recursively\nvar activeCookie = cookie;\nvar req = makeReq(activeCookie);\nvar resp = req.get(baseUrl + '/domains?recursively=true&listSize=1000');\nif (req.getStatus() === 401 || req.getStatus() === 403) {\n    Zabbix.log(4, 'SmartZone100: session expired, re-authenticating');\n    activeCookie = login();\n    if (!activeCookie) throw new Error('SmartZone100: auth failed');\n    req = makeReq(activeCookie);\n    resp = req.get(baseUrl + '/domains?recursively=true&listSize=1000');\n}\n\nvar domList = [];\nif (req.getStatus() === 200) {\n    domList = JSON.parse(resp).list || [];\n} else {\n    // Fallback: no domain hierarchy, fetch flat zone list\n    Zabbix.log(4, 'SmartZone100: /domains not available (' + req.getStatus() + '), using flat zone list');\n    var zReq = makeReq(activeCookie);\n    var zResp = zReq.get(baseUrl + '/rkszones?listSize=1000');\n    if (zReq.getStatus() !== 200) throw new Error('Zone list failed: ' + zReq.getStatus());\n    var zList = JSON.parse(zResp).list || [];\n    var zones = [];\n    for (var zi = 0; zi < zList.length; zi++) {\n        var z = zList[zi];\n        zones.push({zoneId: z.id, zoneName: z.name, domainId: null, zonePath: z.name});\n    }\n    return JSON.stringify(zones);\n}\n\n// Build domain map {id: {name, parent, zoneCount}}\nvar domMap = {};\nfor (var i = 0; i < domList.length; i++) {\n    var d = domList[i];\n    domMap[d.id] = {name: d.name, parent: d.parentDomainId || null, zoneCount: d.zoneCount || 0};\n}\n\n// Build hierarchy path: 'Domain :: Sub :: ...' (stops at root = no parent)\nfunction domainPath(id) {\n    var parts = [], cur = id, seen = {};\n    while (cur && domMap[cur] && domMap[cur].parent && !seen[cur]) {\n        seen[cur] = 1;\n        parts.unshift(domMap[cur].name);\n        cur = domMap[cur].parent;\n    }\n    return parts.join(' :: ');\n}\n\n// Fetch zones for each domain that has zones\nvar zones = [];\nfor (var domId in domMap) {\n    if (!domMap[domId].zoneCount) continue;\n    var zReq = makeReq(activeCookie);\n    var zResp = zReq.get(baseUrl + '/rkszones?domainId=' + domId + '&listSize=1000');\n    if (zReq.getStatus() !== 200) {\n        Zabbix.log(4, 'SmartZone100: zones for domain ' + domId + ' failed: ' + zReq.getStatus());\n        continue;\n    }\n    var dPath = domainPath(domId);\n    var zList = JSON.parse(zResp).list || [];\n    for (var j = 0; j < zList.length; j++) {\n        var z = zList[j];\n        zones.push({\n            zoneId: z.id,\n            zoneName: z.name,\n            domainId: domId,\n            zonePath: dPath ? dPath + ' :: ' + z.name : z.name\n        });\n    }\n}\n\nreturn JSON.stringify(zones);",
+                        "timeout": "60s",
+                        "description": "Fetches all zones with full domain hierarchy paths. Falls back to flat zone list if /domains is unavailable. Used by Zone Discovery.",
+                        "tags": [
+                            {"tag": "component", "value": "ruckus"}
+                        ]
+                    },
+                    {
+                        "uuid": "b8b4478c3b7b48b3a8dd4aeecbf6a55c",
+                        "name": "Ruckus AP List (Zone {$SMARTZONE_ZONE_ID})",
+                        "type": "SCRIPT",
+                        "key": "ruckus.ap.list",
+                        "delay": "1h",
+                        "history": "12h",
+                        "value_type": "TEXT",
+                        "params": "var baseUrl  = 'https://{$SMARTZONE_URL}/wsg/api/public/v6_1';\nvar cookie   = '{$SMARTZONE_TOKEN}';\nvar zoneId   = '{$SMARTZONE_ZONE_ID}';\nvar listSize = 5;\n\nfunction makeReq(c) {\n    var req = new HttpRequest();\n    req.addHeader('Content-Type: application/json;charset=UTF-8');\n    if (c) req.addHeader('Cookie: ' + c);\n    return req;\n}\n\nfunction login() {\n    var user = '{$SMARTZONE_USER}';\n    var pass = '{$SMARTZONE_PASS}';\n    if (!user || !pass) return null;\n    var req = makeReq(null);\n    try {\n        var resp = req.post(baseUrl + '/session', JSON.stringify({username: user, password: pass}));\n        if (req.getStatus() === 200) {\n            var body = JSON.parse(resp);\n            if (body.sessionId) return 'JSESSIONID=' + body.sessionId;\n        }\n        Zabbix.log(3, 'SmartZone100: login failed: ' + req.getStatus());\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone100: login error: ' + e.message);\n    }\n    return null;\n}\n\n// Fetch AP list for the configured zone\nvar activeCookie = cookie;\nvar listReq = makeReq(activeCookie);\nvar listResp = listReq.get(baseUrl + '/aps?zoneId=' + zoneId + '&listSize=' + listSize);\nif (listReq.getStatus() === 401 || listReq.getStatus() === 403) {\n    Zabbix.log(4, 'SmartZone100: session expired, re-authenticating');\n    activeCookie = login();\n    if (!activeCookie) throw new Error('SmartZone100: auth failed');\n    listReq = makeReq(activeCookie);\n    listResp = listReq.get(baseUrl + '/aps?zoneId=' + zoneId + '&listSize=' + listSize);\n}\nif (listReq.getStatus() !== 200) throw new Error('AP list failed: ' + listReq.getStatus());\nvar aps = JSON.parse(listResp).list || [];\n\n// Enrich each AP with IP from operational summary\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    if (!ap.mac) { ap.ip = null; continue; }\n    try {\n        var sumReq = makeReq(activeCookie);\n        var sumResp = sumReq.get(baseUrl + '/aps/' + ap.mac + '/operational/summary');\n        if (sumReq.getStatus() === 200) {\n            ap.ip = JSON.parse(sumResp).ip || null;\n        } else {\n            Zabbix.log(4, 'SmartZone100: summary mac=' + ap.mac + ' status=' + sumReq.getStatus());\n            ap.ip = null;\n        }\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone100: summary error mac=' + ap.mac + ': ' + e.message);\n        ap.ip = null;\n    }\n}\n\nreturn JSON.stringify(aps);",
+                        "timeout": "60s",
+                        "description": "AP list for the zone set in {$SMARTZONE_ZONE_ID}. Master item for AP host discovery. Auto re-authenticates if JSESSIONID expires.",
+                        "tags": [
+                            {"tag": "component", "value": "ruckus"}
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "6051da4cdca14f9da52373b31ca18de4",
+                        "name": "Zone Discovery",
+                        "type": "DEPENDENT",
+                        "key": "ruckus.zone.discovery",
+                        "master_item": {"key": "ruckus.zone.list"},
+                        "lld_macro_paths": [
+                            {"lld_macro": "{#ZONE_ID}",   "path": "$.zoneId"},
+                            {"lld_macro": "{#ZONE_NAME}", "path": "$.zoneName"},
+                            {"lld_macro": "{#ZONE_PATH}", "path": "$.zonePath"}
+                        ],
+                        "item_prototypes": [
+                            {
+                                "uuid": "55d8dbe6f5fe4e86949aad3ea6d1edc5",
+                                "name": "{#ZONE_PATH}",
+                                "type": "SCRIPT",
+                                "key": "ruckus.zone.ap.list[{#ZONE_ID}]",
+                                "delay": "1h",
+                                "history": "12h",
+                                "value_type": "TEXT",
+                                "params": "var baseUrl  = 'https://{$SMARTZONE_URL}/wsg/api/public/v6_1';\nvar cookie   = '{$SMARTZONE_TOKEN}';\nvar zoneId   = '{#ZONE_ID}';\nvar listSize = parseInt('{$SMARTZONE_LIST_SIZE}') || 50;\n\nfunction makeReq(c) {\n    var req = new HttpRequest();\n    req.addHeader('Content-Type: application/json;charset=UTF-8');\n    if (c) req.addHeader('Cookie: ' + c);\n    return req;\n}\n\nfunction login() {\n    var user = '{$SMARTZONE_USER}';\n    var pass = '{$SMARTZONE_PASS}';\n    if (!user || !pass) return null;\n    var req = makeReq(null);\n    try {\n        var resp = req.post(baseUrl + '/session', JSON.stringify({username: user, password: pass}));\n        if (req.getStatus() === 200) {\n            var body = JSON.parse(resp);\n            if (body.sessionId) return 'JSESSIONID=' + body.sessionId;\n        }\n        Zabbix.log(3, 'SmartZone100: login failed: ' + req.getStatus());\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone100: login error: ' + e.message);\n    }\n    return null;\n}\n\n// Fetch AP list for this zone\nvar activeCookie = cookie;\nvar listReq = makeReq(activeCookie);\nvar listResp = listReq.get(baseUrl + '/aps?zoneId=' + zoneId + '&listSize=' + listSize);\nif (listReq.getStatus() === 401 || listReq.getStatus() === 403) {\n    Zabbix.log(4, 'SmartZone100: session expired, re-authenticating');\n    activeCookie = login();\n    if (!activeCookie) throw new Error('SmartZone100: auth failed');\n    listReq = makeReq(activeCookie);\n    listResp = listReq.get(baseUrl + '/aps?zoneId=' + zoneId + '&listSize=' + listSize);\n}\nif (listReq.getStatus() !== 200) throw new Error('AP list failed: ' + listReq.getStatus());\nvar aps = JSON.parse(listResp).list || [];\n\n// Enrich each AP with IP from operational summary\nfor (var i = 0; i < aps.length; i++) {\n    var ap = aps[i];\n    if (!ap.mac) { ap.ip = null; continue; }\n    try {\n        var sumReq = makeReq(activeCookie);\n        var sumResp = sumReq.get(baseUrl + '/aps/' + ap.mac + '/operational/summary');\n        if (sumReq.getStatus() === 200) {\n            ap.ip = JSON.parse(sumResp).ip || null;\n        } else {\n            Zabbix.log(4, 'SmartZone100: summary mac=' + ap.mac + ' status=' + sumReq.getStatus());\n            ap.ip = null;\n        }\n    } catch (e) {\n        Zabbix.log(3, 'SmartZone100: summary error mac=' + ap.mac + ': ' + e.message);\n        ap.ip = null;\n    }\n}\n\nreturn JSON.stringify(aps);",
+                                "timeout": "60s",
+                                "tags": [
+                                    {"tag": "component", "value": "ruckus"}
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [],
+                        "graph_prototypes": [],
+                        "host_prototypes": [],
+                        "preprocessing": []
+                    },
+                    {
+                        "uuid": "3147ca4e13cf4f53b142234ecb6f0aef",
+                        "name": "Discover Ruckus APs",
+                        "type": "DEPENDENT",
+                        "key": "ruckus.ap.discovery",
+                        "master_item": {"key": "ruckus.ap.list"},
+                        "lld_macro_paths": [
+                            {"lld_macro": "{#AP_GROUP_ID}", "path": "$.apGroupId"},
+                            {"lld_macro": "{#AP_IP}",       "path": "$.ip"},
+                            {"lld_macro": "{#AP_MAC}",      "path": "$.mac"},
+                            {"lld_macro": "{#AP_NAME}",     "path": "$.name"},
+                            {"lld_macro": "{#AP_SERIAL}",   "path": "$.serial"},
+                            {"lld_macro": "{#AP_ZONE_ID}",  "path": "$.zoneId"}
+                        ],
+                        "host_prototypes": [
+                            {
+                                "uuid": "1dc7bf9d7e554599b3c1a9704d379f9c",
+                                "host": "Ruckus AP {#AP_NAME}",
+                                "name": "{#AP_NAME} ({#AP_MAC})",
+                                "group_links": [
+                                    {"group": {"name": "Ruckus APs"}}
+                                ],
+                                "templates": [
+                                    {"name": "ICMP Ping"}
+                                ],
+                                "macros": [
+                                    {"macro": "{$AP_IP}",     "value": "{#AP_IP}"},
+                                    {"macro": "{$AP_MAC}",    "value": "{#AP_MAC}"},
+                                    {"macro": "{$AP_NAME}",   "value": "{#AP_NAME}"},
+                                    {"macro": "{$AP_SERIAL}", "value": "{#AP_SERIAL}"}
+                                ],
+                                "tags": [
+                                    {"tag": "AP_MAC",  "value": "{#AP_MAC}"},
+                                    {"tag": "AP_NAME", "value": "{#AP_NAME}"}
+                                ],
+                                "custom_interfaces": "YES",
+                                "interfaces": [
+                                    {
+                                        "type": "SNMP",
+                                        "ip": "{#AP_IP}",
+                                        "port": "161",
+                                        "details": {
+                                            "community": "{$SNMP_COMMUNITY}"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "trigger_prototypes": [],
+                        "graph_prototypes": [],
+                        "item_prototypes": [],
+                        "preprocessing": []
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SMARTZONE_LIST_SIZE}",
+                        "value": "50",
+                        "description": "Max APs fetched per zone. Each AP needs 1 extra HTTP call for IP — raise only if proxy Timeout allows."
+                    },
+                    {
+                        "macro": "{$SMARTZONE_PASS}",
+                        "value": "",
+                        "type": "SECRET_TEXT",
+                        "description": "SmartZone 100 admin password — used for auto re-auth when JSESSIONID expires"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_TOKEN}",
+                        "value": "",
+                        "description": "Active session cookie: JSESSIONID=<value> from POST /wsg/api/public/v6_1/session"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_URL}",
+                        "value": "10.x.x.x:8443",
+                        "description": "SmartZone 100 management IP:port (e.g. 10.12.46.5:8443)"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_USER}",
+                        "value": "admin",
+                        "description": "SmartZone 100 admin username — used for auto re-auth when JSESSIONID expires"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_ZONE_ID}",
+                        "value": "",
+                        "description": "Zone ID for AP host discovery. Set to the zone whose APs you want as Zabbix hosts."
+                    },
+                    {
+                        "macro": "{$SNMP_COMMUNITY}",
+                        "value": "oomoomee",
+                        "description": "SNMP community string for discovered AP hosts"
+                    }
+                ]
+            }
+        ]
+    }
+}

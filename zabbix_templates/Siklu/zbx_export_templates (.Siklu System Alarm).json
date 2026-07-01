@@ -1,0 +1,307 @@
+{
+  "zabbix_export": {
+    "version": "7.4",
+    "template_groups": [
+      {
+        "uuid": "c561ba84a97b499494c1ff18569e1673",
+        "name": "Siklu"
+      },
+      {
+        "uuid": "3bd32e85c5624a0687cbe3e58e2c5f2a",
+        "name": "ITcare"
+      },
+      {
+        "uuid": "b8d9584754184557830ebbf2439a3dca",
+        "name": "Templates/Wireless"
+      }
+    ],
+    "templates": [
+      {
+        "uuid": "300d3bb8277947c28e0e56457370c423",
+        "template": ".Siklu System Alarm",
+        "name": ".Siklu System Alarm",
+        "templates": [],
+        "groups": [
+          {
+            "name": "Siklu"
+          },
+          {
+            "name": "ITcare"
+          },
+          {
+            "name": "Templates/Wireless"
+          }
+        ],
+        "items": [
+          {
+            "uuid": "d727cd170a4c47faabbcac8c4b244d44",
+            "name": "SNMP walk alarm table",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "walk[1.3.6.1.4.1.31926.11.2.1.2,1.3.6.1.4.1.31926.11.2.1.3,1.3.6.1.4.1.31926.11.2.1.4,1.3.6.1.4.1.31926.11.2.1.7,1.3.6.1.4.1.31926.11.2.1.10]",
+            "key": "siklu.alarm.walk",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "0",
+            "value_type": "TEXT",
+            "description": "Master walk for EH alarm table (.31926.11.2.*).\nColumns: severity(.2), type-name(.3), entity(.4), description(.7), severity-code(.10).\nEH-ONLY: alarm OID absent on MH series (verified on live MH-T280).",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "raw"
+              }
+            ]
+          },
+          {
+            "uuid": "f90ae0d89c9f4b6494367dda61d6efb8",
+            "name": "System alarms active count",
+            "type": "SNMP_AGENT",
+            "snmp_oid": "get[1.3.6.1.4.1.31926.11.1.2.0]",
+            "key": "siklu.alarms.count",
+            "delay": "{$HEALTH_POLL_INT}",
+            "history": "{$HISTORY}",
+            "trends": "{$TRENDS}",
+            "value_type": "UNSIGNED",
+            "description": "Total active alarm count. EH-ONLY.",
+            "tags": [
+              {
+                "tag": "component",
+                "value": "health"
+              }
+            ],
+            "triggers": [
+              {
+                "uuid": "bf2f0f2185bb48e8933ce440ab204041",
+                "expression": "last(/.Siklu System Alarm/siklu.alarms.count)>0",
+                "recovery_mode": "RECOVERY_EXPRESSION",
+                "recovery_expression": "last(/.Siklu System Alarm/siklu.alarms.count)=0",
+                "name": "Siklu: System alarms active",
+                "event_name": "Siklu: {ITEM.LASTVALUE1} system alarm(s) active",
+                "opdata": "Active alarms: {ITEM.LASTVALUE1}",
+                "priority": "AVERAGE",
+                "manual_close": "YES",
+                "tags": [
+                  {
+                    "tag": "scope",
+                    "value": "availability"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "uuid": "a7743d9c693a4485ab2aef90a985c196",
+            "name": "Alarm table discovery",
+            "type": "DEPENDENT",
+            "key": "siklu.alarm.discovery",
+            "delay": "0",
+            "lifetime": "{$HEALTH_POLL_INT}",
+            "description": "Discovers active alarms from EH alarm table.",
+            "item_prototypes": [
+              {
+                "uuid": "83e9dae1113a47f998f0050518697b07",
+                "name": "Alarm #{#SNMPINDEX}: Type",
+                "type": "DEPENDENT",
+                "key": "siklu.alarm.type[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "CHAR",
+                "description": "Alarm type/name string (e.g. 'link-down').",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.11.2.1.3.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "5m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siklu.alarm.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "health"
+                  }
+                ]
+              },
+              {
+                "uuid": "abeb7c3d175144a5b5624bd46d46a93d",
+                "name": "Alarm #{#SNMPINDEX}: Affected entity",
+                "type": "DEPENDENT",
+                "key": "siklu.alarm.entity[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "CHAR",
+                "description": "Affected entity string (e.g. 'eth eth3').",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.11.2.1.4.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "5m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siklu.alarm.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "health"
+                  }
+                ]
+              },
+              {
+                "uuid": "61a8fd985437435cb665afff7a61b7d8",
+                "name": "Alarm #{#SNMPINDEX}: Description",
+                "type": "DEPENDENT",
+                "key": "siklu.alarm.description[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "CHAR",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.11.2.1.7.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "5m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siklu.alarm.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "health"
+                  }
+                ]
+              },
+              {
+                "uuid": "cc4b684437db4484be5bc499792d9f09",
+                "name": "Alarm #{#SNMPINDEX}: Severity code",
+                "type": "DEPENDENT",
+                "key": "siklu.alarm.severity[{#SNMPINDEX}]",
+                "delay": "0",
+                "history": "{$HISTORY}",
+                "trends": "0",
+                "value_type": "UNSIGNED",
+                "description": "Severity code: 5=clear, 6=critical (observed values on EH2500).",
+                "preprocessing": [
+                  {
+                    "type": "SNMP_WALK_VALUE",
+                    "parameters": [
+                      "1.3.6.1.4.1.31926.11.2.1.10.{#SNMPINDEX}",
+                      "0"
+                    ]
+                  },
+                  {
+                    "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                    "parameters": [
+                      "5m"
+                    ]
+                  }
+                ],
+                "master_item": {
+                  "key": "siklu.alarm.walk"
+                },
+                "tags": [
+                  {
+                    "tag": "component",
+                    "value": "health"
+                  }
+                ],
+                "trigger_prototypes": [
+                  {
+                    "uuid": "0f84a3ff31a546abaab4ade252040b87",
+                    "expression": "last(/.Siklu System Alarm/siklu.alarm.severity[{#SNMPINDEX}])<>5",
+                    "recovery_mode": "RECOVERY_EXPRESSION",
+                    "recovery_expression": "last(/.Siklu System Alarm/siklu.alarm.severity[{#SNMPINDEX}])=5",
+                    "name": "Siklu: Alarm #{#SNMPINDEX} active",
+                    "event_name": "Siklu: Alarm #{#SNMPINDEX} active: {ITEM.LASTVALUE1}",
+                    "opdata": "Severity: {ITEM.LASTVALUE1}",
+                    "priority": "AVERAGE",
+                    "manual_close": "YES",
+                    "tags": [
+                      {
+                        "tag": "scope",
+                        "value": "availability"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "master_item": {
+              "key": "siklu.alarm.walk"
+            },
+            "preprocessing": [
+              {
+                "type": "SNMP_WALK_TO_JSON",
+                "parameters": [
+                  "{#ALARM_TYPE}",
+                  "1.3.6.1.4.1.31926.11.2.1.3",
+                  "0",
+                  "{#ALARM_ENTITY}",
+                  "1.3.6.1.4.1.31926.11.2.1.4",
+                  "0"
+                ]
+              },
+              {
+                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                "parameters": [
+                  "{$HEALTH_POLL_INT}"
+                ]
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "tag": "target",
+            "value": "siklu"
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$HEALTH_POLL_INT}",
+            "value": "1m"
+          },
+          {
+            "macro": "{$HISTORY}",
+            "value": "90d"
+          },
+          {
+            "macro": "{$TRENDS}",
+            "value": "365d"
+          }
+        ]
+      }
+    ]
+  }
+}

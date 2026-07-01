@@ -1,0 +1,90 @@
+{
+    "zabbix_export": {
+        "version": "7.4",
+        "host_groups": [
+            {
+                "uuid": "314eebd1b5b244d79044cf044303eaa5",
+                "name": "Ruckus"
+            }
+        ],
+        "hosts": [
+            {
+                "host": "Ruckus Virtual SmartZone 100",
+                "name": "Ruckus Virtual SmartZone 100",
+                "monitored_by": "PROXY_GROUP",
+                "proxy_group": {
+                    "name": "PROXY-CA"
+                },
+                "groups": [
+                    {
+                        "name": "Ruckus"
+                    }
+                ],
+                "interfaces": [
+                    {
+                        "ip": "10.12.46.5",
+                        "interface_ref": "if1"
+                    }
+                ],
+                "items": [
+                    {
+                        "name": "Ruckus AP List with IP",
+                        "type": "HTTP_AGENT",
+                        "key": "ruckus.ap.list.ip.test",
+                        "delay": "1h",
+                        "history": "12h",
+                        "value_type": "TEXT",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.list"
+                                ]
+                            },
+                            {
+                                "type": "JAVASCRIPT",
+                                "parameters": [
+                                    "try {\n    // Input is the array of APs (after JSONPATH $.list)\n    var aps = JSON.parse(value);\n    if (!Array.isArray(aps)) {\n        aps = [aps];\n    }\n\n    // Use the same JSESSIONID from your working curl\n    var cookie = 'JSESSIONID=CB2F9333049FEA1E62127D5E508F6C54';\n    var baseUrl = 'https://10.12.46.5:8443/wsg/api/public/v6_1';\n\n    for (var i = 0; i < aps.length; i++) {\n        var ap = aps[i];\n        if (ap.mac) {\n            var url = baseUrl + '/aps/' + ap.mac + '/operational/summary';\n            var req = new HttpRequest();\n            req.addHeader('Content-Type', 'application/json;charset=UTF-8');\n            req.addHeader('Cookie', cookie);\n            try {\n                var resp = req.get(url);\n                if (req.getStatus() == 200) {\n                    var summary = JSON.parse(resp);\n                    ap.ip = summary.ip || null;\n                } else {\n                    ap.ip = null;\n                }\n            } catch (e) {\n                ap.ip = null;\n            }\n        } else {\n            ap.ip = null;\n        }\n    }\n    return JSON.stringify(aps);\n} catch (e) {\n    Zabbix.log(3, 'IP enrichment error: ' + e);\n    return value;  // fallback to original\n}"
+                                ]
+                            }
+                        ],
+                        "interface_ref": "if1",
+                        "url": "https://10.12.46.5:8443/wsg/api/public/v6_1/aps",
+                        "query_fields": [
+                            {
+                                "name": "listSize",
+                                "value": "2"
+                            },
+                            {
+                                "name": "index",
+                                "value": "0"
+                            }
+                        ],
+                        "post_type": "JSON",
+                        "posts": "{}",
+                        "headers": [
+                            {
+                                "name": "Cookie",
+                                "value": "JSESSIONID=CB2F9333049FEA1E62127D5E508F6C54"
+                            },
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json;charset=UTF-8"
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$SMARTZONE_TOKEN}",
+                        "value": "JSESSIONID=CB2F9333049FEA1E62127D5E508F6C54"
+                    },
+                    {
+                        "macro": "{$SMARTZONE_URL}",
+                        "value": "172.30.14.14:8443"
+                    }
+                ]
+            }
+        ]
+    }
+}
